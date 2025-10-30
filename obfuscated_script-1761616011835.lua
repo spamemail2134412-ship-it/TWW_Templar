@@ -1,19 +1,17 @@
 print("west z is an independently created autofarm script and is in no way related to west x.")
 
-game.Workspace.PathfindingUseImprovedSearch = true
-
 local player = game.Players.LocalPlayer
 local plrgui = player.PlayerGui
 local plrname = player.Name
 
-if game.Workspace.WORKSPACE_Entities.Players.plrname.Humanoid.WalkSpeed == 30 then
+if game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed == 30 then
 return
 else
     task.spawn(function()
-    print(game.Workspace.WORKSPACE_Entities.Players.plrname.Humanoid.WalkSpeed)
+    print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
     while true do
         wait(0.1)
-    game.Workspace.WORKSPACE_Entities.Players.plrname.Humanoid.WalkSpeed = 30
+    game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 30
         end
     end)
 end
@@ -29,7 +27,7 @@ if plrgui:FindFirstChild("WestZ") then
 return
 else
 
-local WestZ = Instance.new("ScreenGui")
+WestZ = Instance.new("ScreenGui")
 WestZ.Parent = plrgui
 WestZ.Name = "WestZ"
 
@@ -74,7 +72,7 @@ title.TextSize = 60
 title.TextColor3 = Color3.fromRGB(0,0,0)
 title.Font = Enum.Font.GothamBold
 
-local startAutoFarm = Instance.new("TextButton")
+startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
 startAutoFarm.Text = "Start Auto Farm - Nearest Ore"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
@@ -87,7 +85,7 @@ startAutoFarm.Position = UDim2.new(0.5, -147, 0, 120)
 local autofarmcorner = Instance.new("UICorner")
 autofarmcorner.Parent = startAutoFarm
 
-local Exit = Instance.new("TextButton")
+Exit = Instance.new("TextButton")
 Exit.Parent = Frame
 Exit.Text = "X"
 Exit.Size = UDim2.new(0, 25, 0, 25)
@@ -103,7 +101,7 @@ ExitCorner.Parent = Exit
 
 local tweenParts = draggable:GetDescendants()
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 1)
-local isTweenFinished = false
+isTweenFinished = false
 
 local Mouse = player:GetMouse()
 
@@ -176,7 +174,7 @@ local function FindNearestOre()
             closestOreDistance = distance
             local oreHierarchy = oreIndex[i]
 
-        closestOre = oreHierarchy.Name
+        closestOre = oreHierarchy
         finalpos = closestOre.PrimaryPart.Position
         end
     end
@@ -230,34 +228,6 @@ if success then
 
         if actualpos ~= finalpos then return end
         humanoid:MoveTo(waypoint.Position)
-	
-	task.spawn(function()
-		while finished == false do
-			wait(1)
-			timeElapsed = timeElapsed + 1
-		end
-        end)
-	
-		task.spawn(function()
-		while timeElapsed <= jumpTime do
-			if timeElapsed >= 5 then
-				humanoid.Jump = true
-			end
-		end
-        end)
-
-		task.spawn(function()
-		while timeElapsed <= maxTime+1 do
-
-			if timeElapsed >= 10 then
-				for i,v in ipairs(waypoints) do v:Destroy() end
-				stuck = true
-                if stuck == true then
-                    pathfindSuccess = false
-                    print("Character got stuck! Please try again.")
-                    return pathfindSuccess
-                end
-			end
 
 		end
         end)
@@ -318,8 +288,7 @@ local function closestOreFarm()
         wait(0.1)
     end
     if pathfindSuccess == true then
-        break
-        while closestOre.DepositInfo.OreRemaining > 0 do
+        while closestOre.DepositInfo.OreRemaining.Value > 0 do
             wait(0.1)
             input("leftclick")
         end
