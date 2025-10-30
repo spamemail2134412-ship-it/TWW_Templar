@@ -136,15 +136,19 @@ path = pathfindingservice:CreatePath({
     Costs = {Water = 20}
 })
 
-local function calcNearestOre(waypoints, i, ore)
-    local waypoints = waypoints
+local function calcPathDistance(waypoints, i, ore) -- Calculates the overall distance by taking the distances between each waypoint and summing them.
     local localDistance = {}
-    local waypointPos
-
+    local waypointPos -- A variable that contains the distance between two points
+    local lastWaypoint = nil -- previous waypoint so it can be subtracted from the current waypoint
 
     for i, waypoint in pairs(waypoints) do
-            waypointPos = (waypoint.Position - humanoidrootpart.Position).Magnitude
+        if lastWaypoint == nil then
+            lastWaypoint = waypoint
+            else
+            waypointPos = (waypoint.Position - lastWaypoint.Position).Magnitude
             table.insert(localDistance,waypointPos)
+            lastWaypoint = waypoint
+        end
     end
     local sum = 0
     for _, distance in pairs(localDistance) do
@@ -283,7 +287,7 @@ local function closestOreFarm()
     --put in a while loop tomorrow, it has to check if your inventory is 30/30 and then it will stop and go to sell it all.
     pathfindSuccess = nil
     pathfind()
-    while pathfindSuccess == nil do
+    while pathfindSuccess == nil do -- waits until path is complete
         wait(0.1)
     end
     if pathfindSuccess == true then
