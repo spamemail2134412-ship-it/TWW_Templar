@@ -127,7 +127,7 @@ local nearestOres = {}
 local oreIndex = {}
 local humanoidrootpart = character.HumanoidRootPart
 
-local closestOreDistance = nil
+local closestOreDistance = math.huge
 local closestOre = nil
 
 path = pathfindingservice:CreatePath({
@@ -166,8 +166,7 @@ local function FindNearestOre()
                 success, errorMessage = pcall(function()
                     path:ComputeAsync(character.PrimaryPart.Position, ore.Position)
                 end)
-            calcNearestOre(path:GetWaypoints(), i, ore)
-            closestOreDistance = math.huge
+            calcPathDistance(path:GetWaypoints(), i, ore)
         end
     end
     
@@ -190,8 +189,9 @@ FindNearestOre() -- the rest from this point onwards needs to be in the button. 
 finalpos = finalpos - Vector3.new(2,2,2)
 print(closestOreDistance, "okay")
 print(closestOre)
+print(closestOre)
 pathfindSuccess = nil
-print(character.PrimaryPart.Position)
+print(character:FindFirstChild("HumanoidRootPart").Position)
 local success, errorMessage = pcall(function()
 path:ComputeAsync(character.PrimaryPart.Position, finalpos)
 end)
@@ -208,7 +208,7 @@ character:SetAttribute("finalpos", finalpos)
 
 print(humanoidrootpart.Position)
 if success then
-	
+	print(closestOre)
 	local stuck = false
 
     print("Waypoints found: " .. #path:GetWaypoints())
@@ -258,8 +258,10 @@ else
 end
     pathfindSuccess = true
     task.spawn(function()
-    while closestOre.DepositInfo.OreRemaining.Value > 0 do
+    if success then while closestOre.DepositInfo.OreRemaining.Value > 0 do
+        wait(0.1)
     humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+    end
     end
     end)
     return pathfindSuccess
@@ -290,8 +292,9 @@ local function closestOreFarm()
     while pathfindSuccess == nil do -- waits until path is complete
         wait(0.1)
     end
+    print(closestOre)
     if pathfindSuccess == true then
-        while closestOre.DepositInfo.OreRemaining > 0 do
+        while closestOre.DepositInfo.OreRemaining.Value > 0 do
             wait(0.1)
             input("leftclick")
         end
