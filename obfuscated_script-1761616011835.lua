@@ -126,39 +126,58 @@ local pathfindingservice = game:GetService("PathfindingService")
 local character = wrkspceEnt.Players[plrname]
 local humanoid = character.Humanoid
 local nearestOres = {}
-local oreIndexChild = {}
-local oreIndexParent = {}
+local oreIndex = {}
 local humanoidrootpart = character.HumanoidRootPart
 
 local closestOreDistance = nil
 local closestOre = nil
 
+path = pathfindingservice:CreatePath({
+    AgentCanJump = true,
+    AgentCanClimb = true,
+    Costs = {Water = 20}
+})
+
+local function calcNearestOre(waypoints, i, ore)
+    local waypoints = waypoints
+    local localDistance = {}
+    local waypointPos
+
+
+    for i, waypoint in pairs(waypoints) do
+            waypointPos = (waypoint.Position - humanoidrootpart.Position).Magnitude
+            table.insert(localDistance,waypointPos)
+    end
+    local sum = 0
+    for _, distance in pairs(localDistance) do
+        sum = sum + distance
+    end
+    table.insert(nearestOres, sum)
+    table.insert(oreIndex, ore.i)
+
+end
+
 local function FindNearestOre()
     for i, ore in pairs(ores) do
-        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then --gng remember to fix this, remember that limestone also needs to be farmed if closest. Limestone does not contain rockore, so to get around this, just make a separate nearest ore for loop for limestone, ok bye.
-            local oreposition = ore.PrimaryPart.Position
-            local distance = (humanoidrootpart.Position - oreposition).Magnitude
+        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
+                success, errorMessage = pcall(function()
+                    path:ComputeAsync(character.PrimaryPart.Position, ore.Position)
+                end)
             ore.Name = "Ore" .. i
-            table.insert(nearestOres, distance)
-            table.insert(oreIndexChild, ore)
-            table.insert(oreIndexParent, ore.Parent)
-            closestOreDistance = distance
-
+            calcNearestOre(path:GetWaypoints(), i, ore)
+            closestOreDistance = nearestOres[i]
         end
     end
+    
     print(closestOreDistance)
     for i, distance in pairs(nearestOres) do
-        print(distance, "okay")
+
         if distance < closestOreDistance then
             closestOreDistance = distance
-local oreParent = oreIndexParent[i]
-local oreChild = oreIndexChild[i]
-print(oreParent)
-print(oreChild)
-closestOre = oreParent:FindFirstChild(oreChild.Name)
+            local oreHierarchy = oreIndex[i]
+
+        closestOre = oreHierarchy.Name
         finalpos = closestOre.PrimaryPart.Position
-        print(oreParent)
-        print(closestOre)
         end
     end
 
@@ -170,11 +189,6 @@ finalpos = finalpos - Vector3.new(2,2,2)
 print(closestOreDistance, "okay")
 print(closestOre)
 pathfindSuccess = nil
-path = pathfindingservice:CreatePath({
-    AgentCanJump = true,
-    AgentCanClimb = true,
-    Costs = {Water = 20}
-})
 print(character.PrimaryPart.Position)
 local success, errorMessage = pcall(function()
 path:ComputeAsync(character.PrimaryPart.Position, finalpos)
