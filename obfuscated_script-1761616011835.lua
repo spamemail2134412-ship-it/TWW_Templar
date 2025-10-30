@@ -151,7 +151,8 @@ local function calcNearestOre(waypoints, i, ore)
         sum = sum + distance
     end
     table.insert(nearestOres, sum)
-    table.insert(oreIndex, ore.i)
+    ore.Name = "Ore" .. i
+    table.insert(oreIndex, ore)
 
 end
 
@@ -161,9 +162,8 @@ local function FindNearestOre()
                 success, errorMessage = pcall(function()
                     path:ComputeAsync(character.PrimaryPart.Position, ore.Position)
                 end)
-            ore.Name = "Ore" .. i
             calcNearestOre(path:GetWaypoints(), i, ore)
-            closestOreDistance = nearestOres[i]
+            closestOreDistance = math.huge
         end
     end
     
@@ -181,7 +181,7 @@ local function FindNearestOre()
 
 end
 
-local function pathfind()
+function pathfind()
 FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
 finalpos = finalpos - Vector3.new(2,2,2)
 print(closestOreDistance, "okay")
@@ -229,8 +229,7 @@ if success then
         if actualpos ~= finalpos then return end
         humanoid:MoveTo(waypoint.Position)
 
-		end
-        end)
+        
 	
         task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
             if i == 0 then
@@ -288,7 +287,7 @@ local function closestOreFarm()
         wait(0.1)
     end
     if pathfindSuccess == true then
-        while closestOre.DepositInfo.OreRemaining.Value > 0 do
+        while closestOre.DepositInfo.OreRemaining > 0 do
             wait(0.1)
             input("leftclick")
         end
