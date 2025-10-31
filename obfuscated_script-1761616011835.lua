@@ -179,10 +179,16 @@ local function FindNearestOre()
 
         closestOre = oreHierarchy
         finalpos = closestOre.PrimaryPart.Position
+        finalI = i
         end
     end
 
 end
+
+print(closestOre)
+print(nearestOres[finalI])
+print(finalI)
+print(oreHierarchy)
 
 function pathfind()
 FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
