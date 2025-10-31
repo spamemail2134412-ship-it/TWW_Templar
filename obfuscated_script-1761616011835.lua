@@ -135,10 +135,9 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     local localDistance = {}
     local waypointPos -- A variable that contains the distance between two points
     local lastWaypoint = nil -- previous waypoint so it can be subtracted from the current waypoint
-    nearestOres = {}
-    oreIndex = {}
 
     for i, waypoint in pairs(waypoints) do
+        print(waypoint, "this is a waypoint")
         if lastWaypoint == nil then
             lastWaypoint = waypoint
             else
@@ -157,7 +156,8 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
 end
 
 local function FindNearestOre()
-
+nearestOres = {}
+oreIndex = {}
 closestOreDistance = math.huge
 closestOre = nil
 finalpos = nil
@@ -167,9 +167,11 @@ oreHierarchy = nil
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
                 local success, errorMessage = pcall(function()
                     path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position)
+
                 end)
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
+                    print("Ore iteration " .. i .. " successful path creation.")
                     
                 elseif path.Status == Enum.PathStatus.NoPath then
                     print("Ore iteration " .. i .. " path failed, path not found.")
@@ -180,12 +182,13 @@ oreHierarchy = nil
     end
     
     for i, distance in pairs(nearestOres) do
-
+        print(distance)
         if distance < closestOreDistance then
+            print(distance, "this is the distance")
             closestOreDistance = distance
-            oreHierarchy = oreIndex[i]
+            closestOre = oreIndex[i]
+            print(closestOre)
 
-        closestOre = oreHierarchy
         finalpos = closestOre.PrimaryPart.Position
         end
     end
