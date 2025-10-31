@@ -127,9 +127,6 @@ local nearestOres = {}
 local oreIndex = {}
 local humanoidrootpart = character.HumanoidRootPart
 
-closestOreDistance = math.huge
-closestOre = nil
-
 path = pathfindingservice:CreatePath({
     AgentCanJump = true,
     AgentCanClimb = true,
@@ -160,12 +157,18 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
 end
 
 local function FindNearestOre()
+
+closestOreDistance = math.huge
+closestOre = nil
+finalpos = nil
+oreHierarchy = nil
+
     for i, ore in pairs(ores) do
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
                 local success, errorMessage = pcall(function()
                     path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position)
                 end)
-                if success then
+                if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
                     
                 elseif path.Status == Enum.PathStatus.NoPath then
@@ -180,7 +183,7 @@ local function FindNearestOre()
 
         if distance < closestOreDistance then
             closestOreDistance = distance
-            local oreHierarchy = oreIndex[i]
+            oreHierarchy = oreIndex[i]
 
         closestOre = oreHierarchy
         finalpos = closestOre.PrimaryPart.Position
@@ -298,10 +301,10 @@ local function closestOreFarm()
     end
     print(closestOre)
     if pathfindSuccess == true then
-        while closestOre.DepositInfo.OreRemaining.Value > 0 do
-            wait(0.1)
-            input("leftclick")
-        end
+        --while closestOre.DepositInfo.OreRemaining.Value > 0 do
+            --wait(0.1)
+            --input("leftclick")
+        --end
     end
 end
 
