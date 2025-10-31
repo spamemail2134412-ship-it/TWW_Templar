@@ -137,7 +137,6 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     local lastWaypoint = nil -- previous waypoint so it can be subtracted from the current waypoint
 
     for i, waypoint in pairs(waypoints) do
-        print(waypoint, "this is a waypoint")
         if lastWaypoint == nil then
             lastWaypoint = waypoint
             else
@@ -165,9 +164,16 @@ oreHierarchy = nil
 
     for i, ore in pairs(ores) do
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
+            local modifier = 0
+            if string.find(ore.Parent.Name, "Vein") then
+                for i, v in pairs(ore:GetChildren()) do
+                    if v:IsA("MeshPart") then
+                        modifier = 10
+                    end
+                end
+            end
                 local success, errorMessage = pcall(function()
-                    path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position)
-
+                    path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position - Vector3.new(modifier,modifier,modifier))
                 end)
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
