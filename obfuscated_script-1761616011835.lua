@@ -127,8 +127,8 @@ local nearestOres = {}
 local oreIndex = {}
 local humanoidrootpart = character.HumanoidRootPart
 
-local closestOreDistance = math.huge
-local closestOre = nil
+closestOreDistance = math.huge
+closestOre = nil
 
 path = pathfindingservice:CreatePath({
     AgentCanJump = true,
@@ -157,7 +157,6 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     table.insert(nearestOres, sum)
     ore.Name = "Ore" .. i
     table.insert(oreIndex, ore)
-
 end
 
 local function FindNearestOre()
@@ -170,7 +169,6 @@ local function FindNearestOre()
         end
     end
     
-    print(closestOreDistance)
     for i, distance in pairs(nearestOres) do
 
         if distance < closestOreDistance then
@@ -179,16 +177,10 @@ local function FindNearestOre()
 
         closestOre = oreHierarchy
         finalpos = closestOre.PrimaryPart.Position
-        finalI = i
         end
     end
 
 end
-
-print(closestOre)
-print(nearestOres[finalI])
-print(finalI)
-print(oreHierarchy)
 
 function pathfind()
 FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
@@ -197,7 +189,6 @@ print(closestOreDistance, "okay")
 print(closestOre)
 print(closestOre)
 pathfindSuccess = nil
-print(character:FindFirstChild("HumanoidRootPart").Position)
 local success, errorMessage = pcall(function()
 path:ComputeAsync(character.PrimaryPart.Position, finalpos)
 end)
@@ -259,7 +250,7 @@ if success then
 
     end
 else
-    if path.Status == path.NoPath then print("No path calculated! Please try again.") else print("Unknown error occurred! Please try again.") end
+    if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
     pathfindSuccess = false
 end
     pathfindSuccess = true
