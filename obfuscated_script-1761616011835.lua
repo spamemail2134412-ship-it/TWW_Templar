@@ -4,6 +4,19 @@ local player = game.Players.LocalPlayer
 local plrgui = player.PlayerGui
 local plrname = player.Name
 
+-- pickaxe tiers
+
+Tier0 = {Coal, Copper}
+Tier1 = {Coal, Copper}
+Tier2 = {Coal, Copper, Zinc}
+Tier3 = {Coal, Copper, Zinc, Iron, Limestone}
+Tier4 = {Coal, Copper, Zinc, Iron, Limestone}
+Tier5 = {Coal, Copper, Zinc, Iron, Limestone, Silver}
+Tier6 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold}
+Tier7 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein}
+Tier8 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein, SilverVein, GoldVein}
+Tier9 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein, SilverVein, GoldVein}
+
 if game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed == 30 then
 return
 else
@@ -37,6 +50,33 @@ draggable.Name = "Draggable"
 draggable.Transparency = 1
 draggable.Size = UDim2.new(0, 800, 0, 800)
 draggable.Position = UDim2.new(0.5, -400, 0.5, -400)
+
+local sliderFrame = Instance.new("Frame")
+sliderFrame.Parent = draggable
+sliderFrame.Transparency = 1
+sliderFrame.Size = UDim2.new(0, 200, 0, 15)
+sliderFrame.Position = UDim2.new(0.5, -150, 0, 180)
+sliderFrame.Name = "SliderFrame"
+sliderFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+local sliderUI = Instance.new("UICorner")
+sliderUI.Parent = sliderFrame
+
+local slider = Instance.new("Frame")
+slider.Parent = sliderFrame
+slider.Transparency = 1
+slider.Size = UDim2.new(0, 10, 0, 30)
+slider.Position = UDim2.new(0,0,-0.5,-10)
+slider.Name = "Slider"
+slider.BackgroundColor3 = Color3.fromRGB(0,0,0)
+
+local sliderUIDetector = Instance.new("UIDragDetector")
+sliderUIDetector.Parent = slider
+sliderUIDetector.DragStyle = Enum.UIDragDetectorDragStyle.TranslateLine
+sliderUIDetector.DragAxis = Vector2.new(1,0)
+sliderUIDetector.MinDragTranslation = UDim2.new(-0.5,0,0)
+sliderUIDetector.MaxDragTranslation = UDim2.new(0.5,0,0)
+sliderUIDetector.ReferenceUIInstance = sliderFrame
 
 local dragDetector = Instance.new("UIDragDetector")
 dragDetector.Parent = draggable
