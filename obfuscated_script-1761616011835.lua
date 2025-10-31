@@ -123,8 +123,6 @@ end
 local pathfindingservice = game:GetService("PathfindingService")
 local character = wrkspceEnt.Players[plrname]
 local humanoid = character.Humanoid
-local nearestOres = {}
-local oreIndex = {}
 local humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
@@ -137,6 +135,8 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     local localDistance = {}
     local waypointPos -- A variable that contains the distance between two points
     local lastWaypoint = nil -- previous waypoint so it can be subtracted from the current waypoint
+    nearestOres = {}
+    oreIndex = {}
 
     for i, waypoint in pairs(waypoints) do
         if lastWaypoint == nil then
