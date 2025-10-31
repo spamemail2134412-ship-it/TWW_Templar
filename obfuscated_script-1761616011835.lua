@@ -162,10 +162,17 @@ end
 local function FindNearestOre()
     for i, ore in pairs(ores) do
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
-                success, errorMessage = pcall(function()
-                    path:ComputeAsync(character.PrimaryPart.Position, ore.Position)
+                local success, errorMessage = pcall(function()
+                    path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position)
                 end)
-            calcPathDistance(path:GetWaypoints(), i, ore)
+                if success then
+                    calcPathDistance(path:GetWaypoints(), i, ore)
+                    
+                elseif path.Status == Enum.PathStatus.NoPath then
+                    print("Ore iteration " .. i .. " path failed, path not found.")
+                    else
+                    print("Ore iteration " .. i .. " path failed, unknown error occurred.")
+                end
         end
     end
     
@@ -255,11 +262,11 @@ else
 end
     pathfindSuccess = true
     task.spawn(function()
-    if success then while closestOre.DepositInfo.OreRemaining.Value > 0 do
-        wait(0.1)
-    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-    end
-    end
+    --if success then while closestOre.DepositInfo.OreRemaining.Value > 0 do
+        --wait(0.1)
+    --humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+    --end
+    --end
     end)
     return pathfindSuccess
 end
