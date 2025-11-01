@@ -4,6 +4,7 @@ local player = game.Players.LocalPlayer
 local plrgui = player.PlayerGui
 local plrname = player.Name
 
+local colourTheme = {9, 137, 207}
 -- pickaxe tiers
 
 Tier0 = {Coal, Copper}
@@ -55,7 +56,7 @@ local sliderFrame = Instance.new("Frame")
 sliderFrame.Parent = draggable
 sliderFrame.Transparency = 1
 sliderFrame.Size = UDim2.new(0, 200, 0, 15)
-sliderFrame.Position = UDim2.new(0.5, -150, 0, 180)
+sliderFrame.Position = UDim2.new(0.5, -300, 0, 250)
 sliderFrame.Name = "SliderFrame"
 sliderFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 
@@ -66,9 +67,11 @@ local slider = Instance.new("Frame")
 slider.Parent = sliderFrame
 slider.Transparency = 1
 slider.Size = UDim2.new(0, 10, 0, 30)
-slider.Position = UDim2.new(0,0,-0.5,-10)
+slider.Position = UDim2.new(0,0,0.15,-10)
 slider.Name = "Slider"
 slider.BackgroundColor3 = Color3.fromRGB(0,0,0)
+slider.BorderSizePixel = 2
+slider.BorderColor3 = Color3.fromRGB(unpack(colourTheme))
 
 local sliderUIDetector = Instance.new("UIDragDetector")
 sliderUIDetector.Parent = slider
@@ -77,6 +80,19 @@ sliderUIDetector.DragAxis = Vector2.new(1,0)
 sliderUIDetector.MinDragTranslation = UDim2.new(-0.5,0,0)
 sliderUIDetector.MaxDragTranslation = UDim2.new(0.5,0,0)
 sliderUIDetector.ReferenceUIInstance = sliderFrame
+
+local sliderText = Instance.new("TextLabel")
+sliderText.Parent = draggable
+sliderText.BackgroundTransparency = 1
+sliderText.TextTransparency = 1
+sliderText.Text = "Pickaxe Tier: Basic Pickaxe"
+sliderText.Size = UDim2.new(0, 300, 0, 50)
+sliderText.TextSize = 25
+sliderText.Font = Enum.Font.GothamBold
+sliderText.Position = UDim2.new(0.5, -350, 0, 185)
+sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
+sliderText.TextStrokeColor3 = Color3.fromRGB(255,255,255)
+sliderText.TextStrokeTransparency = 0.7
 
 local dragDetector = Instance.new("UIDragDetector")
 dragDetector.Parent = draggable
@@ -121,7 +137,7 @@ startAutoFarm.TextSize = 17
 startAutoFarm.TextColor3 = Color3.fromRGB(0, 0, 0)
 startAutoFarm.Font = Enum.Font.SourceSansBold
 startAutoFarm.Transparency = 1
-startAutoFarm.Position = UDim2.new(0.5, -147, 0, 120)
+startAutoFarm.Position = UDim2.new(0.5, -350, 0, 120)
 local autofarmcorner = Instance.new("UICorner")
 autofarmcorner.Parent = startAutoFarm
 
@@ -147,12 +163,12 @@ local Mouse = player:GetMouse()
 
 for i, element in pairs(tweenParts) do
     if element:IsA("Frame") or element:IsA("TextButton") then
-        
+        if element.Name == "Slider" then finaltransparency = 0 else finaltransparency = 0.3 end
 
-        local tween = tweenservice:Create(element, tweenInfo, {Transparency = 0.5})
+        local tween = tweenservice:Create(element, tweenInfo, {Transparency = finaltransparency})
         tween:Play()
         elseif element:IsA("TextLabel") then
-            local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0.5})
+            local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0})
             textTween:Play()
             if i == #tweenParts then
                 wait(1)
