@@ -4,6 +4,9 @@ local player = game.Players.LocalPlayer
 local plrgui = player.PlayerGui
 local plrname = player.Name
 
+local pickaxeSelected = "Tier1Pickaxe"
+local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
+
 local colourTheme = {9, 137, 207}
 -- pickaxe tiers
 
@@ -91,8 +94,6 @@ sliderText.TextSize = 25
 sliderText.Font = Enum.Font.GothamBold
 sliderText.Position = UDim2.new(0.5, -350, 0, 185)
 sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
-sliderText.TextStrokeColor3 = Color3.fromRGB(255,255,255)
-sliderText.TextStrokeTransparency = 0.7
 
 local dragDetector = Instance.new("UIDragDetector")
 dragDetector.Parent = draggable
@@ -134,7 +135,7 @@ startAutoFarm.Text = "Start Auto Farm - Nearest Ore"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 startAutoFarm.TextSize = 17
-startAutoFarm.TextColor3 = Color3.fromRGB(0, 0, 0)
+startAutoFarm.TextColor3 = Color3.fromRGB(255,255,255)
 startAutoFarm.Font = Enum.Font.SourceSansBold
 startAutoFarm.Transparency = 1
 startAutoFarm.Position = UDim2.new(0.5, -350, 0, 120)
@@ -177,7 +178,7 @@ for i, element in pairs(tweenParts) do
     end
 end
 local pathfindingservice = game:GetService("PathfindingService")
-local character = wrkspceEnt.Players[plrname]
+character = wrkspceEnt.Players[plrname]
 local humanoid = character.Humanoid
 local humanoidrootpart = character.HumanoidRootPart
 
@@ -329,13 +330,15 @@ else
     pathfindSuccess = false
 end
     pathfindSuccess = true
-    task.spawn(function()
-    --if success then while closestOre.DepositInfo.OreRemaining.Value > 0 do
-        --wait(0.1)
-    --humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-    --end
-    --end
+
+task.spawn(function()
+    if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
+        wait(0.1)
+    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+    end
+    end
     end)
+    
     return pathfindSuccess
 end
 
@@ -343,19 +346,27 @@ end
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
-local function input(inputType)
+local function input(inputType, inputButton)
     if inputType == "leftclick" then
     local camera = workspace.CurrentCamera
     local centerX = camera.ViewportSize.X / 2
     local centerY = camera.ViewportSize.Y / 2
     virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,true,game,1)
-
+    wait(0.1)
     virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,false,game,1)
-    elseif inputType == "pressF" then
-        virtualinputmanager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
-        virtualinputmanager:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+    elseif inputType == "pressbutton" then
+        virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
+        wait(0.1)
+        virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
     end
 end
+
+local slot = plrgui.Hotbar.Container.HotbarList.Body
+local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
+
+print(slotItem)
+print(("LoadoutItem/" .. pickaxeSelected))
+print(character)
 
 local function closestOreFarm()
     --put in a while loop tomorrow, it has to check if your inventory is 30/30 and then it will stop and go to sell it all.
@@ -366,10 +377,21 @@ local function closestOreFarm()
     end
     print(closestOre)
     if pathfindSuccess == true then
-        --while closestOre.DepositInfo.OreRemaining.Value > 0 do
-            --wait(0.1)
-            --input("leftclick")
-        --end
+        if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. pickaxeSelected) then
+            print("Pickaxe not selected!")
+            input("pressbutton", Enum.KeyCode.Four)
+             while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                wait(0.1)
+                input("leftclick")
+            end
+            input("pressbutton", Enum.KeyCode.Four)
+        else
+            while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                wait(0.1)
+                input("leftclick")
+            end
+            input("pressbutton", Enum.KeyCode.Four)
+        end
     end
 end
 
