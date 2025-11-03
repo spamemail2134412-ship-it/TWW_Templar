@@ -305,17 +305,22 @@ if success then
             part.Parent = game.Workspace:WaitForChild("Path")
             part.Name = "part"..i
             print(part.Size, "less than number")
-            part.Size = Vector3.new(3, 1, 1)
+            part.Size = Vector3.new(3, 2, 2)
             local actualpos = character:GetAttribute("finalpos")
 
             local connection = Instance.new("Part")
-            connection.Material = "Plastic"
+            connection.Shape = "Cylinder"
+            connection.Material = "Neon"
             connection.Anchored = true
             connection.CanCollide = false
             connection.Parent = game.Workspace:WaitForChild("Path")
-            connection.Size = Vector3.new(thickness, thickness, dist)
-            connection.CFrame = CFrame.new(a, b) * CFrame.new(0, 0, -dist/2) - Vector3.new(0,0.5,0)
+            connection.Size = Vector3.new(dist, thickness, thickness)
+            connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
             connection.Name = "Connection" .. i
+            connection.BrickColor = BrickColor.new("Orange")
+            local up = Vector3.new(0,1,0)
+            local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
+            connection.CFrame = rotation
 
             task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
                 if i == 0 then
