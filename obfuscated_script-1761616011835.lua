@@ -183,8 +183,8 @@ local humanoid = character.Humanoid
 local humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
-    AgentCanJump = true,
     AgentCanClimb = true,
+    WaypointSpacing = 3,
     Costs = {Water = 20}
 })
 
@@ -285,46 +285,96 @@ if success then
 	local stuck = false
 
     print("Waypoints found: " .. #path:GetWaypoints())
-    for i, waypoint in ipairs(path:GetWaypoints()) do
-          
-        local part = Instance.new("Part")
-        part.Material = "Neon"
-        part.Anchored = true
-        part.CanCollide = false
-        part.Shape = "Ball"
-        part.Position = waypoint.Position
-        part.Parent = game.Workspace:WaitForChild("Path")
-        part.Name = "part"..i
-        local actualpos = character:GetAttribute("finalpos")
-	
-	local waypoints = path:GetWaypoints()
-	local finished = false
-	local maxTime = 10
-	local jumpTime = 5
-	local timeElapsed = 0
+    for i, waypoint in pairs(path:GetWaypoints()) do
+        local waypoints = path:GetWaypoints()
+        if i < #path:GetWaypoints() then
+            
+            local a = waypoints[i].Position
+            local b = waypoints[i+1].Position
+            local dir = b - a
+            local dist = dir.Magnitude
+            local mid = (a + b) / 2
+            local thickness = 0.4
 
-        if actualpos ~= finalpos then return end
-        humanoid:MoveTo(waypoint.Position)
+            local part = Instance.new("Part")
+            part.Material = "Neon"
+            part.Anchored = true
+            part.CanCollide = false
+            part.Shape = "Ball"
+            part.Position = waypoint.Position - Vector3.new(0,0.5,0)
+            part.Parent = game.Workspace:WaitForChild("Path")
+            part.Name = "part"..i
+            print(part.Size, "less than number")
+            part.Size = Vector3.new(3, 1, 1)
+            local actualpos = character:GetAttribute("finalpos")
 
-        
-	
-        task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
-            if i == 0 then
+            local connection = Instance.new("Part")
+            connection.Material = "Plastic"
+            connection.Anchored = true
+            connection.CanCollide = false
+            connection.Parent = game.Workspace:WaitForChild("Path")
+            connection.Size = Vector3.new(thickness, thickness, dist)
+            connection.CFrame = CFrame.new(a, b) * CFrame.new(0, 0, -dist/2) - Vector3.new(0,0.5,0)
+            connection.Name = "Connection" .. i
 
-                wait(1)
-                part:Destroy()
+            task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
+                if i == 0 then
+                    wait(1)
+                    part:Destroy()
+                    connection:Destroy()
                 else
                     wait(0.25 + i / 2)
                     part:Destroy()
-            end
-        end)
-        if waypoint.Action == Enum.PathWaypointAction.Jump then
-            humanoid.Jump = true
-        end
+                    connection:Destroy()
+                end
+            end)
+
+        else
+
+            local part = Instance.new("Part")
+            part.Material = "Neon"
+            part.Anchored = true
+            part.CanCollide = false
+            part.Shape = "Ball"
+            part.Position = waypoint.Position - Vector3.new(0,0.5,0)
+            part.Parent = game.Workspace:WaitForChild("Path")
+            part.Name = "part"..i
+            print(part.Size, "equal to ore more than")
+            part.Size = Vector3.new(3, 1, 1)
+            local actualpos = character:GetAttribute("finalpos")
+
+            task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
+                if i == 0 then
+
+                    wait(1)
+                    part:Destroy()
+                else
+                    wait(0.25 + i / 2)
+                    part:Destroy()
+                end
+            end)
+    end
+
+
+
+    end
+
+    for i, waypoint in ipairs(path:GetWaypoints()) do
+        print("ok so we got here ig?")
+	    local waypoints = path:GetWaypoints()
+	    local finished = false
+	    local maxTime = 10
+	    local jumpTime = 5
+	    local timeElapsed = 0
+
+        --if actualpos ~= finalpos then return end
+        humanoid:MoveTo(waypoint.Position)
+
 
         humanoid.MoveToFinished:Wait()
 
     end
+
 else
     if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
     pathfindSuccess = false
@@ -334,7 +384,7 @@ end
 task.spawn(function()
     if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
         wait(0.1)
-    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
     end
     end
     end)
@@ -376,6 +426,7 @@ local function closestOreFarm()
         wait(0.1)
     end
     print(closestOre)
+
     if pathfindSuccess == true then
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. pickaxeSelected) then
             print("Pickaxe not selected!")
