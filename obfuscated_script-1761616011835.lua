@@ -1,13 +1,14 @@
 print("west z is an independently created autofarm script and is in no way related to west x.")
 
 local player = game.Players.LocalPlayer
-local plrgui = player.PlayerGui
+local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
-local pickaxeSelected = "Tier1Pickaxe"
+local pickaxeSelected = "BasicPickaxe"
 local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
-local colourTheme = {9, 137, 207}
+local old = {9, 137, 207}
+local colourTheme = {255, 255, 255}
 -- pickaxe tiers
 
 Tier0 = {Coal, Copper}
@@ -88,12 +89,30 @@ local sliderText = Instance.new("TextLabel")
 sliderText.Parent = draggable
 sliderText.BackgroundTransparency = 1
 sliderText.TextTransparency = 1
-sliderText.Text = "Pickaxe Tier: Basic Pickaxe"
+sliderText.Text = "Pickaxe Tier: BasicPickaxe"
 sliderText.Size = UDim2.new(0, 300, 0, 50)
 sliderText.TextSize = 25
 sliderText.Font = Enum.Font.GothamBold
 sliderText.Position = UDim2.new(0.5, -350, 0, 185)
 sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
+
+sliderUIDetector.DragContinue:Connect(function()
+
+    local totalWidth = sliderFrame.AbsoluteSize.X - slider.AbsoluteSize.X
+    local intervalCount = 10
+    local intervalWidth = totalWidth / (intervalCount - 1)
+
+    local xPos = slider.Position.X.Offset
+
+    local nearestIndex = math.floor((xPos + intervalWidth/2) / intervalWidth)
+    local snappedX = nearestIndex * intervalWidth
+    
+    slider.Position = UDim2.new(0, snappedX, slider.Position.Y.Scale, slider.Position.Y.Offset)
+    sliderText.Text = "Pickaxe Tier: " .. pickaxeTiers[nearestIndex + 1]
+
+    pickaxeSelected = pickaxeTiers[nearestIndex + 1]
+
+end)
 
 local dragDetector = Instance.new("UIDragDetector")
 dragDetector.Parent = draggable
@@ -301,11 +320,11 @@ if success then
             part.Anchored = true
             part.CanCollide = false
             part.Shape = "Ball"
-            part.Position = waypoint.Position - Vector3.new(0,0.5,0)
+            part.Position = waypoint.Position
             part.Parent = game.Workspace:WaitForChild("Path")
             part.Name = "part"..i
             print(part.Size, "less than number")
-            part.Size = Vector3.new(3, 2, 2)
+            part.Size = Vector3.new(3, 1, 1)
             local actualpos = character:GetAttribute("finalpos")
 
             local connection = Instance.new("Part")
@@ -317,7 +336,7 @@ if success then
             connection.Size = Vector3.new(dist, thickness, thickness)
             connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
             connection.Name = "Connection" .. i
-            connection.BrickColor = BrickColor.new("Orange")
+            connection.Color = Color3.fromRGB(213, 115, 61)
             local up = Vector3.new(0,1,0)
             local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
             connection.CFrame = rotation
@@ -341,7 +360,7 @@ if success then
             part.Anchored = true
             part.CanCollide = false
             part.Shape = "Ball"
-            part.Position = waypoint.Position - Vector3.new(0,0.5,0)
+            part.Position = waypoint.Position
             part.Parent = game.Workspace:WaitForChild("Path")
             part.Name = "part"..i
             print(part.Size, "equal to ore more than")
@@ -385,14 +404,6 @@ else
     pathfindSuccess = false
 end
     pathfindSuccess = true
-
-task.spawn(function()
-    if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
-        wait(0.1)
-        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-    end
-    end
-    end)
     
     return pathfindSuccess
 end
@@ -433,15 +444,35 @@ local function closestOreFarm()
     print(closestOre)
 
     if pathfindSuccess == true then
-        if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. pickaxeSelected) then
+        if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
             input("pressbutton", Enum.KeyCode.Four)
+
+            task.spawn(function()
+                if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                        wait(0.1)
+                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    end
+                end
+            end)
+            
              while closestOre.DepositInfo.OreRemaining.Value > 0 do
                 wait(0.1)
                 input("leftclick")
             end
             input("pressbutton", Enum.KeyCode.Four)
+        elseif slotItem == nil then print("No pickaxe found in slot 4.")
+        elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
         else
+
+            task.spawn(function()
+                if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                        wait(0.1)
+                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    end
+                end
+            end)
+
             while closestOre.DepositInfo.OreRemaining.Value > 0 do
                 wait(0.1)
                 input("leftclick")
