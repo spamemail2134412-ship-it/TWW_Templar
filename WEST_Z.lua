@@ -449,10 +449,9 @@ local function closestOreFarm()
             input("pressbutton", Enum.KeyCode.Four)
 
             task.spawn(function()
-                if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                        wait(0.1)
-                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                    end
+                while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                    wait(0.1)
+                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
             
@@ -466,10 +465,9 @@ local function closestOreFarm()
         else
 
             task.spawn(function()
-                if success == true then while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                        wait(0.1)
-                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                    end
+                while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                    wait(0.1)
+                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
 
