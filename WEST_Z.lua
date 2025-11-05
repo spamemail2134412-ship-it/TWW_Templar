@@ -4,12 +4,13 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
+-- pickaxeTiers used for pickaxe selection slider
 local pickaxeSelected = "BasicPickaxe"
 local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
 local old = {9, 137, 207}
 local colourTheme = {255, 255, 255}
--- pickaxe tiers
+-- pickaxe tiers, planned to be used on the pathfinding update.
 
 Tier0 = {Coal, Copper}
 Tier1 = {Coal, Copper}
@@ -213,10 +214,10 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     local lastWaypoint = nil -- previous waypoint so it can be subtracted from the current waypoint
 
     for i, waypoint in pairs(waypoints) do
-        if lastWaypoint == nil then
+        if lastWaypoint == nil then -- If there is no data to compare to, then it will skip over so that there is previous waypoint. (In order to measure the distance between them)
             lastWaypoint = waypoint
             else
-            waypointPos = (waypoint.Position - lastWaypoint.Position).Magnitude
+            waypointPos = (waypoint.Position - lastWaypoint.Position).Magnitude -- Measures the distance between the current waypoint and the previous waypoint.
             table.insert(localDistance,waypointPos)
             lastWaypoint = waypoint
         end
@@ -254,10 +255,10 @@ oreHierarchy = nil
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
                     print("Ore iteration " .. i .. " successful path creation.")
-                    
+					
                 elseif path.Status == Enum.PathStatus.NoPath then
                     print("Ore iteration " .. i .. " path failed, path not found.")
-                    else
+                else
                     print("Ore iteration " .. i .. " path failed, unknown error occurred.")
                 end
         end
