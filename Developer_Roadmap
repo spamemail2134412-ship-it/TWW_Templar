@@ -16,6 +16,7 @@ Premade autofarm routes: 🔵 2️⃣
 Server hop on death & autofarm route completed: 🔵
 Discord Webhooks (to view autofarm stats): 🔵 (Barely planned, on bottom of priority list and will come after main functionality is introduced.) 5️⃣
 Underground travel: 🔵 3️⃣
+Pathfinding fixes (Create:Async keeps failing to create a path, so eventually this will be fixed but it is not particularly high on my priority list right now.): 🟠 3️⃣
 
 UI ELEMENTS:
 UI Transparency slider: 🔵 3️⃣
