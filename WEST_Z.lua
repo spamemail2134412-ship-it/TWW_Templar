@@ -200,7 +200,7 @@ end
 local pathfindingservice = game:GetService("PathfindingService")
 character = wrkspceEnt.Players[plrname]
 local humanoid = character.Humanoid
-local humanoidrootpart = character.HumanoidRootPart
+humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
     AgentCanClimb = true,
@@ -240,8 +240,17 @@ closestOreDistance = math.huge
 closestOre = nil
 finalpos = nil
 oreHierarchy = nil
+
+local function collisionOff(ore)
+    if ore:FindFirstChild("RockBase") then ore.RockBase.CanCollide = false end
+    if ore:FindFirstChild("RockBaseL") then ore.RockBaseL.CanCollide = false end
+    if ore:FindFirstChild("RockBaseVein") then ore.RockBaseVein.CanCollide = false end
+    if ore:FindFirstChild("RockBaseLVein") then ore.RockBaseLVein.CanCollide = false end
+end
+
     for i, ore in pairs(ores) do
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) then
+            collisionOff(ore)
             local modifier = 0
             if string.find(ore.Parent.Name, "Vein") then
                 for i, v in pairs(ore:GetChildren()) do
