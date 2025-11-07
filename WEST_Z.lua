@@ -12,16 +12,16 @@ local old = {9, 137, 207}
 local colourTheme = {255, 255, 255}
 -- pickaxe tiers, planned to be used on the pathfinding update.
 
-Tier0 = {Coal, Copper}
-Tier1 = {Coal, Copper}
-Tier2 = {Coal, Copper, Zinc}
-Tier3 = {Coal, Copper, Zinc, Iron, Limestone}
-Tier4 = {Coal, Copper, Zinc, Iron, Limestone}
-Tier5 = {Coal, Copper, Zinc, Iron, Limestone, Silver}
-Tier6 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold}
-Tier7 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein}
-Tier8 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein, SilverVein, GoldVein}
-Tier9 = {Coal, Copper, Zinc, Iron, Limestone, Silver, Gold, Quartz, CoalVein, CopperVein, ZincVein, SilverVein, GoldVein}
+_G.Tier0 = {"Coal", "Copper"}
+_G.Tier1 = {"Coal", "Copper"}
+_G.Tier2 = {"Coal", "Copper", "Zinc"}
+_G.Tier3 = {"Coal", "Copper", "Zinc", "Iron", "Limestone"}
+_G.Tier4 = {"Coal", "Copper", "Zinc", "Iron", "Limestone"}
+_G.Tier5 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver"}
+_G.Tier6 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold"}
+_G.Tier7 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein"}
+_G.Tier8 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
+_G.Tier9 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
 
 if game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed == 30 then
 return
@@ -231,6 +231,8 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     table.insert(oreIndex, ore)
 end
 
+local pickaxeIndex = table.find(pickaxeTiers, pickaxeSelected)
+
 local function FindNearestOre()
 nearestOres = {}
 oreIndex = {}
@@ -238,9 +240,8 @@ closestOreDistance = math.huge
 closestOre = nil
 finalpos = nil
 oreHierarchy = nil
-
     for i, ore in pairs(ores) do
-        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 then
+        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) then
             local modifier = 0
             if string.find(ore.Parent.Name, "Vein") then
                 for i, v in pairs(ore:GetChildren()) do
