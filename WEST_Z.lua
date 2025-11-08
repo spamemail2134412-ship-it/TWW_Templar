@@ -203,6 +203,8 @@ local humanoid = character.Humanoid
 humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
+    AgentHeight = 1,
+    AgentRadius = 1,
     AgentCanClimb = true,
     WaypointSpacing = 3,
     Costs = {Water = 20}
@@ -407,7 +409,6 @@ if success then
 
 
         humanoid.MoveToFinished:Wait()
-
     end
 
 else
@@ -418,23 +419,26 @@ end
     
     return pathfindSuccess
 end
-
 end
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
-local function input(inputType, inputButton)
+local function input(inputType, inputButton, timeInterval)
     if inputType == "leftclick" then
     local camera = workspace.CurrentCamera
     local centerX = camera.ViewportSize.X / 2
     local centerY = camera.ViewportSize.Y / 2
     virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,true,game,1)
-    wait(0.1)
+    wait(0.2)
     virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,false,game,1)
     elseif inputType == "pressbutton" then
         virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
-        wait(0.1)
+        wait(timeInterval)
         virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
+    elseif inputType == "holdLeftClick" then
+        virtualinputmanager:SendMouseButtonEvent(0,0,0,true,game,1)
+    elseif inputType == "abortLeftClick" then
+        virtualinputmanager:SendMouseButtonEvent(0,0,0,false,game,1)
     end
 end
 
@@ -458,17 +462,15 @@ local function closestOreFarm()
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
             input("pressbutton", Enum.KeyCode.Four)
-
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
                     humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
-            
              while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                wait(0.1)
-                input("leftclick")
+                input("holdLeftClick")
+                input("pressbutton", Enum.KeyCode.E, 0.5)
             end
             input("pressbutton", Enum.KeyCode.Four)
         elseif slotItem == nil then print("No pickaxe found in slot 4.")
@@ -481,11 +483,11 @@ local function closestOreFarm()
                     humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
-
             while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                wait(0.1)
-                input("leftclick")
+                input("holdLeftClick")
+                input("pressbutton", Enum.KeyCode.E, 0.5)
             end
+            input("abortLeftClick")
             input("pressbutton", Enum.KeyCode.Four)
         end
     end
