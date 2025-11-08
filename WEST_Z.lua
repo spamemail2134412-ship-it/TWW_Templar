@@ -465,12 +465,13 @@ local function closestOreFarm()
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
-                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
              while closestOre.DepositInfo.OreRemaining.Value > 0 do
                 input("holdLeftClick")
                 input("pressbutton", Enum.KeyCode.E, 0.5)
+                wait(0.1)
             end
             input("pressbutton", Enum.KeyCode.Four)
         elseif slotItem == nil then print("No pickaxe found in slot 4.")
@@ -480,15 +481,17 @@ local function closestOreFarm()
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
-                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    workspace.CurrentCamera.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
             while closestOre.DepositInfo.OreRemaining.Value > 0 do
                 input("holdLeftClick")
                 input("pressbutton", Enum.KeyCode.E, 0.5)
+                wait(0.1)
             end
             input("abortLeftClick")
             input("pressbutton", Enum.KeyCode.Four)
+            virtualinputmanager:SendKeyEvent(false, Enum.KeyCode.LeftAlt, false, game)
         end
     end
 end
