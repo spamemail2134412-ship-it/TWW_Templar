@@ -442,6 +442,15 @@ local function input(inputType, inputButton, timeInterval)
     end
 end
 
+local function closestVender()
+    local currentPos = humanoidrootpart.Position
+    local closestVenderDistance = math.huge
+    local finalVenderPos = nil
+    local venders = {}
+    
+
+end
+
 local slot = plrgui.Hotbar.Container.HotbarList.Body
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
 
