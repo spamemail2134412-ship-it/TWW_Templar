@@ -4,6 +4,10 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
+local exemption = {"startAutoFarm"}
+
+local taskbarButtons = {}
+
 -- pickaxeTiers used for pickaxe selection slider
 local pickaxeSelected = "BasicPickaxe"
 local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
@@ -96,6 +100,7 @@ sliderText.TextSize = 25
 sliderText.Font = Enum.Font.GothamBold
 sliderText.Position = UDim2.new(0.5, -350, 0, 185)
 sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
+sliderText.Name = "sliderText"
 
 sliderUIDetector.DragContinue:Connect(function()
 
@@ -123,7 +128,8 @@ Frame.Parent = draggable
 Frame.Size = UDim2.new(0, 800, 0, 800)
 Frame.Position = UDim2.new(0.5, -400, 0.5, -400)
 Frame.Transparency = 1
-Frame.BackgroundColor3 = Color3.fromRGB(53,53,53)
+Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.ZIndex = 0
 
 local uicornerFrame = Instance.new("UICorner")
 uicornerFrame.Parent = Frame
@@ -132,9 +138,10 @@ local tweenservice = game:GetService("TweenService")
 
 local framebar = Instance.new("Frame")
 framebar.Parent = draggable
-framebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+framebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 framebar.Size = UDim2.new(0, 800, 0, 100)
 framebar.Transparency = 1
+framebar.ZIndex = 0
 
 local uicornerFrameBar = Instance.new("UICorner")
 uicornerFrameBar.Parent = framebar
@@ -145,36 +152,70 @@ title.Text = "West Z"
 title.Size = UDim2.new(0, 800, 0, 100)
 title.TextTransparency = 1
 title.BackgroundTransparency = 1
-title.TextSize = 60
-title.TextColor3 = Color3.fromRGB(0,0,0)
+title.TextSize = 30
+title.TextColor3 = Color3.fromRGB(255,255,255)
 title.Font = Enum.Font.GothamBold
+title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
 startAutoFarm.Text = "Start Auto Farm - Nearest Ore"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
-startAutoFarm.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-startAutoFarm.TextSize = 17
+startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+startAutoFarm.TextSize = 20
 startAutoFarm.TextColor3 = Color3.fromRGB(255,255,255)
 startAutoFarm.Font = Enum.Font.SourceSansBold
 startAutoFarm.Transparency = 1
 startAutoFarm.Position = UDim2.new(0.5, -350, 0, 120)
+startAutoFarm.Name = "startAutoFarm"
+
 local autofarmcorner = Instance.new("UICorner")
 autofarmcorner.Parent = startAutoFarm
 
 Exit = Instance.new("TextButton")
 Exit.Parent = Frame
 Exit.Text = "X"
-Exit.Size = UDim2.new(0, 25, 0, 25)
-Exit.BackgroundColor3 = Color3.fromRGB(200,0,0)
+Exit.Size = UDim2.new(0, 30, 0, 30)
+Exit.BackgroundColor3 = Color3.fromRGB(50,50,50)
 Exit.Font = Enum.Font.SourceSansBold
 Exit.Transparency = 1
-Exit.Position = UDim2.new(1, -30, 0, 5)
+Exit.Position = UDim2.new(1, -40, 0, 5)
 Exit.TextSize = 20
-Exit.TextColor3 = Color3.fromRGB(0,0,0)
+Exit.TextColor3 = Color3.fromRGB(255,255,255)
+Exit.Name = "Exit"
+Exit.BackgroundTransparency = 1
+table.insert(taskbarButtons, Exit)
 
 local ExitCorner = Instance.new("UICorner")
 ExitCorner.Parent = Exit
+
+local minimise = Instance.new("TextButton")
+minimise.Text = "-"
+minimise.Size = UDim2.new(0, 30, 0, 30)
+minimise.TextColor3 = Color3.fromRGB(255,255,255)
+minimise.Position = UDim2.new(1, -75, 0, 5)
+minimise.Parent = Frame
+minimise.BackgroundTransparency = 1
+minimise.TextSize = 20
+table.insert(taskbarButtons, minimise)
+minimise.BackgroundColor3 = Color3.fromRGB(50,50,50)
+minimise.Transparency = 1
+
+local settings = Instance.new("ImageButton")
+settings.Size = UDim2.new(0, 30, 0, 30)
+settings.Position = UDim2.new(1, -110, 0, 5)
+settings.Image = "rbxthumb://type=Asset&id=2484556387&w=420&h=420"
+settings.Parent = Frame
+settings.BackgroundTransparency = 1
+settings.BackgroundColor3 = Color3.fromRGB(50,50,50)
+table.insert(taskbarButtons, settings)
+settings.ImageTransparency = 1
+
+local settingsCorner = Instance.new("UICorner")
+settingsCorner.Parent = settings
+
+local minimiseCorner = Instance.new("UICorner")
+minimiseCorner.Parent = minimise
 
 local tweenParts = draggable:GetDescendants()
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 1)
@@ -183,18 +224,21 @@ isTweenFinished = false
 local Mouse = player:GetMouse()
 
 for i, element in pairs(tweenParts) do
-    if element:IsA("Frame") or element:IsA("TextButton") then
-        if element.Name == "Slider" then finaltransparency = 0 else finaltransparency = 0.3 end
+    if element:IsA("Frame") or table.find(exemption, element.Name) then
+        if table.find(exemption,element.Name) then finaltransparency = 0 else finaltransparency = 0.3 end
 
         local tween = tweenservice:Create(element, tweenInfo, {Transparency = finaltransparency})
         tween:Play()
-        elseif element:IsA("TextLabel") then
-            local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0})
-            textTween:Play()
-            if i == #tweenParts then
-                wait(1)
-                isTweenFinished = true
-            end
+    elseif element:IsA("TextLabel") or element:IsA("TextButton") then
+        local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0})
+        textTween:Play()
+        if i == #tweenParts then
+            wait(1)
+            isTweenFinished = true
+        end
+    elseif element:IsA("ImageButton") then
+        local textTween = tweenservice:Create(element, tweenInfo, {ImageTransparency = 0})
+        textTween:Play()
     end
 end
 local pathfindingservice = game:GetService("PathfindingService")
@@ -203,8 +247,8 @@ local humanoid = character.Humanoid
 humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
-    AgentHeight = 1,
-    AgentRadius = 1,
+    AgentHeight = 7.459118,
+    AgentRadius = 2.36565,
     AgentCanClimb = true,
     WaypointSpacing = 3,
     Costs = {Water = 20}
@@ -262,7 +306,7 @@ end
                 end
             end
                 local success, errorMessage = pcall(function()
-                    path:ComputeAsync(character.PrimaryPart.Position, ore.PrimaryPart.Position - Vector3.new(modifier,modifier,modifier))
+                    path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, ore.PrimaryPart.Position - Vector3.new(modifier,modifier,modifier))
                 end)
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
@@ -298,7 +342,7 @@ print(closestOre)
 print(closestOre)
 pathfindSuccess = nil
 local success, errorMessage = pcall(function()
-path:ComputeAsync(character.PrimaryPart.Position, finalpos)
+path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, finalpos)
 end)
 print(path.Status)
 if game.Workspace:FindFirstChild("Path") then
@@ -405,10 +449,10 @@ if success then
 	    local timeElapsed = 0
 
         --if actualpos ~= finalpos then return end
-        humanoid:MoveTo(waypoint.Position)
+        wrkspceEnt.Players[plrname].Humanoid:MoveTo(waypoint.Position)
 
 
-        humanoid.MoveToFinished:Wait()
+        wrkspceEnt.Players[plrname].Humanoid.MoveToFinished:Wait()
     end
 
 else
@@ -452,6 +496,7 @@ local function closestVender()
 end
 
 local slot = plrgui.Hotbar.Container.HotbarList.Body
+if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") WestZ:Destroy() return end
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
 
 print(slotItem)
@@ -505,6 +550,18 @@ local function closestOreFarm()
     end
 end
 
+local function buttonHover()
+    for _,button in pairs(taskbarButtons) do
+        button.MouseEnter:Connect(function()
+            button.BackgroundTransparency = 0
+        end)
+        
+        button.MouseLeave:Connect(function()
+            button.BackgroundTransparency = 1
+        end)
+    end
+end
+
 local function applyButtonFunctionality()
 
 -- Exit button.
@@ -516,6 +573,8 @@ end)
 startAutoFarm.MouseButton1Down:Connect(function()
     closestOreFarm()
 end)
+
+buttonHover()
 
 end
 
