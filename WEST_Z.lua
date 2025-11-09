@@ -27,14 +27,19 @@ _G.Tier7 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Qu
 _G.Tier8 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
 _G.Tier9 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
 
-if game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed == 30 then
-return
-else
+local walkSpeedValue = plrgui:FindFirstChild("WalkSpeedValue")
+
+if walkSpeedValue then  else
+    WalkSpeedValue = Instance.new("BoolValue")
+    WalkSpeedValue.Name = "WalkSpeedValue"
+    WalkSpeedValue.Value = true
+    WalkSpeedValue.Parent = plrgui
+
     task.spawn(function()
-    print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
-    while true do
-        wait(0.1)
-    game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 30
+        print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
+        while true do
+            wait(0.1)
+        game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 30
         end
     end)
 end
@@ -54,7 +59,7 @@ WestZ = Instance.new("ScreenGui")
 WestZ.Parent = plrgui
 WestZ.Name = "WestZ"
 
-local draggable = Instance.new("Frame")
+draggable = Instance.new("Frame")
 draggable.Parent = WestZ
 draggable.Name = "Draggable"
 draggable.Transparency = 1
@@ -189,7 +194,7 @@ table.insert(taskbarButtons, Exit)
 local ExitCorner = Instance.new("UICorner")
 ExitCorner.Parent = Exit
 
-local minimise = Instance.new("TextButton")
+minimise = Instance.new("TextButton")
 minimise.Text = "-"
 minimise.Size = UDim2.new(0, 30, 0, 30)
 minimise.TextColor3 = Color3.fromRGB(255,255,255)
@@ -216,6 +221,17 @@ settingsCorner.Parent = settings
 
 local minimiseCorner = Instance.new("UICorner")
 minimiseCorner.Parent = minimise
+
+overview = Instance.new("Frame")
+overview.BackgroundColor3 = Color3.fromRGB(0,0,0)
+overview.Position = UDim2.new(0,800,0,-57)
+overview.Size = UDim2.new(0,800,0,100)
+overview.Parent = WestZ
+overview.Name = "OverviewPanel"
+overview.Visible = false
+
+local overviewCorner = Instance.new("UICorner")
+overviewCorner.Parent = overview
 
 local tweenParts = draggable:GetDescendants()
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 1)
@@ -563,6 +579,12 @@ local function buttonHover()
 end
 
 local function applyButtonFunctionality()
+
+-- Minimise button
+minimise.MouseButton1Down:Connect(function()
+    overview.Visible = not overview.Visible
+    draggable.Visible = not draggable.Visible
+end)
 
 -- Exit button.
 Exit.MouseButton1Down:Connect(function()
