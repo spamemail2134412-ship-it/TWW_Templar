@@ -51,19 +51,19 @@ local mining = wrkspceInt.Mining
 local oredeposits = mining.OreDeposits
 local ores = oredeposits:GetDescendants()
 
-if plrgui:FindFirstChild("WestZ") then
+if plrgui:FindFirstChild("Templar") then
 return
 else
 
-WestZ = Instance.new("ScreenGui")
-WestZ.Parent = plrgui
-WestZ.Name = "WestZ"
+Templar = Instance.new("ScreenGui")
+Templar.Parent = plrgui
+Templar.Name = "Templar"
 
 draggable = Instance.new("Frame")
-draggable.Parent = WestZ
+draggable.Parent = Templar
 draggable.Name = "Draggable"
 draggable.Transparency = 1
-draggable.Size = UDim2.new(0, 800, 0, 800)
+draggable.Size = UDim2.new(0, 800, 0, 600)
 draggable.Position = UDim2.new(0.5, -400, 0.5, -400)
 
 local sliderFrame = Instance.new("Frame")
@@ -130,8 +130,8 @@ dragDetector.Parent = draggable
 
 local Frame = Instance.new("Frame")
 Frame.Parent = draggable
-Frame.Size = UDim2.new(0, 800, 0, 800)
-Frame.Position = UDim2.new(0.5, -400, 0.5, -400)
+Frame.Size = UDim2.new(0, 800, 0, 600)
+Frame.Position = UDim2.new(0.5, -400, 0.5, -300)
 Frame.Transparency = 1
 Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Frame.ZIndex = 0
@@ -153,7 +153,7 @@ uicornerFrameBar.Parent = framebar
 
 local title = Instance.new("TextLabel")
 title.Parent = framebar
-title.Text = "West Z"
+title.Text = "Templar"
 title.Size = UDim2.new(0, 800, 0, 100)
 title.TextTransparency = 1
 title.BackgroundTransparency = 1
@@ -226,12 +226,42 @@ overview = Instance.new("Frame")
 overview.BackgroundColor3 = Color3.fromRGB(0,0,0)
 overview.Position = UDim2.new(0,800,0,-57)
 overview.Size = UDim2.new(0,800,0,100)
-overview.Parent = WestZ
+overview.Parent = Templar
 overview.Name = "OverviewPanel"
 overview.Visible = false
 
 local overviewCorner = Instance.new("UICorner")
 overviewCorner.Parent = overview
+
+maximise = Instance.new("ImageButton")
+maximise.Parent = overview
+maximise.Size = UDim2.new(0, 30, 0, 30)
+maximise.Position = UDim2.new(0,730,0,5)
+table.insert(taskbarButtons,maximise)
+maximise.BackgroundTransparency = 1
+maximise.BackgroundColor3 = Color3.fromRGB(50,50,50)
+maximise.Image = "rbxthumb://type=Asset&id=94060666841421&w=420&h=420"
+
+local maximiseCorner = Instance.new("UICorner")
+maximiseCorner.Parent = maximise
+
+overviewExit = Instance.new("TextButton")
+overviewExit.Parent = overview
+overviewExit.Size = UDim2.new(0,30,0,30)
+overviewExit.Position = UDim2.new(0,765,0,5)
+overviewExit.BackgroundTransparency = 1
+overviewExit.BackgroundColor3 = Color3.fromRGB(50,50,50)
+overviewExit.Text = "X"
+overviewExit.TextColor3 = Color3.fromRGB(255,255,255)
+table.insert(taskbarButtons,overviewExit)
+overviewExit.TextSize = 20
+overviewExit.Font = Enum.Font.SourceSansBold
+
+local overviewExitCorner = Instance.new("UICorner")
+overviewExitCorner.Parent = overviewExit
+
+local overviewDrag = Instance.new("UIDragDetector")
+overviewDrag.Parent = overview
 
 local tweenParts = draggable:GetDescendants()
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 1)
@@ -512,7 +542,7 @@ local function closestVender()
 end
 
 local slot = plrgui.Hotbar.Container.HotbarList.Body
-if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") WestZ:Destroy() return end
+if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") Templar:Destroy() return end
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
 
 print(slotItem)
@@ -580,6 +610,17 @@ end
 
 local function applyButtonFunctionality()
 
+-- OverviewPanel exit button
+overviewExit.MouseButton1Down:Connect(function()
+    Templar:Destroy()
+end)
+
+-- OverviewPanel maximise button
+maximise.MouseButton1Down:Connect(function()
+    overview.Visible = false
+    draggable.Visible = true
+end)
+
 -- Minimise button
 minimise.MouseButton1Down:Connect(function()
     overview.Visible = not overview.Visible
@@ -588,7 +629,7 @@ end)
 
 -- Exit button.
 Exit.MouseButton1Down:Connect(function()
-    WestZ:Destroy()
+    Templar:Destroy()
 end)
 
 -- Autofarm button.
