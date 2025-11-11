@@ -619,7 +619,7 @@ local function buttonHover()
         end)
     end
 end
-
+local clockwise = true
 local function applyButtonFunctionality()
 
 -- OverviewPanel exit button
@@ -628,14 +628,17 @@ overviewExit.MouseButton1Down:Connect(function()
 end)
 
 -- Settings button
-
 settings.MouseButton1Down:Connect(function()
+	tweeninfo = TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
     local part = settingsFrame
     local tweeninfoSlide = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
     local tweeninfoTransparency = TweenInfo.new(1.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
     local pos = nil
     local transparency = nil
     local visible = nil
+	local openTween = tweenservice:Create(settings, tweeninfo, {Rotation = 90})
+    local closeTween = tweenservice:Create(settings, tweeninfo, {Rotation = -90})
+	if clockwise == true then openTween:Play() clockwise = false else closeTween:Play() clockwise = true end
     if settingsFrame.Position.Y.Offset == 500 then
         visible = true
         pos = UDim2.new(0.5,-400,0.5,-300)
@@ -652,7 +655,6 @@ settings.MouseButton1Down:Connect(function()
     
     local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider}
     if visible == true then
-        tweeninfo = TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
         for _,button in pairs(buttonsDeleted) do
             local part = button
             if button:IsA("TextLabel") then 
