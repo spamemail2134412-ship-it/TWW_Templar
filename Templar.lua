@@ -620,6 +620,7 @@ local function buttonHover()
     end
 end
 local clockwise = true
+local isRunning = false
 local function applyButtonFunctionality()
 
 -- OverviewPanel exit button
@@ -629,53 +630,64 @@ end)
 
 -- Settings button
 settings.MouseButton1Down:Connect(function()
-	tweeninfo = TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
-    local part = settingsFrame
-    local tweeninfoSlide = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
-    local tweeninfoTransparency = TweenInfo.new(1.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
-    local pos = nil
-    local transparency = nil
-    local visible = nil
-	local openTween = tweenservice:Create(settings, tweeninfo, {Rotation = 90})
-    local closeTween = tweenservice:Create(settings, tweeninfo, {Rotation = -90})
-	if clockwise == true then openTween:Play() clockwise = false else closeTween:Play() clockwise = true end
-    if settingsFrame.Position.Y.Offset == 500 then
-        visible = true
-        pos = UDim2.new(0.5,-400,0.5,-300)
-        transparency = 0.3
-    else
-        visible = false
-        pos = UDim2.new(0.5,-400,0.5,500)
-        transparency = 1
-    end
-    local tweenSlide = tweenservice:Create(part, tweeninfoSlide, {Position = pos})
-    tweenSlide:Play()
-    local tweenTransparency = tweenservice:Create(part, tweeninfoTransparency, {Transparency = transparency})
-    tweenTransparency:Play()
+    if isRunning == false then
+        isRunning = true
+	    tweeninfo = TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
+        local part = settingsFrame
+        local tweeninfoSlide = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
+        local tweeninfoTransparency = TweenInfo.new(1.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
+        local pos = nil
+        local transparency = nil
+        local visible = nil
+	    local openTween = tweenservice:Create(settings, tweeninfo, {Rotation = 90})
+        local closeTween = tweenservice:Create(settings, tweeninfo, {Rotation = -90})
+	    if clockwise == true then
+	        openTween:Play()
+	        clockwise = false
+	    else
+            closeTween:Play()
+            clockwise = true
+        end
+        if settingsFrame.Position.Y.Offset == 500 then
+            visible = true
+            pos = UDim2.new(0.5,-400,0.5,-300)
+            transparency = 0.3
+        else
+            visible = false
+            pos = UDim2.new(0.5,-400,0.5,500)
+            transparency = 1
+        end
+        local tweenSlide = tweenservice:Create(part, tweeninfoSlide, {Position = pos})
+        tweenSlide:Play()
+        local tweenTransparency = tweenservice:Create(part, tweeninfoTransparency, {Transparency = transparency})
+        tweenTransparency:Play()
     
-    local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider}
-    if visible == true then
-        for _,button in pairs(buttonsDeleted) do
-            local part = button
-            if button:IsA("TextLabel") then 
-            tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 1})
-            else
-            tween = tweenservice:Create(part,tweeninfo,{Transparency = 1})
+        local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider}
+        if visible == true then
+            for _,button in pairs(buttonsDeleted) do
+                local part = button
+                if button:IsA("TextLabel") then 
+                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 1})
+                else
+                    tween = tweenservice:Create(part,tweeninfo,{Transparency = 1})
+                end
+                button.Active = false
+                tween:Play()
             end
-            button.Active = false
-            tween:Play()
-        end
-    else
-        for _,button in pairs(buttonsDeleted) do
-            local part = button
-            if button:IsA("TextLabel") then 
-            tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
-            else
-            tween = tweenservice:Create(part,tweeninfo,{Transparency = 0})
+        else
+            for _,button in pairs(buttonsDeleted) do
+                local part = button
+                if button:IsA("TextLabel") then 
+                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
+                else
+                    tween = tweenservice:Create(part,tweeninfo,{Transparency = 0})
+                end
+                button.Active = true
+                tween:Play()
             end
-            button.Active = true
-            tween:Play()
         end
+        wait(0.8)
+        isRunning = false
     end
     
 end)
