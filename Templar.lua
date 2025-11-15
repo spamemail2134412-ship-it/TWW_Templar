@@ -4,28 +4,6 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-
-local Servers = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-local Server, Next = nil, nil
-local function ListServers(cursor)
-    local Raw = game:HttpGet(Servers .. ((cursor and "&cursor=" .. cursor) or ""))
-    return HttpService:JSONDecode(Raw)
-end
-
-repeat
-    local Servers = ListServers(Next)
-    Server = Servers.data[math.random(1, (#Servers.data / 3))]
-    Next = Servers.nextPageCursor
-until Server
-
-local function tp()
-    if Server.playing < Server.maxPlayers and Server.id ~= game.JobId then
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, Server.id, game.Players.LocalPlayer)
-    end
-end
-
 local exemption = {"startAutoFarm", "settingsFrame"}
 
 local taskbarButtons = {}
@@ -61,7 +39,7 @@ if walkSpeedValue then  else
         print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
         while true do
             wait(0.1)
-        game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 30
+        game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 32
         end
     end)
 end
@@ -599,12 +577,12 @@ local function closestOreFarm()
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
-                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
              while closestOre.DepositInfo.OreRemaining.Value > 0 do
                 input("holdLeftClick")
-                input("pressbutton", Enum.KeyCode.E, 0.5)
+                input("pressbutton", Enum.KeyCode.E, 1)
                 wait(0.1)
             end
             input("pressbutton", Enum.KeyCode.Four)
@@ -615,7 +593,7 @@ local function closestOreFarm()
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
-                    workspace.CurrentCamera.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
                 end
             end)
             while closestOre.DepositInfo.OreRemaining.Value > 0 do
