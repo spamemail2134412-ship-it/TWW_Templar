@@ -11,12 +11,14 @@ local Servers = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/server
 local Server, Next = nil, nil
 local function ListServers(cursor)
     local Raw = game:HttpGet(Servers .. ((cursor and "&cursor=" .. cursor) or ""))
-	local success, fail = pcall(function()
+    local success, errorMessage = pcall(function()
     	return HttpService:JSONDecode(Raw)
-	end)
-	if fail then
+    end)
+	if not success then
 		warn("Your executor level is too low. Use another to use the script.")
-		break
+		return nil
+	else
+	    return errorMessage
 	end
 end
 
@@ -336,7 +338,7 @@ path = pathfindingservice:CreatePath({
     AgentHeight = 7.459118,
     AgentRadius = 2.36565,
     AgentCanClimb = true,
-    WaypointSpacing = 3,
+    WaypointSpacing = 10,
     Costs = {Water = 20}
 })
 
@@ -420,6 +422,101 @@ end
 
 end
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Global = require(ReplicatedStorage.SharedModules.Global)
+
+local bodyVelocity = nil
+local bodyGyro = nil
+local isRagdollFlying = false
+
+local function enableRagdollFly()
+    if isRagdollFlying then return end
+    
+    Global.PlayerCharacter:Ragdoll(nil, true)
+    task.wait(0.5)
+    
+    for _, joint in pairs(character:GetDescendants()) do
+        if joint:IsA("BallSocketConstraint") then
+            joint.Enabled = false
+        end
+    end
+    
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.P = 10000
+    bodyVelocity.Parent = humanoidrootpart
+    
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bodyGyro.P = 10000
+    bodyGyro.D = 500
+    bodyGyro.CFrame = humanoidrootpart.CFrame
+    bodyGyro.Parent = humanoidrootpart
+    
+    local undergroundPos = humanoidrootpart.Position - Vector3.new(0, 3, 0)
+    humanoidrootpart.CFrame = CFrame.new(undergroundPos)
+    
+    isRagdollFlying = true
+end
+
+local function disableRagdollFly()
+    if not isRagdollFlying then return end
+    
+    if bodyVelocity then bodyVelocity:Destroy() end
+    if bodyGyro then bodyGyro:Destroy() end
+    
+    Global.PlayerCharacter:GetUp()
+    task.wait(1.5)
+    
+    isRagdollFlying = false
+end
+
+
+local function ragdollMoveTo(targetPos)
+    if not isRagdollFlying then 
+        return false 
+    end
+    
+    local speed = 75
+    
+    targetPos = Vector3.new(targetPos.X, targetPos.Y - 3, targetPos.Z)
+    
+    local stuckTimer = 0
+    local lastPos = humanoidrootpart.Position
+    
+    while true do
+        local currentPos = humanoidrootpart.Position
+        local direction = (targetPos - currentPos)
+        local distance = direction.Magnitude
+        
+        if (currentPos - lastPos).Magnitude < 0.1 then
+            stuckTimer = stuckTimer + 1
+            if stuckTimer > 30 then
+                return false
+            end
+        else
+            stuckTimer = 0
+            lastPos = currentPos
+        end
+        
+        if distance < 5 then
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            return true
+        end
+        
+        bodyVelocity.Velocity = direction.Unit * speed
+        local horizontalLook = Vector3.new(direction.X, 0, direction.Z)
+        if horizontalLook.Magnitude > 0 then
+            bodyGyro.CFrame = CFrame.lookAt(Vector3.new(0,0,0), horizontalLook)
+        else
+            bodyGyro.CFrame = CFrame.new()
+        end
+        
+        task.wait()
+    end
+end
+
 function pathfind()
 FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
 finalpos = finalpos - Vector3.new(2,2,2)
@@ -447,6 +544,7 @@ if success then
 	local stuck = false
 
     print("Waypoints found: " .. #path:GetWaypoints())
+    enableRagdollFly()
     for i, waypoint in pairs(path:GetWaypoints()) do
         local waypoints = path:GetWaypoints()
         if i < #path:GetWaypoints() then
@@ -533,12 +631,9 @@ if success then
 	    local maxTime = 10
 	    local jumpTime = 5
 	    local timeElapsed = 0
-
-        --if actualpos ~= finalpos then return end
-        wrkspceEnt.Players[plrname].Humanoid:MoveTo(waypoint.Position)
-
-
-        wrkspceEnt.Players[plrname].Humanoid.MoveToFinished:Wait()
+        
+        ragdollMoveTo(waypoint.Position)
+        
     end
 
 else
@@ -554,22 +649,24 @@ end
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
 local function input(inputType, inputButton, timeInterval)
-    if inputType == "leftclick" then
-    local camera = workspace.CurrentCamera
-    local centerX = camera.ViewportSize.X / 2
-    local centerY = camera.ViewportSize.Y / 2
-    virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,true,game,1)
-    wait(0.2)
-    virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,false,game,1)
-    elseif inputType == "pressbutton" then
-        virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
-        wait(timeInterval)
-        virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
-    elseif inputType == "holdLeftClick" then
-        virtualinputmanager:SendMouseButtonEvent(0,0,0,true,game,1)
-    elseif inputType == "abortLeftClick" then
-        virtualinputmanager:SendMouseButtonEvent(0,0,0,false,game,1)
-    end
+    task.defer(function()
+        if inputType == "leftclick" then
+            local camera = workspace.CurrentCamera
+            local centerX = camera.ViewportSize.X / 2
+            local centerY = camera.ViewportSize.Y / 2
+            virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,true,game,1)
+            wait(0.2)
+            virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,false,game,1)
+        elseif inputType == "pressbutton" then
+            virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
+            wait(timeInterval)
+            virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
+        elseif inputType == "holdLeftClick" then
+            virtualinputmanager:SendMouseButtonEvent(0,0,0,true,game,1)
+        elseif inputType == "abortLeftClick" then
+            virtualinputmanager:SendMouseButtonEvent(0,0,0,false,game,1)
+        end
+    end)
 end
 
 local function closestVender()
@@ -597,37 +694,43 @@ local function closestOreFarm()
         wait(0.1)
     end
     print(closestOre)
-
     if pathfindSuccess == true then
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
             input("pressbutton", Enum.KeyCode.Four)
+            local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
+            local equippeditem = playerChar:GetEquippedItem()
+            equippeditem.CameraFreeLook = true
+            local pickaxeItem = playerChar:GetItem(pickaxeSelected)
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
                     humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    equippeditem.CameraFreeLook = true
+                    pickaxeItem:Swing()
                 end
             end)
              while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                input("holdLeftClick")
                 input("pressbutton", Enum.KeyCode.E, 1)
-                wait(0.1)
+                wait(1)
             end
             input("pressbutton", Enum.KeyCode.Four)
         elseif slotItem == nil then print("No pickaxe found in slot 4.")
         elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
         else
-
             task.spawn(function()
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
                     wait(0.1)
                     humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                    local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
+                    local equippeditem = playerChar:GetEquippedItem()
+                    equippeditem.CameraFreeLook = true
+                    pickaxeItem:Swing()
                 end
             end)
             while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                input("holdLeftClick")
-                input("pressbutton", Enum.KeyCode.E, 0.5)
-                wait(0.1)
+                input("pressbutton", Enum.KeyCode.E, 1)
+                wait(1)
             end
             input("abortLeftClick")
             input("pressbutton", Enum.KeyCode.Four)
