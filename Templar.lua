@@ -11,7 +11,13 @@ local Servers = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/server
 local Server, Next = nil, nil
 local function ListServers(cursor)
     local Raw = game:HttpGet(Servers .. ((cursor and "&cursor=" .. cursor) or ""))
-    return HttpService:JSONDecode(Raw)
+	local success, fail = pcall(function()
+    	return HttpService:JSONDecode(Raw)
+	end)
+	if fail then
+		warn("Your executor level is too low. Use another to use the script.")
+		break
+	end
 end
 
 repeat
