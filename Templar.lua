@@ -100,7 +100,7 @@ sliderFrame = Instance.new("Frame")
 sliderFrame.Parent = draggable
 sliderFrame.Transparency = 1
 sliderFrame.Size = UDim2.new(0, 200, 0, 15)
-sliderFrame.Position = UDim2.new(0.5, -300, 0, 250)
+sliderFrame.Position = UDim2.new(0.5, -300, 0, 265)
 sliderFrame.Name = "SliderFrame"
 sliderFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
 
@@ -133,7 +133,7 @@ sliderText.Text = "Pickaxe Tier: BasicPickaxe"
 sliderText.Size = UDim2.new(0, 300, 0, 50)
 sliderText.TextSize = 25
 sliderText.Font = Enum.Font.GothamBold
-sliderText.Position = UDim2.new(0.5, -350, 0, 185)
+sliderText.Position = UDim2.new(0.5, -350, 0, 200)
 sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
 sliderText.Name = "sliderText"
 
@@ -175,7 +175,7 @@ tweenservice = game:GetService("TweenService")
 local framebar = Instance.new("Frame")
 framebar.Parent = draggable
 framebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-framebar.Size = UDim2.new(0, 800, 0, 100)
+framebar.Size = UDim2.new(0, 800, 0, 120)
 framebar.Transparency = 1
 framebar.ZIndex = 0
 
@@ -195,14 +195,14 @@ title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
-startAutoFarm.Text = "Start Auto Farm - Nearest Ore"
+startAutoFarm.Text = "Nearest Ore"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 startAutoFarm.TextSize = 20
 startAutoFarm.TextColor3 = Color3.fromRGB(255,255,255)
 startAutoFarm.Font = Enum.Font.SourceSansBold
 startAutoFarm.Transparency = 1
-startAutoFarm.Position = UDim2.new(0.5, -350, 0, 120)
+startAutoFarm.Position = UDim2.new(0.5, -350, 0, 140)
 startAutoFarm.Name = "startAutoFarm"
 
 local autofarmcorner = Instance.new("UICorner")
@@ -305,6 +305,81 @@ settingsFrame.Name = "settingsFrame"
 local settingsFrameCorner = Instance.new("UICorner")
 settingsFrameCorner.Parent = settingsFrame
 
+automine = Instance.new("TextButton")
+automine.Parent = Frame
+automine.Size = UDim2.new(0,200,0,30)
+automine.Position = UDim2.new(0,75,0,80)
+automine.BackgroundColor3 = Color3.fromRGB(0,0,0)
+automine.TextColor3 = Color3.fromRGB(255,255,255)
+automine.Text = "Automine"
+automine.TextSize = 25
+automine.Font = Enum.Font.GothamBold
+automine.Transparency = 1
+automine.Name = "automine"
+automine.BackgroundColor3 = Color3.fromRGB(50,50,50)
+table.insert(taskbarButtons, automine)
+
+local automineCorner = Instance.new("UICorner")
+automineCorner.Parent = automine
+
+mineconfig = Instance.new("TextButton")
+mineconfig.Parent = Frame
+mineconfig.Size = UDim2.new(0,190,0,30)
+mineconfig.Position = UDim2.new(0,540,0,80)
+mineconfig.BackgroundColor3 = Color3.fromRGB(0,0,0)
+mineconfig.TextColor3 = Color3.fromRGB(255,255,255)
+mineconfig.Text = "Config"
+mineconfig.TextSize = 25
+mineconfig.Font = Enum.Font.GothamBold
+mineconfig.Transparency = 1
+mineconfig.Name = "mineconfig"
+mineconfig.BackgroundColor3 = Color3.fromRGB(50,50,50)
+table.insert(taskbarButtons, mineconfig)
+
+local mineConfigCorner = Instance.new("UICorner")
+mineConfigCorner.Parent = mineconfig
+
+webhook = Instance.new("TextButton")
+webhook.Parent = Frame
+webhook.Size = UDim2.new(0,200,0,30)
+webhook.Position = UDim2.new(0,305,0,80)
+webhook.BackgroundColor3 = Color3.fromRGB(0,0,0)
+webhook.TextColor3 = Color3.fromRGB(255,255,255)
+webhook.Text = "Webhooks"
+webhook.TextSize = 25
+webhook.Font = Enum.Font.GothamBold
+webhook.Transparency = 1
+webhook.Name = "webhook"
+webhook.BackgroundColor3 = Color3.fromRGB(50,50,50)
+table.insert(taskbarButtons, webhook)
+
+local webhookCorner = Instance.new("UICorner")
+webhookCorner.Parent = webhook
+
+separationFrame = Instance.new("Frame")
+separationFrame.Parent = Frame
+separationFrame.BackgroundColor3 = Color3.fromRGB(unpack(colourTheme))
+separationFrame.Transparency = 1
+separationFrame.Size = UDim2.new(0,5,0,30)
+separationFrame.Position = UDim2.new(0,60,0,80)
+
+local separationFrameCorner = Instance.new("UICorner")
+separationFrameCorner.Parent = separationFrame
+
+numBars = 4
+local startX = 60
+local endX   = 745
+local spacing = (endX - startX) / (numBars - 1)
+
+separators = {}
+
+for i = 1, numBars do
+    local clone = separationFrame:Clone()
+    clone.Position = UDim2.new(0, startX + spacing * i, 0, 80)
+    clone.Parent = Frame
+    separators[i] = clone
+end
+
 local tweenParts = draggable:GetDescendants()
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 1)
 isTweenFinished = false
@@ -338,7 +413,7 @@ path = pathfindingservice:CreatePath({
     AgentHeight = 7.459118,
     AgentRadius = 2.36565,
     AgentCanClimb = true,
-    WaypointSpacing = 5,
+    WaypointSpacing = 10,
     Costs = {Water = 20}
 })
 
@@ -454,7 +529,7 @@ local function enableRagdollFly()
     bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     bodyGyro.P = 10000
     bodyGyro.D = 500
-    bodyGyro.CFrame = humanoidrootpart.CFrame
+    bodyGyro.CFrame = CFrame.new()
     bodyGyro.Parent = humanoidrootpart
     
     local undergroundPos = humanoidrootpart.Position - Vector3.new(0, 3, 0)
@@ -520,7 +595,7 @@ local function ragdollMoveTo(targetPos)
         if horizontalLook.Magnitude > 0 then
             bodyGyro.CFrame = CFrame.lookAt(Vector3.new(0,0,0), horizontalLook)
         else
-            bodyGyro.CFrame = CFrame.new()
+            bodyGyro.CFrame = CFrame.fromEulerAnglesXYZ(math.rad(90), 0, 0)
         end
         
         task.wait()
@@ -708,7 +783,7 @@ local function closestOreFarm()
     if pathfindSuccess == true then
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
-            wait(2)
+            wait(1)
             input("pressbutton", Enum.KeyCode.Four)
             local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
             local equippeditem = playerChar:GetEquippedItem()
@@ -771,6 +846,8 @@ overviewExit.MouseButton1Down:Connect(function()
     Templar:Destroy()
 end)
 
+local isAFRunning = false
+
 -- Settings button
 settings.MouseButton1Down:Connect(function()
     if isRunning == false then
@@ -805,18 +882,22 @@ settings.MouseButton1Down:Connect(function()
         local tweenTransparency = tweenservice:Create(part, tweeninfoTransparency, {Transparency = transparency})
         tweenTransparency:Play()
     
-        local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider}
+        local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig}
+        for i = 1, numBars do
+            table.insert(buttonsDeleted, separators[i])
+        end
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
                 local part = button
                 if button:IsA("TextLabel") then 
                     tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 1})
+                    tween:Play()
                 else
                     tween = tweenservice:Create(part,tweeninfo,{Transparency = 1})
+                    tween:Play()
                 end
-                tween:Play()
                 task.spawn(function()
-                wait(0.8)
+                wait(1)
                 button.Visible = false
                 end)
             end
@@ -824,6 +905,8 @@ settings.MouseButton1Down:Connect(function()
             for _,button in pairs(buttonsDeleted) do
                 local part = button
                 if button:IsA("TextLabel") then 
+                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
+                elseif button:IsA("TextButton") and button.Name ~= "startAutoFarm" then
                     tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
                 else
                     tween = tweenservice:Create(part,tweeninfo,{Transparency = 0})
@@ -857,7 +940,13 @@ end)
 
 -- Autofarm button.
 startAutoFarm.MouseButton1Down:Connect(function()
-    closestOreFarm()
+    if isAFRunning == false then
+        isAFRunning = true
+        startAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
+        closestOreFarm()
+    else
+        warn("Autofarm already running. To turn off the autofarm, please leave the game.")
+    end
 end)
 
 buttonHover()
