@@ -338,7 +338,7 @@ path = pathfindingservice:CreatePath({
     AgentHeight = 7.459118,
     AgentRadius = 2.36565,
     AgentCanClimb = true,
-    WaypointSpacing = 10,
+    WaypointSpacing = 5,
     Costs = {Water = 20}
 })
 
@@ -435,9 +435,12 @@ local function enableRagdollFly()
     Global.PlayerCharacter:Ragdoll(nil, true)
     task.wait(0.5)
     
-    for _, joint in pairs(character:GetDescendants()) do
-        if joint:IsA("BallSocketConstraint") then
-            joint.Enabled = false
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("Motor6D") then
+            part.Enabled = true -- Re-enable motors
+        end
+        if part:IsA("BallSocketConstraint") then
+            part.Enabled = false -- Disable ragdoll constraints
         end
     end
     
@@ -465,6 +468,13 @@ local function disableRagdollFly()
     
     if bodyVelocity then bodyVelocity:Destroy() end
     if bodyGyro then bodyGyro:Destroy() end
+    
+    for _, weld in pairs(humanoidrootpart:GetChildren()) do
+        if weld:IsA("WeldConstraint") then
+            weld:Destroy()
+        end
+    end
+    
     
     Global.PlayerCharacter:GetUp()
     task.wait(1.5)
@@ -639,9 +649,10 @@ if success then
 else
     if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
     pathfindSuccess = false
+    disableRagdollFly()
 end
     pathfindSuccess = true
-    
+    disableRagdollFly()
     return pathfindSuccess
 end
 end
@@ -697,6 +708,7 @@ local function closestOreFarm()
     if pathfindSuccess == true then
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
+            wait(2)
             input("pressbutton", Enum.KeyCode.Four)
             local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
             local equippeditem = playerChar:GetEquippedItem()
