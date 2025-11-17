@@ -158,7 +158,7 @@ end)
 local dragDetector = Instance.new("UIDragDetector")
 dragDetector.Parent = draggable
 
-local Frame = Instance.new("Frame")
+Frame = Instance.new("Frame")
 Frame.Parent = draggable
 Frame.Size = UDim2.new(0, 800, 0, 600)
 Frame.Position = UDim2.new(0.5, -400, 0.5, -300)
@@ -839,7 +839,96 @@ local function buttonHover()
 end
 local clockwise = true
 local isRunning = false
+
+buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig}
+buttonsDeletedTabAutomine = {startAutoFarm,sliderFrame,sliderText,slider}
+buttonsDeletedTabConfig = {}
+buttonsDeletedTabWebhooks = {}
+
+local isAMon = true
+local isWHon = false
+local isCon = false
+
+local function showTab(tab)
+    automineFrame.Visible = false
+    webhooksFrame.Visible = false
+    configFrame.Visible = false
+
+    tab.Visible = true
+end
+
 local function applyButtonFunctionality()
+
+-- Automine tab
+
+mineconfig.MouseButton1Down:Connect(function()
+    if isCon then
+        return
+    else
+        
+        for i,v in pairs(buttonsDeletedTabConfig) do
+            v.Visible = true
+        end
+        
+        for i, v in pairs(buttonsDeletedTabAutomine) do
+            v.Visible = false
+        end
+        
+        for i,v in pairs(buttonsDeletedTabWebhooks) do
+            v.Visible = false
+        end
+        
+        isAMon = false
+        isWHon = false
+        isCon = true
+    end
+end)
+
+
+webhook.MouseButton1Down:Connect(function()
+    if isWHon == true then
+        return
+    else
+        
+        for i,v in pairs(buttonsDeletedTabWebhooks) do
+            v.Visible = true
+        end
+        
+        for i,v in pairs(buttonsDeletedTabAutomine) do
+            v.Visible = false
+        end
+        
+        for i,v in pairs(buttonsDeletedTabConfig) do
+            v.Visible = false
+        end
+        
+        isAMon = false
+        isWHon = true
+        isCon = false
+    end
+end)
+
+automine.MouseButton1Down:Connect(function()
+    if isAMon == true then
+        return
+    else
+        for i,v in pairs(buttonsDeletedTabAutomine) do
+            v.Visible = true
+        end
+        
+        for i,v in pairs(buttonsDeletedTabConfig) do
+            v.Visible = false
+        end
+        
+        for i,v in pairs(buttonsDeletedTabWebhooks) do
+            v.Visible = false
+        end
+        
+        isAMon = true
+        isWHon = false
+        isCon = false
+    end
+end)
 
 -- OverviewPanel exit button
 overviewExit.MouseButton1Down:Connect(function()
@@ -881,8 +970,7 @@ settings.MouseButton1Down:Connect(function()
         tweenSlide:Play()
         local tweenTransparency = tweenservice:Create(part, tweeninfoTransparency, {Transparency = transparency})
         tweenTransparency:Play()
-    
-        local buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig}
+        
         for i = 1, numBars do
             table.insert(buttonsDeleted, separators[i])
         end
@@ -915,7 +1003,7 @@ settings.MouseButton1Down:Connect(function()
                 button.Visible = true
             end
         end
-        wait(0.8)
+        wait(1)
         isRunning = false
     end
     
