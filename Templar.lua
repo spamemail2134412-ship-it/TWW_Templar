@@ -8,6 +8,16 @@ local parentDirectory = "../"
 local folderName = "TWW_Templar"
 local fullFolderPath = parentDirectory .. folderName
 
+if game.Workspace:FindFirstChild("Path") then
+
+    else
+        folder = Instance.new("Folder")
+        folder.Parent = game.Workspace
+        folder.Name = "Path"
+end  
+
+sortedOreIndex = {}
+
 if isfolder(folderName) then
     print("Paths folder already exists.")
 else
@@ -394,6 +404,8 @@ separationFrame.Position = UDim2.new(0,60,0,80)
 local separationFrameCorner = Instance.new("UICorner")
 separationFrameCorner.Parent = separationFrame
 
+
+
 numBars = 4
 local startX = 60
 local endX   = 745
@@ -454,6 +466,8 @@ local function collisionOff(ore)
     if ore:FindFirstChild("RockBaseLVein") then ore.RockBaseLVein.CanCollide = false end
 end
 
+waypointTable = {}
+
 local function calcPathDistance(waypoints, i, ore) -- Calculates the overall distance by taking the distances between each waypoint and summing them.
     local localDistance = {}
     local waypointPos -- A variable that contains the distance between two points
@@ -476,6 +490,7 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     table.insert(nearestOres, sum)
     ore.Name = "Ore" .. i
     table.insert(oreIndex, ore)
+    table.insert(waypointTable, waypoints)
 end
 
 local function calculatePaths()
@@ -513,24 +528,67 @@ local function calculatePaths()
     print("Paths found: ", successes)
     print("Paths failed: ", failures)
     print("Paths unknown: ", unknown)
+    return successes
 end
 
-local function FindNearestOre()
+local nearestWaypoints = {}
+
+waypointOrder = {}
+
+function FindNearestOre()
 nearestOres = {}
 oreIndex = {}
 closestOreDistance = math.huge
 closestOre = nil
 finalpos = nil
 oreHierarchy = nil
-    
+oreCheckpoints = {}
+sortedOreIndex = {}
+
     calculatePaths()
     
-    for i, distance in pairs(nearestOres) do
-        if distance < closestOreDistance then
-            closestOreDistance = distance
-            closestOre = oreIndex[i]
-            
-            finalpos = closestOre.PrimaryPart.Position
+    local sortedOres = {}
+    for i, distance in ipairs(nearestOres) do
+        table.insert(sortedOres, {index = i, distance = distance})
+    end
+    
+    table.sort(sortedOres, function(a, b)
+        return a.distance < b.distance
+    end)
+    
+    for _, data in ipairs(sortedOres) do
+        local i = data.index
+        local ore = oreIndex[i]
+        local pos = ore.PrimaryPart.Position
+        
+        table.insert(oreCheckpoints, pos)
+        table.insert(nearestWaypoints, waypointTable[i])
+        table.insert(sortedOreIndex, ore)
+    end
+
+    if #sortedOres > 0 then
+        local closestIndex = sortedOres[1].index
+        closestOre = sortedOreIndex[1]
+        closestOreDistance = sortedOres[1].distance
+        finalpos = closestOre.PrimaryPart.Position
+    end
+end
+
+local function pathCalculator()
+    local index = 0
+    for i, waypoints in pairs(nearestWaypoints) do
+        index = index + 1
+        if i == 1 then
+            table.insert(waypointOrder, waypoints)
+        else
+            local success, errorMessage = pcall(function()
+                path:ComputeAsync(oreCheckpoints[index - 1], oreCheckpoints[index])
+            end)
+            if success then
+                table.insert(waypointOrder, path:GetWaypoints())
+            else
+                index = index - 1
+            end
         end
     end
 end
@@ -550,10 +608,10 @@ local function enableRagdollFly()
     
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("Motor6D") then
-            part.Enabled = true -- Re-enable motors
+            part.Enabled = true
         end
         if part:IsA("BallSocketConstraint") then
-            part.Enabled = false -- Disable ragdoll constraints
+            part.Enabled = false
         end
     end
     
@@ -640,111 +698,79 @@ local function ragdollMoveTo(targetPos)
     end
 end
 
-function loadWaypoints(waypoints)
+function loadWaypoints()
+    pathCalculator()
     print("Loading path...")
-    for i, waypoint in pairs(waypoints) do
-        if i < #waypoints then
+    for i, waypoints in pairs(waypointOrder) do
+        for i, waypoint in pairs(waypoints) do
+            if i < #waypoints then
             
-            local a = waypoints[i].Position
-            local b = waypoints[i+1].Position
-            local dir = b - a
-            local dist = dir.Magnitude
-            local mid = (a + b) / 2
-            local thickness = 0.4
+                local a = waypoints[i].Position
+                local b = waypoints[i+1].Position
+                local dir = b - a
+                local dist = dir.Magnitude
+                local mid = (a + b) / 2
+                local thickness = 0.4
 
-            local part = Instance.new("Part")
-            part.Material = "Neon"
-            part.Anchored = true
-            part.CanCollide = false
-            part.Shape = "Ball"
-            part.Position = waypoint.Position
-            part.Parent = game.Workspace:WaitForChild("Path")
-            part.Name = "part"..i
-            part.Size = Vector3.new(3, 1, 1)
+                local part = Instance.new("Part")
+                part.Material = "Neon"
+                part.Anchored = true
+                part.CanCollide = false
+                part.Shape = "Ball"
+                part.Position = waypoint.Position
+                part.Parent = game.Workspace:WaitForChild("Path")
+                part.Name = "part"..i
+                part.Size = Vector3.new(3, 1, 1)
 
-            local connection = Instance.new("Part")
-            connection.Shape = "Cylinder"
-            connection.Material = "Neon"
-            connection.Anchored = true
-            connection.CanCollide = false
-            connection.Parent = game.Workspace:WaitForChild("Path")
-            connection.Size = Vector3.new(dist, thickness, thickness)
-            connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
-            connection.Name = "Connection" .. i
-            connection.Color = Color3.fromRGB(213, 115, 61)
-            local up = Vector3.new(0,1,0)
-            local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
-            connection.CFrame = rotation
+                local connection = Instance.new("Part")
+                connection.Shape = "Cylinder"
+                connection.Material = "Neon"
+                connection.Anchored = true
+                connection.CanCollide = false
+                connection.Parent = game.Workspace:WaitForChild("Path")
+                connection.Size = Vector3.new(dist, thickness, thickness)
+                connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
+                connection.Name = "Connection" .. i
+                connection.Color = Color3.fromRGB(213, 115, 61)
+                local up = Vector3.new(0,1,0)
+                local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
+                connection.CFrame = rotation
 
-            task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
-                if i == 0 then
-                    wait(1)
-                    part:Destroy()
-                    connection:Destroy()
-                else
-                    wait(0.25 + i / 2)
-                    part:Destroy()
-                    connection:Destroy()
-                end
-            end)
+            else
 
-        else
+                local part = Instance.new("Part")
+                part.Material = "Neon"
+                part.Anchored = true
+                part.CanCollide = false
+                part.Shape = "Ball"
+                part.Position = waypoint.Position
+                part.Parent = game.Workspace:WaitForChild("Path")
+                part.Name = "part"..i
+                part.Size = Vector3.new(3, 1, 1)
 
-            local part = Instance.new("Part")
-            part.Material = "Neon"
-            part.Anchored = true
-            part.CanCollide = false
-            part.Shape = "Ball"
-            part.Position = waypoint.Position
-            part.Parent = game.Workspace:WaitForChild("Path")
-            part.Name = "part"..i
-            part.Size = Vector3.new(3, 1, 1)
-
-            task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
-                if i == 0 then
-
-                    wait(1)
-                    part:Destroy()
-                else
-                    wait(0.25 + i / 2)
-                    part:Destroy()
-                end
-            end)
+            end
         end
     end
     print("Path loaded")
 end
 
 
-function pathfind()
-FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
-finalpos = finalpos - Vector3.new(2,2,2)
+function pathfind(index)
+ -- the rest from this point onwards needs to be in the button. cya.
+--finalpos = finalpos + Vector3.new(2,2,2)
+closestOre = sortedOreIndex[index]
+finalpos = oreCheckpoints[index]
 print("Closest ore found: " .. closestOreDistance)
 pathfindSuccess = nil
-local success, errorMessage = pcall(function()
-path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, finalpos)
-end)
 print(path.Status)
-if game.Workspace:FindFirstChild("Path") then
 
-    else
-        folder = Instance.new("Folder")
-        folder.Parent = game.Workspace
-        folder.Name = "Path"
-end   
-
-if success then
-	print("Closest ore: ", closestOre)
-	
-    print("Waypoints found: " .. #path:GetWaypoints())
+if nearestWaypoints[1] then
     
     enableRagdollFly()
     
-    loadWaypoints(path:GetWaypoints())
-    
     print("Moving to pos: ", finalpos)
     
-    for i, waypoint in ipairs(path:GetWaypoints()) do
+    for i, waypoint in ipairs(waypointOrder[index]) do
 	    local waypoints = path:GetWaypoints()
 	    local finished = false
 	    local maxTime = 10
@@ -806,55 +832,55 @@ print(("LoadoutItem/" .. pickaxeSelected))
 print(character)
 
 local function closestOreFarm()
-    --put in a while loop tomorrow, it has to check if your inventory is 30/30 and then it will stop and go to sell it all.
-    pathfindSuccess = nil
-    pathfind()
-    while pathfindSuccess == nil do -- waits until path is complete
-        wait(0.1)
-    end
-    print("Closest ore: ", closestOre)
-    if pathfindSuccess == true then
-        if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
-            print("Pickaxe not selected!")
-            wait(1)
-            input("pressbutton", Enum.KeyCode.Four)
-            local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
-            local equippeditem = playerChar:GetEquippedItem()
-            equippeditem.CameraFreeLook = true
-            local pickaxeItem = playerChar:GetItem(pickaxeSelected)
-            task.spawn(function()
-                while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                    wait(0.1)
-                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                    equippeditem.CameraFreeLook = true
-                    pickaxeItem:Swing()
-                end
-            end)
-             while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                input("pressbutton", Enum.KeyCode.E, 1)
+        --put in a while loop tomorrow, it has to check if your inventory is 30/30 and then it will stop and go to sell it all.
+        pathfindSuccess = nil
+        FindNearestOre()
+        loadWaypoints()
+    for i,v in ipairs(waypointOrder) do
+        pathfind(i)
+        while pathfindSuccess == nil do -- waits until path is complete
+            wait(0.1)
+        end
+        print("Closest ore: ", closestOre)
+        if pathfindSuccess == true then
+            if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
+                print("Pickaxe not selected!")
                 wait(1)
-            end
-            input("pressbutton", Enum.KeyCode.Four)
-        elseif slotItem == nil then print("No pickaxe found in slot 4.")
-        elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
-        else
-            task.spawn(function()
+                input("pressbutton", Enum.KeyCode.Four)
+                local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
+                local equippeditem = playerChar:GetEquippedItem()
+                local pickaxeItem = playerChar:GetItem(pickaxeSelected)
+                pickaxeItem.CameraFreeLook = true
+                task.spawn(function()
+                    while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                        wait(0.1)
+                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                        pickaxeItem:Swing()
+                    end
+                end)
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                    wait(0.1)
-                    humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                    local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
-                    local equippeditem = playerChar:GetEquippedItem()
-                    equippeditem.CameraFreeLook = true
-                    pickaxeItem:Swing()
+                    input("pressbutton", Enum.KeyCode.E, 1)
+                    wait(1)
                 end
-            end)
-            while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                input("pressbutton", Enum.KeyCode.E, 1)
-                wait(1)
+                input("pressbutton", Enum.KeyCode.Four)
+            elseif slotItem == nil then print("No pickaxe found in slot 4.")
+            elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
+            else
+                task.spawn(function()
+                    while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                        wait(0.1)
+                        humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                        pickaxeItem:Swing()
+                    end
+                end)
+                while closestOre.DepositInfo.OreRemaining.Value > 0 do
+                    input("pressbutton", Enum.KeyCode.E, 1)
+                    wait(1)
+                end
+                input("abortLeftClick")
+                input("pressbutton", Enum.KeyCode.Four)
+                virtualinputmanager:SendKeyEvent(false, Enum.KeyCode.LeftAlt, false, game)
             end
-            input("abortLeftClick")
-            input("pressbutton", Enum.KeyCode.Four)
-            virtualinputmanager:SendKeyEvent(false, Enum.KeyCode.LeftAlt, false, game)
         end
     end
 end
