@@ -4,6 +4,31 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
+local parentDirectory = "../"
+local folderName = "TWW_Templar"
+local fullFolderPath = parentDirectory .. folderName
+
+if isfolder(folderName) then
+    print("Paths folder already exists.")
+else
+    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) end) then
+        print("Function makefolder not supported.")
+    end
+end
+
+local function createTXTFile()
+
+    local fileName = os.date("%Y.%m.%d_%H.%M.%S") .. ".txt"
+    local fullPath = folderName .. "/" .. fileName
+
+    writefile(fullPath, "This file was created at tick: " .. tick())
+
+    print("File created at:", fullPath)
+    
+    return fullPath
+    
+end
+
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
@@ -420,6 +445,15 @@ path = pathfindingservice:CreatePath({
     Costs = {Water = 20}
 })
 
+local pickaxeIndex = table.find(pickaxeTiers, pickaxeSelected)
+
+local function collisionOff(ore)
+    if ore:FindFirstChild("RockBase") then ore.RockBase.CanCollide = false end
+    if ore:FindFirstChild("RockBaseL") then ore.RockBaseL.CanCollide = false end
+    if ore:FindFirstChild("RockBaseVein") then ore.RockBaseVein.CanCollide = false end
+    if ore:FindFirstChild("RockBaseLVein") then ore.RockBaseLVein.CanCollide = false end
+end
+
 local function calcPathDistance(waypoints, i, ore) -- Calculates the overall distance by taking the distances between each waypoint and summing them.
     local localDistance = {}
     local waypointPos -- A variable that contains the distance between two points
@@ -434,6 +468,7 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
             lastWaypoint = waypoint
         end
     end
+    
     local sum = 0
     for _, distance in pairs(localDistance) do
         sum = sum + distance
@@ -443,23 +478,11 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     table.insert(oreIndex, ore)
 end
 
-local pickaxeIndex = table.find(pickaxeTiers, pickaxeSelected)
-
-local function FindNearestOre()
-nearestOres = {}
-oreIndex = {}
-closestOreDistance = math.huge
-closestOre = nil
-finalpos = nil
-oreHierarchy = nil
-
-local function collisionOff(ore)
-    if ore:FindFirstChild("RockBase") then ore.RockBase.CanCollide = false end
-    if ore:FindFirstChild("RockBaseL") then ore.RockBaseL.CanCollide = false end
-    if ore:FindFirstChild("RockBaseVein") then ore.RockBaseVein.CanCollide = false end
-    if ore:FindFirstChild("RockBaseLVein") then ore.RockBaseLVein.CanCollide = false end
-end
-
+local function calculatePaths()
+    local successes = 0
+    local failures = 0
+    local unknown = 0
+    
     for i, ore in pairs(ores) do
         if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) then
             collisionOff(ore)
@@ -471,33 +494,45 @@ end
                     end
                 end
             end
+            
                 local success, errorMessage = pcall(function()
                     path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, ore.PrimaryPart.Position - Vector3.new(modifier,modifier,modifier))
                 end)
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
-                    print("Ore iteration " .. i .. " successful path creation.")
-					
+                    successes = successes + 1
+                    
                 elseif path.Status == Enum.PathStatus.NoPath then
-                    print("Ore iteration " .. i .. " path failed, path not found.")
+                    failures = failures + 1
+                    
                 else
-                    print("Ore iteration " .. i .. " path failed, unknown error occurred.")
+                    unknown = unknown + 1
                 end
         end
     end
+    print("Paths found: ", successes)
+    print("Paths failed: ", failures)
+    print("Paths unknown: ", unknown)
+end
+
+local function FindNearestOre()
+nearestOres = {}
+oreIndex = {}
+closestOreDistance = math.huge
+closestOre = nil
+finalpos = nil
+oreHierarchy = nil
+    
+    calculatePaths()
     
     for i, distance in pairs(nearestOres) do
-        print(distance)
         if distance < closestOreDistance then
-            print(distance, "this is the distance")
             closestOreDistance = distance
             closestOre = oreIndex[i]
-            print(closestOre)
-
-        finalpos = closestOre.PrimaryPart.Position
+            
+            finalpos = closestOre.PrimaryPart.Position
         end
     end
-
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -766,7 +801,7 @@ local slot = plrgui.Hotbar.Container.HotbarList.Body
 if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") Templar:Destroy() return end
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
 
-print(slotItem)
+print(slotItem .. " selected.")
 print(("LoadoutItem/" .. pickaxeSelected))
 print(character)
 
@@ -777,7 +812,7 @@ local function closestOreFarm()
     while pathfindSuccess == nil do -- waits until path is complete
         wait(0.1)
     end
-    print(closestOre)
+    print("Closest ore: ", closestOre)
     if pathfindSuccess == true then
         if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
             print("Pickaxe not selected!")
