@@ -1,7 +1,7 @@
 DEVELOPER ROADMAP:
-Finished: 🟢
-Being worked on: 🟠
-Not started: 🔴
+Up: 🟢
+Down: 🔴
+Updating: 🟠
 Planned: 🔵
 
 High Priority: 1️⃣
@@ -10,27 +10,25 @@ Low Priority: 3️⃣
 Potential to be added: 5️⃣
 
 AUTOFARM:
-Implementing pickaxe tiers to pathfinding: 🟢 1️⃣
-Adding sell mechanic to autofarm: 🔴 2️⃣
-Premade autofarm routes: 🔵 2️⃣
+Implementing pickaxe tiers to pathfinding: 🟢️
+Adding sell mechanic to autofarm: 🟠 2️⃣
+Premade autofarm routes: 🟠 2️⃣
 Server hop on death & autofarm route completed: 🔵
-Discord Webhooks (to view autofarm stats): 🔵 (Barely planned, on bottom of priority list and will come after main functionality is introduced.) 5️⃣
+Discord Webhooks (to view autofarm stats): 🟠 5️⃣
 Underground travel: 🔵 3️⃣
-Pathfinding fixes (Create:Async keeps failing to create a path, so eventually this will be fixed but it is not particularly high on my priority list right now.): 🟠 3️⃣
-Pathfinding fix (removing leftover waypoints from the previous pathfind() that did not get completed.): 🔴
+Automine paths & path recorder: 🟠
 
 UI ELEMENTS:
 UI Transparency slider: 🔵 3️⃣
-Themes: 🔴 3️⃣
-Different tabs (For different sections): 🔵 5️⃣
+Themes: 🟠 3️⃣
+Different tabs (For different sections): 🟢️
 
 ANTI-CHEAT BYPASSING (All 5️⃣):
-Bypassing speed limit (Faster autofarm): 🔵 5️⃣
-(Possibly) Using remote events to mine, sell, etc: 🔵 5️⃣
-Bypassing the server-side checks that keep your character where it thinks it should be (An extension of speed limit bypassing): 🔵 5️⃣
+Bypassing speed limit (Faster autofarm): 🟢️
+(Possibly) Using remote events to mine, sell, etc: 🟢️
 
 GENERAL ADDITIONS:
-Correct character placement relative to ore & Removing the FaceMouse functionality of the game: 🟠 1️⃣
+Correct character placement relative to ore & Removing the FaceMouse functionality of the game: 🟢️
 
 EXTRA:
-Expanding upon Templar by adding more autofarm capabilities, eg. hunting or bounty hunt farming, ESP etc: 🔵 (Generally just to make West Z less of an autofarm script and more of a TWW script hub) 5️⃣
+Extra additions: 🟠 5️⃣
