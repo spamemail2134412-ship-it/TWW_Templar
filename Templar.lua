@@ -756,8 +756,6 @@ end
 
 
 function pathfind(index)
- -- the rest from this point onwards needs to be in the button. cya.
---finalpos = finalpos + Vector3.new(2,2,2)
 closestOre = sortedOreIndex[index]
 finalpos = oreCheckpoints[index]
 print("Closest ore found: " .. closestOreDistance)
@@ -819,8 +817,6 @@ local function closestVender()
     local closestVenderDistance = math.huge
     local finalVenderPos = nil
     local venders = {}
-    
-
 end
 
 local slot = plrgui.Hotbar.Container.HotbarList.Body
@@ -832,7 +828,6 @@ print(("LoadoutItem/" .. pickaxeSelected))
 print(character)
 
 local function closestOreFarm()
-        --put in a while loop tomorrow, it has to check if your inventory is 30/30 and then it will stop and go to sell it all.
         pathfindSuccess = nil
         FindNearestOre()
         loadWaypoints()
