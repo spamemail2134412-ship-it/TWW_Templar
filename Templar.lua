@@ -602,37 +602,10 @@ local function ragdollMoveTo(targetPos)
     end
 end
 
-function pathfind()
-FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
-finalpos = finalpos - Vector3.new(2,2,2)
-print(closestOreDistance, "okay")
-print(closestOre)
-print(closestOre)
-pathfindSuccess = nil
-local success, errorMessage = pcall(function()
-path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, finalpos)
-end)
-print(path.Status)
-if game.Workspace:FindFirstChild("Path") then
-
-    else
-        folder = Instance.new("Folder")
-        folder.Parent = game.Workspace
-        folder.Name = "Path"
-end   
-
-character:SetAttribute("finalpos", finalpos)
-
-print(humanoidrootpart.Position)
-if success then
-	print(closestOre)
-	local stuck = false
-
-    print("Waypoints found: " .. #path:GetWaypoints())
-    enableRagdollFly()
-    for i, waypoint in pairs(path:GetWaypoints()) do
-        local waypoints = path:GetWaypoints()
-        if i < #path:GetWaypoints() then
+function loadWaypoints(waypoints)
+    print("Loading path...")
+    for i, waypoint in pairs(waypoints) do
+        if i < #waypoints then
             
             local a = waypoints[i].Position
             local b = waypoints[i+1].Position
@@ -649,9 +622,7 @@ if success then
             part.Position = waypoint.Position
             part.Parent = game.Workspace:WaitForChild("Path")
             part.Name = "part"..i
-            print(part.Size, "less than number")
             part.Size = Vector3.new(3, 1, 1)
-            local actualpos = character:GetAttribute("finalpos")
 
             local connection = Instance.new("Part")
             connection.Shape = "Cylinder"
@@ -689,9 +660,7 @@ if success then
             part.Position = waypoint.Position
             part.Parent = game.Workspace:WaitForChild("Path")
             part.Name = "part"..i
-            print(part.Size, "equal to ore more than")
             part.Size = Vector3.new(3, 1, 1)
-            local actualpos = character:GetAttribute("finalpos")
 
             task.spawn(function() --remove if statement and just keep wait(0.25+i/2) and part:Destroy() if you want a quicker deletion
                 if i == 0 then
@@ -703,14 +672,41 @@ if success then
                     part:Destroy()
                 end
             end)
+        end
     end
+    print("Path loaded")
+end
 
 
+function pathfind()
+FindNearestOre() -- the rest from this point onwards needs to be in the button. cya.
+finalpos = finalpos - Vector3.new(2,2,2)
+print("Closest ore found: " .. closestOreDistance)
+pathfindSuccess = nil
+local success, errorMessage = pcall(function()
+path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, finalpos)
+end)
+print(path.Status)
+if game.Workspace:FindFirstChild("Path") then
 
-    end
+    else
+        folder = Instance.new("Folder")
+        folder.Parent = game.Workspace
+        folder.Name = "Path"
+end   
 
+if success then
+	print("Closest ore: ", closestOre)
+	
+    print("Waypoints found: " .. #path:GetWaypoints())
+    
+    enableRagdollFly()
+    
+    loadWaypoints(path:GetWaypoints())
+    
+    print("Moving to pos: ", finalpos)
+    
     for i, waypoint in ipairs(path:GetWaypoints()) do
-        print("ok so we got here ig?")
 	    local waypoints = path:GetWaypoints()
 	    local finished = false
 	    local maxTime = 10
@@ -720,7 +716,6 @@ if success then
         ragdollMoveTo(waypoint.Position)
         
     end
-
 else
     if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
     pathfindSuccess = false
