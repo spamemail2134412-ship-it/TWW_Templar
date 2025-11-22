@@ -9,6 +9,7 @@ local HttpService = game:GetService("HttpService")
 
 local Servers = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
 local Server, Next = nil, nil
+
 local function ListServers(cursor)
     local Raw = game:HttpGet(Servers .. ((cursor and "&cursor=" .. cursor) or ""))
     local success, errorMessage = pcall(function()
@@ -57,21 +58,23 @@ _G.Tier7 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Qu
 _G.Tier8 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
 _G.Tier9 = {"Coal", "Copper", "Zinc", "Iron", "Limestone", "Silver", "Gold", "Quartz", "CoalVein", "CopperVein", "ZincVein", "SilverVein", "GoldVein"}
 
-local walkSpeedValue = plrgui:FindFirstChild("WalkSpeedValue")
+local function toggleWalkSpeed()
+    local walkSpeedValue = plrgui:FindFirstChild("WalkSpeedValue")
 
-if walkSpeedValue then  else
-    WalkSpeedValue = Instance.new("BoolValue")
-    WalkSpeedValue.Name = "WalkSpeedValue"
-    WalkSpeedValue.Value = true
-    WalkSpeedValue.Parent = plrgui
+    if walkSpeedValue then  else
+        WalkSpeedValue = Instance.new("BoolValue")
+        WalkSpeedValue.Name = "WalkSpeedValue"
+        WalkSpeedValue.Value = true
+        WalkSpeedValue.Parent = plrgui
 
-    task.spawn(function()
-        print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
-        while true do
-            wait(0.1)
-        game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 32
-        end
-    end)
+        task.spawn(function()
+            print(game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed)
+            while true do
+                wait(0.1)
+            game.Workspace.WORKSPACE_Entities.Players[plrname].Humanoid.WalkSpeed = 32
+            end
+        end)
+    end
 end
 
 local wrkspceInt = game.Workspace.WORKSPACE_Interactables
