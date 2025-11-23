@@ -1,5 +1,3 @@
-print("west z is an independently created autofarm script and is in no way related to west x.")
-
 local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
@@ -233,7 +231,7 @@ title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
-startAutoFarm.Text = "Nearest Ore"
+startAutoFarm.Text = "Nearest Ore (don't use it's shit)"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 startAutoFarm.TextSize = 20
