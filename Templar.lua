@@ -31,9 +31,7 @@ end
 local function createTXTFile()
 
     local fileName = os.date("%Y.%m.%d_%H.%M.%S") .. ".txt"
-    local fullPath = folderName .. "/" .. fileName
-
-    writefile(fullPath, "This file was created at tick: " .. tick())
+    fullPath = folderName .. "/" .. fileName
 
     print("File created at:", fullPath)
     
@@ -936,6 +934,76 @@ local function showTab(tab)
 
     tab.Visible = true
 end
+
+local UserInputService = game:GetService("UserInputService")
+
+local raycastParams = RaycastParams.new()
+raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+raycastParams.FilterDescendantsInstances = {character} -- ignore the player
+
+local recording = false
+
+local oreType = nil
+local orePos = nil
+local orePart = nil
+
+local function recordMine()
+    local oreType = oreType.Name
+    local orePos = tostring(orePos)
+    local orePart = orePart.Name
+    local text = "mine, " .. oreType .. ", " .. orePart .. ", " .. orePos
+    
+    appendfile(fullPath, text)
+    
+end
+
+local camera = workspace.CurrentCamera
+
+local function onClick(input, gameProcessed)
+    if not recording then return end
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mousePos = input.Position
+        local ray = camera:ScreenPointToRay(mousePos.X, mousePos.Y)
+        
+        local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+        if result then
+            local part = result.Instance
+            print("Clicked part:", part.Name)
+            print("Position:", part.Position)
+            
+            if part.Parent and part.Parent:IsA("Model") and string.find(part.Name, "Rock") then
+                print("Ore: ", part.Parent.Name)
+                print("Ore Type: ", part.Parent.Parent.Name)
+                oreType = part.Parent.Parent
+                orePos = part.Position
+                orePart = part
+                recordMine()
+            end
+        else
+            print("Nothing clicked, data not recorded.")
+        end
+    end
+end
+
+local function recordPosition()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "move, " .. posString
+    
+    appendfile(fullPath, text)
+end
+
+UserInputService.InputBegan:Connect(onClick)
+
+createTXTFile()
+recordPosition()
+
+local function startRecording()
+    recording = not recording
+end
+wait(2)
+startRecording()
 
 local function applyButtonFunctionality()
 	-- Config tab
