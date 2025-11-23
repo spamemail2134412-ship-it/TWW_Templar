@@ -435,15 +435,127 @@ pathSelector.Name = "pathSelector"
 
 pathRecorder = Instance.new("Frame")
 pathRecorder.Parent = Templar
-pathRecorder.Position = UDim2.new(0,0,0,0)
-pathRecorder.Size = UDim2.new(0,0,0,0)
-pathRecorder.Visible = false
+pathRecorder.AnchorPoint = Vector2.new(0.5, 0.5)
+pathRecorder.Position = UDim2.new(0.5,0,0.5,0)
+pathRecorder.Size = UDim2.new(0,500,0,500)
+pathRecorder.Visible = true
 pathRecorder.BackgroundColor3 = Color3.fromRGB(0,0,0)
 pathRecorder.BackgroundTransparency = 0.3
 pathRecorder.Name = "PathRecorder"
 
 pathRecorderCorner = Instance.new("UICorner")
-pathRecorderCorner.Parent = pathRecordersd
+pathRecorderCorner.Parent = pathRecorder
+
+pthRecDragDetector = Instance.new("UIDragDetector")
+pthRecDragDetector.Parent = pathRecorder
+
+recPosButton = Instance.new("TextButton")
+recPosButton.Parent = pathRecorder
+recPosButton.Text = "Record Position"
+recPosButton.Size = UDim2.new(0, 300, 0, 50)
+recPosButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recPosButton.TextSize = 20
+recPosButton.TextColor3 = Color3.fromRGB(255,255,255)
+recPosButton.Font = Enum.Font.SourceSansBold
+recPosButton.Transparency = 1
+recPosButton.Position = UDim2.new(0.5, -350, 0, 140)
+recPosButton.Name = "recPosButton"
+
+recSellPosButton = Instance.new("TextButton")
+recSellPosButton.Parent = pathRecorder
+recSellPosButton.Text = "Record Sell Position"
+recSellPosButton.Size = UDim2.new(0, 300, 0, 50)
+recSellPosButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recSellPosButton.TextSize = 20
+recSellPosButton.TextColor3 = Color3.fromRGB(255,255,255)
+recSellPosButton.Font = Enum.Font.SourceSansBold
+recSellPosButton.Transparency = 1
+recSellPosButton.Position = UDim2.new(0.5, -350, 0, 140)
+recSellPosButton.Name = "recSellPosButton"
+
+recBronze = Instance.new("TextButton")
+recBronze.Parent = pathRecorder
+recBronze.Text = "Bronze Spawn"
+recBronze.Size = UDim2.new(0, 300, 0, 50)
+recBronze.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recBronze.TextSize = 20
+recBronze.TextColor3 = Color3.fromRGB(255,255,255)
+recBronze.Font = Enum.Font.SourceSansBold
+recBronze.Transparency = 1
+recBronze.Position = UDim2.new(0.5, -350, 0, 140)
+recBronze.Name = "recBronze"
+
+recPuerto = Instance.new("TextButton")
+recPuerto.Parent = pathRecorder
+recPuerto.Text = "Puerto Dorado Spawn"
+recPuerto.Size = UDim2.new(0, 300, 0, 50)
+recPuerto.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recPuerto.TextSize = 20
+recPuerto.TextColor3 = Color3.fromRGB(255,255,255)
+recPuerto.Font = Enum.Font.SourceSansBold
+recPuerto.Transparency = 1
+recPuerto.Position = UDim2.new(0.5, -350, 0, 140)
+recPuerto.Name = "recPuerto"
+
+recReservation = Instance.new("TextButton")
+recReservation.Parent = pathRecorder
+recReservation.Text = "Reservation Spawn"
+recReservation.Size = UDim2.new(0, 300, 0, 50)
+recReservation.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recReservation.TextSize = 20
+recReservation.TextColor3 = Color3.fromRGB(255,255,255)
+recReservation.Font = Enum.Font.SourceSansBold
+recReservation.Transparency = 1
+recReservation.Position = UDim2.new(0.5, -350, 0, 140)
+recReservation.Name = "Reservation"
+
+recDelores = Instance.new("TextButton")
+recDelores.Parent = pathRecorder
+recDelores.Text = "Delores' Ranch Spawn"
+recDelores.Size = UDim2.new(0, 300, 0, 50)
+recDelores.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recDelores.TextSize = 20
+recDelores.TextColor3 = Color3.fromRGB(255,255,255)
+recDelores.Font = Enum.Font.SourceSansBold
+recDelores.Transparency = 1
+recDelores.Position = UDim2.new(0.5, -350, 0, 140)
+recDelores.Name = "recDelores"
+
+recHowling = Instance.new("TextButton")
+recHowling.Parent = pathRecorder
+recHowling.Text = "Howling Peak Spawn"
+recHowling.Size = UDim2.new(0, 300, 0, 50)
+recHowling.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recHowling.TextSize = 20
+recHowling.TextColor3 = Color3.fromRGB(255,255,255)
+recHowling.Font = Enum.Font.SourceSansBold
+recHowling.Transparency = 1
+recHowling.Position = UDim2.new(0.5, -350, 0, 140)
+recHowling.Name = "recHowling"
+
+recOutlaws = Instance.new("TextButton")
+recOutlaws.Parent = pathRecorder
+recOutlaws.Text = "Outlaw's Perch Spawn"
+recOutlaws.Size = UDim2.new(0, 300, 0, 50)
+recOutlaws.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recOutlawsTextSize = 20
+recOutlaws.TextColor3 = Color3.fromRGB(255,255,255)
+recOutlaws.Font = Enum.Font.SourceSansBold
+recOutlaws.Transparency = 1
+recOutlaws.Position = UDim2.new(0.5, -350, 0, 140)
+recOutlaws.Name = "recOutlaws"
+
+recWindmill = Instance.new("TextButton")
+recWindmill.Parent = pathRecorder
+recWindmill.Text = "Windmill Camp Spawn"
+recWindmill.Size = UDim2.new(0, 300, 0, 50)
+recWindmill.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+recWindmill.TextSize = 20
+recWindmill.TextColor3 = Color3.fromRGB(255,255,255)
+recWindmill.Font = Enum.Font.SourceSansBold
+recWindmill.Transparency = 1
+recWindmill.Position = UDim2.new(0.5, -350, 0, 140)
+recWindmill.Name = "recWindmill"
 
 numBars = 4
 local startX = 60
