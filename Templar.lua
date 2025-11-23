@@ -1,4 +1,3 @@
-
 local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
@@ -26,17 +25,6 @@ else
     if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) end) then
         print("Function makefolder not supported.")
     end
-end
-
-local function createTXTFile()
-
-    local fileName = os.date("%Y.%m.%d_%H.%M.%S") .. ".txt"
-    fullPath = folderName .. "/" .. fileName
-
-    print("File created at:", fullPath)
-    
-    return fullPath
-    
 end
 
 local TeleportService = game:GetService("TeleportService")
@@ -70,7 +58,7 @@ local function tp()
     end
 end
 
-local exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "recPosButton", "recSellPosButton", "recBronze", "recPuerto", "recReservation", "recDelores", "recHowling", "recOutlaws", "recWindmill"}
+local exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
 
 local taskbarButtons = {}
 
@@ -434,11 +422,11 @@ pathSelector.Position = UDim2.new(0.5, 75, 0, 215)
 pathSelector.Name = "pathSelector"
 
 pathRecorder = Instance.new("Frame")
-pathRecorder.Parent = draggable
+pathRecorder.Parent = Templar
 pathRecorder.AnchorPoint = Vector2.new(0.5, 0.5)
 pathRecorder.Position = UDim2.new(0.5,0,0.5,0)
 pathRecorder.Size = UDim2.new(0,601,0,500)
-pathRecorder.Visible = true
+pathRecorder.Visible = false
 pathRecorder.BackgroundColor3 = Color3.fromRGB(0,0,0)
 pathRecorder.BackgroundTransparency = 0.3
 pathRecorder.Name = "PathRecorder"
@@ -457,7 +445,6 @@ recPosButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recPosButton.TextSize = 20
 recPosButton.TextColor3 = Color3.fromRGB(255,255,255)
 recPosButton.Font = Enum.Font.SourceSansBold
-recPosButton.Transparency = 1
 recPosButton.Position = UDim2.new(1.187, -350, -0.106, 140)
 recPosButton.Name = "recPosButton"
 
@@ -472,7 +459,6 @@ recSellPosButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recSellPosButton.TextSize = 20
 recSellPosButton.TextColor3 = Color3.fromRGB(255,255,255)
 recSellPosButton.Font = Enum.Font.SourceSansBold
-recSellPosButton.Transparency = 1
 recSellPosButton.Position = UDim2.new(0.723, -350, -0.106, 140)
 recSellPosButton.Name = "recSellPosButton"
 
@@ -487,7 +473,6 @@ recBronze.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recBronze.TextSize = 20
 recBronze.TextColor3 = Color3.fromRGB(255,255,255)
 recBronze.Font = Enum.Font.SourceSansBold
-recBronze.Transparency = 1
 recBronze.Position = UDim2.new(0.633, -350, 0.144, 140)
 recBronze.Name = "recBronze"
 
@@ -502,7 +487,6 @@ recPuerto.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recPuerto.TextSize = 20
 recPuerto.TextColor3 = Color3.fromRGB(255,255,255)
 recPuerto.Font = Enum.Font.SourceSansBold
-recPuerto.Transparency = 1
 recPuerto.Position = UDim2.new(0.949, -350, 0.144, 140)
 recPuerto.Name = "recPuerto"
 
@@ -517,7 +501,6 @@ recReservation.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recReservation.TextSize = 20
 recReservation.TextColor3 = Color3.fromRGB(255,255,255)
 recReservation.Font = Enum.Font.SourceSansBold
-recReservation.Transparency = 1
 recReservation.Position = UDim2.new(1.267, -350, 0.144, 140)
 recReservation.Name = "recReservation"
 
@@ -532,7 +515,6 @@ recDelores.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recDelores.TextSize = 20
 recDelores.TextColor3 = Color3.fromRGB(255,255,255)
 recDelores.Font = Enum.Font.SourceSansBold
-recDelores.Transparency = 1
 recDelores.Position = UDim2.new(0.632, -350, 0.278, 140)
 recDelores.Name = "recDelores"
 
@@ -547,7 +529,6 @@ recHowling.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recHowling.TextSize = 20
 recHowling.TextColor3 = Color3.fromRGB(255,255,255)
 recHowling.Font = Enum.Font.SourceSansBold
-recHowling.Transparency = 1
 recHowling.Position = UDim2.new(0.949, -350, 0.278, 140)
 recHowling.Name = "recHowling"
 
@@ -562,7 +543,6 @@ recOutlaws.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recOutlaws.TextSize = 20
 recOutlaws.TextColor3 = Color3.fromRGB(255,255,255)
 recOutlaws.Font = Enum.Font.SourceSansBold
-recOutlaws.Transparency = 1
 recOutlaws.Position = UDim2.new(1.267, -350, 0.278, 140)
 recOutlaws.Name = "recOutlaws"
 
@@ -577,7 +557,6 @@ recWindmill.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 recWindmill.TextSize = 20
 recWindmill.TextColor3 = Color3.fromRGB(255,255,255)
 recWindmill.Font = Enum.Font.SourceSansBold
-recWindmill.Transparency = 1
 recWindmill.Position = UDim2.new(0.949, -350, 0.414, 140)
 recWindmill.Name = "recWindmill"
 
@@ -601,6 +580,92 @@ pathrecSpawnLabel.Size = UDim2.new(0,200,0,50)
 pathrecSpawnLabel.Position = UDim2.new(0.333, 0, 0.304, 0)
 pathrecSpawnLabel.TextColor3 = Color3.fromRGB(255,255,255)
 pathrecSpawnLabel.Text = "Spawns:"
+
+pathrecButton = Instance.new("TextButton")
+pathrecButton.Parent = Frame
+pathrecButton.Text = "Path Recorder"
+pathrecButton.Size = UDim2.new(0, 300, 0, 50)
+pathrecButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+pathrecButton.TextSize = 20
+pathrecButton.TextColor3 = Color3.fromRGB(255,255,255)
+pathrecButton.Font = Enum.Font.SourceSansBold
+pathrecButton.Position = UDim2.new(0.5, -350, 0, 140)
+pathrecButton.Name = "pathrecButton"
+pathrecButton.Visible = false
+
+local pathrecButtonCorner = Instance.new("UICorner")
+pathrecButtonCorner.Parent = pathrecButton
+
+recExit = Instance.new("TextButton")
+recExit.Parent = pathRecorder
+recExit.Text = "X"
+recExit.Size = UDim2.new(0, 30, 0, 30)
+recExit.BackgroundColor3 = Color3.fromRGB(50,50,50)
+recExit.Font = Enum.Font.SourceSansBold
+recExit.Position = UDim2.new(0.92, 0, 0.028, 0)
+recExit.TextSize = 20
+recExit.TextColor3 = Color3.fromRGB(255,255,255)
+recExit.Name = "Exit"
+recExit.BackgroundTransparency = 1
+table.insert(taskbarButtons, recExit)
+
+local recExitCorner = Instance.new("UICorner")
+recExitCorner.Parent = recExit
+
+nameSelector = Instance.new("TextBox")
+nameSelector.Text = "-- Select a file name"
+nameSelector.Parent = draggable
+nameSelector.Size = UDim2.new(0, 250, 0, 40)
+nameSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+nameSelector.BorderSizePixel = 1
+nameSelector.BorderColor3 = Color3.fromRGB(unpack(colourTheme))
+nameSelector.TextSize = 20
+nameSelector.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameSelector.Font = Enum.Font.SourceSansBold
+nameSelector.Position = UDim2.new(0.5, 75, 0, 215)
+nameSelector.Name = "nameSelector"
+nameSelector.AnchorPoint = Vector2.new(0.5, 0.5)
+nameSelector.Position = UDim2.new(0.5,0,0.5,0)
+nameSelector.Visible = false
+
+local UserInputService = game:GetService("UserInputService")
+
+local function waitForEnter()
+    local connection
+    local pressed = Instance.new("BindableEvent")
+
+    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Return then
+            connection:Disconnect()
+            pressed:Fire()
+        end
+    end)
+
+    pressed.Event:Wait()
+end
+
+function createTXTFile()
+    local userInputName = nil
+    nameSelector.Visible = true
+    
+    while true do
+        waitForEnter()
+
+        if nameSelector.Text:match("^%s*$") then
+            print("No name was entered. Please enter a valid name.")
+        else
+            userInputName = nameSelector.Text
+            local fileName = userInputName .. ".txt"
+            fullPath = folderName .. "/" .. fileName
+
+            writefile(fullPath, "")
+
+            print("File created at:", fullPath)
+            nameSelector.Visible = false
+            return fullPath
+        end
+    end
+end
 
 numBars = 4
 local startX = 60
@@ -638,6 +703,10 @@ for i, element in pairs(tweenParts) do
     elseif element:IsA("ImageButton") then
         local textTween = tweenservice:Create(element, tweenInfo, {ImageTransparency = 0})
         textTween:Play()
+    end
+    if i == #tweenParts then
+        wait(1)
+        isTweenFinished = true
     end
 end
 local pathfindingservice = game:GetService("PathfindingService")
@@ -1087,9 +1156,9 @@ end
 local clockwise = true
 local isRunning = false
 
-buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector}
+buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector,pathrecButton}
 buttonsDeletedTabAutomine = {startAutoFarm,sliderFrame,sliderText,slider,pathedAutoFarm,pathSelector}
-buttonsDeletedTabConfig = {}
+buttonsDeletedTabConfig = {pathrecButton}
 buttonsDeletedTabWebhooks = {}
 
 local isAMon = true
@@ -1146,7 +1215,7 @@ local function onClick(input, gameProcessed)
                 print("Ore Type: ", part.Parent.Parent.Name)
                 oreType = part.Parent.Parent
                 orePos = part.Position
-                orePart = oreType.PrimaryPart
+                orePart = part.Parent.PrimaryPart
                 recordMine()
             end
         else
@@ -1156,7 +1225,7 @@ local function onClick(input, gameProcessed)
 end
 
 local function recordPosition()
-    local pos = humanoidrootpart.Position
+    local pos = wrkspceEnt.Players[plrname].HumanoidRootPart.Position
     local posString = tostring(pos)
     local text = "move, " .. posString .. [[
 
@@ -1252,6 +1321,59 @@ local function startRecording()
 end
 
 local function applyButtonFunctionality()
+
+pathrecButton.MouseButton1Down:Connect(function()
+    local pathBool = pathRecorder.Visible
+    
+    if pathBool == false then
+        createTXTFile()
+        startRecording()
+        pathRecorder.Visible = true
+    else
+        startRecording()
+        pathRecorder.Visible = false
+    end
+end)
+
+recExit.MouseButton1Down:Connect(function()
+    pathRecorder.Visible = false
+end)
+
+recWindmill.MouseButton1Down:Connect(function()
+    recordWindmill()
+end)
+
+recOutlaws.MouseButton1Down:Connect(function()
+    recordOutlaws()
+end)
+
+recHowling.MouseButton1Down:Connect(function()
+    recordHowling()
+end)
+
+recDelores.MouseButton1Down:Connect(function()
+    recordDelores()
+end)
+
+recReservation.MouseButton1Down:Connect(function()
+    recordReservation()
+end)
+
+recPuerto.MouseButton1Down:Connect(function()
+    recordPuerto()
+end)
+
+recBronze.MouseButton1Down:Connect(function()
+    recordBronze()
+end)
+
+recPosButton.MouseButton1Down:Connect(function()
+    recordPosition()
+end)
+
+recSellPosButton.MouseButton1Down:Connect(function()
+    recordSellPosition()
+end)
 
 	-- Config tab
 mineconfig.MouseButton1Down:Connect(function()
