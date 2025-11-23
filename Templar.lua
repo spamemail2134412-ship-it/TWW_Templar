@@ -1,3 +1,4 @@
+
 local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
@@ -71,7 +72,7 @@ local function tp()
     end
 end
 
-local exemption = {"startAutoFarm", "settingsFrame"}
+local exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
 
 local taskbarButtons = {}
 
@@ -407,31 +408,31 @@ separationFrameCorner.Parent = separationFrame
 
 pathedAutoFarm = Instance.new("TextButton")
 pathedAutoFarm.Parent = Frame
-pathedAutoFarm.Text = "Path Automine"
+pathedAutoFarm.Text = "Premade Route"
 pathedAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 pathedAutoFarm.TextSize = 20
 pathedAutoFarm.TextColor3 = Color3.fromRGB(255,255,255)
 pathedAutoFarm.Font = Enum.Font.SourceSansBold
 pathedAutoFarm.Transparency = 1
-pathedAutoFarm.Position = UDim2.new(0.5, -450, 0, 140)
+pathedAutoFarm.Position = UDim2.new(0.5, 50, 0, 140)
 pathedAutoFarm.Name = "pathedAutoFarm"
 
 local pathedAutoFarmCorner = Instance.new("UICorner")
-pathAutoFarmCorner.Parent = pathedAutoFarm
+pathedAutoFarmCorner.Parent = pathedAutoFarm
 
 pathSelector = Instance.new("TextBox")
-pathSelector.Text = "--File name"
+pathSelector.Text = "-- File name"
 pathSelector.Parent = Frame
-pathSelector.Size = UDim2.new(0, 200, 0, 50)
+pathSelector.Size = UDim2.new(0, 250, 0, 40)
 pathSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-pathSelector.BorderSize = 1
+pathSelector.BorderSizePixel = 1
 pathSelector.BorderColor3 = Color3.fromRGB(unpack(colourTheme))
 pathSelector.TextSize = 20
 pathSelector.TextColor3 = Color3.fromRGB(255,255,255)
 pathSelector.Font = Enum.Font.SourceSansBold
 pathSelector.Transparency = 1
-pathSelector.Position = UDim2.new(0.5, -450, 0, 265)
+pathSelector.Position = UDim2.new(0.5, 75, 0, 215)
 pathSelector.Name = "pathSelector"
 
 numBars = 4
@@ -919,8 +920,8 @@ end
 local clockwise = true
 local isRunning = false
 
-buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig}
-buttonsDeletedTabAutomine = {startAutoFarm,sliderFrame,sliderText,slider}
+buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector}
+buttonsDeletedTabAutomine = {startAutoFarm,sliderFrame,sliderText,slider,pathedAutoFarm,pathSelector}
 buttonsDeletedTabConfig = {}
 buttonsDeletedTabWebhooks = {}
 
@@ -1070,7 +1071,7 @@ settings.MouseButton1Down:Connect(function()
                 local part = button
                 if button:IsA("TextLabel") then 
                     tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
-                elseif button:IsA("TextButton") and button.Name ~= "startAutoFarm" then
+                elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
                     tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
                 else
                     tween = tweenservice:Create(part,tweeninfo,{Transparency = 0})
