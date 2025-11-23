@@ -3,7 +3,7 @@ local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
 local slot = plrgui.Hotbar.Container.HotbarList.Body
-if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") Templar:Destroy() return end
+if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") return end
 
 local parentDirectory = "../"
 local folderName = "TWW_Templar"
