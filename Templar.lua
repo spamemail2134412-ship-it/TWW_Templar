@@ -433,6 +433,18 @@ pathSelector.Transparency = 1
 pathSelector.Position = UDim2.new(0.5, 75, 0, 215)
 pathSelector.Name = "pathSelector"
 
+pathRecorder = Instance.new("Frame")
+pathRecorder.Parent = Templar
+pathRecorder.Position = UDim2.new(0,0,0,0)
+pathRecorder.Size = UDim2.new(0,0,0,0)
+pathRecorder.Visible = false
+pathRecorder.BackgroundColor3 = Color3.fromRGB(0,0,0)
+pathRecorder.BackgroundTransparency = 0.3
+pathRecorder.Name = "PathRecorder"
+
+pathRecorderCorner = Instance.new("UICorner")
+pathRecorderCorner.Parent = pathRecordersd
+
 numBars = 4
 local startX = 60
 local endX   = 745
@@ -951,7 +963,9 @@ local function recordMine()
     local oreType = oreType.Name
     local orePos = tostring(orePos)
     local orePart = orePart.Name
-    local text = "mine, " .. oreType .. ", " .. orePart .. ", " .. orePos
+    local text = "mine, " .. oreType .. ", " .. orePart .. ", " .. orePos .. [[
+
+]]
     
     appendfile(fullPath, text)
     
@@ -969,15 +983,13 @@ local function onClick(input, gameProcessed)
         local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
         if result then
             local part = result.Instance
-            print("Clicked part:", part.Name)
-            print("Position:", part.Position)
             
             if part.Parent and part.Parent:IsA("Model") and string.find(part.Name, "Rock") then
                 print("Ore: ", part.Parent.Name)
                 print("Ore Type: ", part.Parent.Parent.Name)
                 oreType = part.Parent.Parent
                 orePos = part.Position
-                orePart = part
+                orePart = oreType.PrimaryPart
                 recordMine()
             end
         else
@@ -989,23 +1001,101 @@ end
 local function recordPosition()
     local pos = humanoidrootpart.Position
     local posString = tostring(pos)
-    local text = "move, " .. posString
+    local text = "move, " .. posString .. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordSellPosition()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "sell, " .. posString .. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordBronze()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "bronzeSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordPuerto()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "puertoSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordReservation()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "reservationSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordDelores()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "deloresSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordHowling()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "howlingSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordOutlaws()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "outlawsSpawn".. [[
+
+]]
+    
+    appendfile(fullPath, text)
+end
+
+local function recordWindmill()
+    local pos = humanoidrootpart.Position
+    local posString = tostring(pos)
+    local text = "windmillSpawn".. [[
+
+]]
     
     appendfile(fullPath, text)
 end
 
 UserInputService.InputBegan:Connect(onClick)
 
-createTXTFile()
-recordPosition()
-
 local function startRecording()
     recording = not recording
 end
-wait(2)
-startRecording()
 
 local function applyButtonFunctionality()
+
 	-- Config tab
 mineconfig.MouseButton1Down:Connect(function()
     if isCon then
