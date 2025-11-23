@@ -405,7 +405,34 @@ separationFrame.Position = UDim2.new(0,60,0,80)
 local separationFrameCorner = Instance.new("UICorner")
 separationFrameCorner.Parent = separationFrame
 
+pathedAutoFarm = Instance.new("TextButton")
+pathedAutoFarm.Parent = Frame
+pathedAutoFarm.Text = "Path Automine"
+pathedAutoFarm.Size = UDim2.new(0, 300, 0, 50)
+pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+pathedAutoFarm.TextSize = 20
+pathedAutoFarm.TextColor3 = Color3.fromRGB(255,255,255)
+pathedAutoFarm.Font = Enum.Font.SourceSansBold
+pathedAutoFarm.Transparency = 1
+pathedAutoFarm.Position = UDim2.new(0.5, -450, 0, 140)
+pathedAutoFarm.Name = "pathedAutoFarm"
 
+local pathedAutoFarmCorner = Instance.new("UICorner")
+pathAutoFarmCorner.Parent = pathedAutoFarm
+
+pathSelector = Instance.new("TextBox")
+pathSelector.Text = "--File name"
+pathSelector.Parent = Frame
+pathSelector.Size = UDim2.new(0, 200, 0, 50)
+pathSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+pathSelector.BorderSize = 1
+pathSelector.BorderColor3 = Color3.fromRGB(unpack(colourTheme))
+pathSelector.TextSize = 20
+pathSelector.TextColor3 = Color3.fromRGB(255,255,255)
+pathSelector.Font = Enum.Font.SourceSansBold
+pathSelector.Transparency = 1
+pathSelector.Position = UDim2.new(0.5, -450, 0, 265)
+pathSelector.Name = "pathSelector"
 
 numBars = 4
 local startX = 60
