@@ -2,6 +2,9 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
+local slot = plrgui.Hotbar.Container.HotbarList.Body
+if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") Templar:Destroy() return end
+
 local parentDirectory = "../"
 local folderName = "TWW_Templar"
 local fullFolderPath = parentDirectory .. folderName
@@ -474,7 +477,7 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     for i, waypoint in pairs(waypoints) do
         if lastWaypoint == nil then -- If there is no data to compare to, then it will skip over so that there is previous waypoint. (In order to measure the distance between them)
             lastWaypoint = waypoint
-            else
+        else
             waypointPos = (waypoint.Position - lastWaypoint.Position).Magnitude -- Measures the distance between the current waypoint and the previous waypoint.
             table.insert(localDistance,waypointPos)
             lastWaypoint = waypoint
@@ -691,12 +694,12 @@ local function ragdollMoveTo(targetPos)
         else
             bodyGyro.CFrame = CFrame.fromEulerAnglesXYZ(math.rad(90), 0, 0)
         end
-        
+
         task.wait()
     end
 end
 
-function loadWaypoints()
+function waypointVisualizer()
     pathCalculator()
     print("Loading path...")
     for i, waypoints in pairs(waypointOrder) do
@@ -760,31 +763,30 @@ print("Closest ore found: " .. closestOreDistance)
 pathfindSuccess = nil
 print(path.Status)
 
-if nearestWaypoints[1] then
+	if nearestWaypoints[1] then
     
-    enableRagdollFly()
+    	enableRagdollFly()
     
-    print("Moving to pos: ", finalpos)
-    
-    for i, waypoint in ipairs(waypointOrder[index]) do
-	    local waypoints = path:GetWaypoints()
-	    local finished = false
-	    local maxTime = 10
-	    local jumpTime = 5
-	    local timeElapsed = 0
+    	print("Moving to pos: ", finalpos)
+
+    	for i, waypoint in ipairs(waypointOrder[index]) do
+	    	local waypoints = path:GetWaypoints()
+	    	local finished = false
+	    	local maxTime = 10
+	    	local jumpTime = 5
+	    	local timeElapsed = 0
         
-        ragdollMoveTo(waypoint.Position)
-        
-    end
-else
-    if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
-    pathfindSuccess = false
-    disableRagdollFly()
-end
-    pathfindSuccess = true
-    disableRagdollFly()
-    return pathfindSuccess
-end
+        	ragdollMoveTo(waypoint.Position)
+    	end
+	else
+    	if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
+    	pathfindSuccess = false
+    	disableRagdollFly()
+	end
+    	pathfindSuccess = true
+    	disableRagdollFly()
+    	return pathfindSuccess
+	end
 end
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
@@ -817,18 +819,16 @@ local function closestVender()
     local venders = {}
 end
 
-local slot = plrgui.Hotbar.Container.HotbarList.Body
-if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") Templar:Destroy() return end
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
 
 print(slotItem .. " selected.")
 print(("LoadoutItem/" .. pickaxeSelected))
 print(character)
 
-local function closestOreFarm()
+local function nearestOreFarm()
         pathfindSuccess = nil
         FindNearestOre()
-        loadWaypoints()
+        waypointVisualizer()
     for i,v in ipairs(waypointOrder) do
         pathfind(i)
         while pathfindSuccess == nil do -- waits until path is complete
@@ -910,9 +910,7 @@ local function showTab(tab)
 end
 
 local function applyButtonFunctionality()
-
--- Automine tab
-
+	-- Config tab
 mineconfig.MouseButton1Down:Connect(function()
     if isCon then
         return
@@ -935,8 +933,7 @@ mineconfig.MouseButton1Down:Connect(function()
         isCon = true
     end
 end)
-
-
+	-- Webhooks tab
 webhook.MouseButton1Down:Connect(function()
     if isWHon == true then
         return
@@ -959,7 +956,7 @@ webhook.MouseButton1Down:Connect(function()
         isCon = false
     end
 end)
-
+	-- Automine tab
 automine.MouseButton1Down:Connect(function()
     if isAMon == true then
         return
@@ -1083,7 +1080,7 @@ startAutoFarm.MouseButton1Down:Connect(function()
     if isAFRunning == false then
         isAFRunning = true
         startAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
-        closestOreFarm()
+        nearestOreFarm()
     else
         warn("Autofarm already running. To turn off the autofarm, please leave the game.")
     end
