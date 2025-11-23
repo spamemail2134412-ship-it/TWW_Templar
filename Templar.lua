@@ -231,7 +231,7 @@ title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
-startAutoFarm.Text = "Nearest Ore (don't use it's shit)"
+startAutoFarm.Text = "Nearest Ore (not recommended)"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 startAutoFarm.TextSize = 20
