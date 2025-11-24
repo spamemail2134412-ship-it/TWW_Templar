@@ -221,7 +221,7 @@ title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
 startAutoFarm.Parent = Frame
-startAutoFarm.Text = "Nearest Ore (not recommended)"
+startAutoFarm.Text = "Nearest Ore (deprecated)"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 startAutoFarm.TextSize = 20
@@ -1040,7 +1040,7 @@ print(path.Status)
 	    	local jumpTime = 5
 	    	local timeElapsed = 0
         
-        	ragdollMoveTo(waypoint.Position)
+        	ragdollMoveTo(waypoint.Position + Vector3.new(0,10,0))
     	end
 	else
     	if path.Status == Enum.PathStatus.NoPath then print("No path calculated! Please try again.") return else print("Unknown error occurred! Please try again.") end
