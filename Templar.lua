@@ -1320,6 +1320,26 @@ local function startRecording()
     recording = not recording
 end
 
+local function automineSpawn(spawnLocation)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UI = require(ReplicatedStorage.Modules.UI.NewUI.UI)
+local Network = require(ReplicatedStorage.SharedModules.Global.Network)
+
+local success, errorMessage
+
+repeat
+    success, errorMessage = pcall(function()
+        Network:FireServer("RespawnTriggered")
+    end)
+
+    if not success then
+        task.wait(0.5)
+    end
+until success
+
+Network:InvokeServer("Respawn", "Bronze")
+end
+
 local function applyButtonFunctionality()
 
 pathrecButton.MouseButton1Down:Connect(function()
@@ -1337,6 +1357,7 @@ end)
 
 recExit.MouseButton1Down:Connect(function()
     pathRecorder.Visible = false
+    startRecording()
 end)
 
 recWindmill.MouseButton1Down:Connect(function()
@@ -1556,5 +1577,10 @@ buttonHover()
 end
 
 if isTweenFinished == true then
+    applyButtonFunctionality()
+else 
+    while isTwenFinished == false do
+        wait(0.1)
+    end
     applyButtonFunctionality()
 end
