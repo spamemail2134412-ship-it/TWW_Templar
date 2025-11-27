@@ -1,6 +1,6 @@
 Templar is an autofarm script that is currently in development for https://www.roblox.com/games/2317712696/The-Wild-West. The script is a WIP and does not yet have full functionality or complete autofarm capability, though will in the future.
 
-HOW TO USE:
+**HOW TO USE:**
   Path Recorder:
   - The parser for premade paths will iterate through the txt file and complete every action in the order in which it's listed (and wait for it to finish before continuing with the next action).
   - In the spawns section, when a button it will copy the spawn location to the txt file. Each spawn has its own button, you should record a path respawn at the start of every path file.
