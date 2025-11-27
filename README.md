@@ -10,7 +10,7 @@ Templar is an autofarm script that is currently in development for https://www.r
   - If you want to cycle through your paths rather than one singular path, you can go to the config tab and configure your paths. (WIP)  
 
   Setup:
-  - When launching the script, a folder will be created in your executor Workspace called ``TWW_Templar``, this folder is where all path files will be copied to.
+  - When launching the script, a folder will be created in your executor ``Workspace`` called ``TWW_Templar``, this folder is where all path files will be copied to.
   - To start a path autofarm, simply select what txt file you want to use with the text box. It needs to be the full file name with the .txt file extension.
   - Your executor's auto-execute setting MUST BE TURNED ON FOR THE AUTOFARM TO WORK. Otherwise, server hopping will not work.
   - If your executor does not have auto execute, then download velocity or volcano which both have the functionality.
