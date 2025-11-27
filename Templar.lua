@@ -81,6 +81,36 @@ local function tp()
     end
 end
 
+local attributeSet = game.Workspace:FindFirstChild("attributeSet")
+
+if not attributeSet then
+    attributeSet = Instance.new("BoolValue")
+    attributeSet.Parent = game.Workspace
+    attributeSet.Name = "attributeSet"
+    attributeSet = game.Workspace:WaitForChild("attributeSet")
+end
+
+if attributeSet.Value == false then
+    print("ok")
+    attributeSet.Value = true
+    local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+
+    for _, model in ipairs(oreFolder:GetDescendants()) do
+        if model:IsA("Model") then
+            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+            if primary then
+                local pos = primary.Position
+                local id =
+                math.floor(pos.X + 0.5) ..
+                "_" .. math.floor(pos.Y + 0.5) ..
+                "_" .. math.floor(pos.Z + 0.5)
+
+                model:SetAttribute("UniqueOreID", id)
+            end
+        end
+    end
+end
+
 local exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
 
 local taskbarButtons = {}
@@ -1205,14 +1235,11 @@ raycastParams.FilterDescendantsInstances = {character} -- ignore the player
 local recording = false
 
 local oreType = nil
-local orePos = nil
-local orePart = nil
+local oreID = nil
 
 local function recordMine()
     local oreType = oreType.Name
-    local orePos = tostring(orePos)
-    local orePart = orePart.Name
-    local text = "mine, " .. oreType .. ", " .. orePart .. ", " .. orePos .. [[
+    local text = "mine, " .. oreType .. ", " .. oreID .. [[
 
 ]]
     
@@ -1237,8 +1264,8 @@ local function onClick(input, gameProcessed)
                 print("Ore: ", part.Parent.Name)
                 print("Ore Type: ", part.Parent.Parent.Name)
                 oreType = part.Parent.Parent
-                orePos = part.Position
                 orePart = part.Parent.PrimaryPart
+                oreID = part.Parent:GetAttribute("UniqueOreID")
                 recordMine()
             end
         else
@@ -1267,81 +1294,28 @@ local function recordSellPosition()
     appendfile(fullPath, text)
 end
 
-local function recordBronze()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "bronzeSpawn".. [[
+local function recordSpawn(spawnLocation)
+    local text = spawnLocation .. [[
 
 ]]
     
     appendfile(fullPath, text)
 end
-
-local function recordPuerto()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "puertoSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-local function recordReservation()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "reservationSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-local function recordDelores()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "deloresSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-local function recordHowling()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "howlingSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-local function recordOutlaws()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "outlawsSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-local function recordWindmill()
-    local pos = humanoidrootpart.Position
-    local posString = tostring(pos)
-    local text = "windmillSpawn".. [[
-
-]]
-    
-    appendfile(fullPath, text)
-end
-
-UserInputService.InputBegan:Connect(onClick)
 
 local function startRecording()
     recording = not recording
+    UserInputService.InputBegan:Connect(onClick)
 end
+
+local recordSpawns = {
+    {button = recBronze, string = "bronze"},
+    {button = recPuerto, string = "dorado"},
+    {button = recReservation, string = "reservation"},
+    {button = recDelores, string = "delores"},
+    {button = recHowling, string = "howling"},
+    {button = recOutlaws, string = "outlaws"},
+    {button = recWindmill, string = "windmill"}
+}
 
 local function automineSpawn(spawnLocation)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1365,50 +1339,31 @@ end
 
 local function applyButtonFunctionality()
 
+for _,table in pairs(recordSpawns) do
+    table.button.MouseButton1Click:Connect(function()
+        recordSpawn(table.string)
+    end)
+end
+
 pathrecButton.MouseButton1Down:Connect(function()
     local pathBool = pathRecorder.Visible
+    isPathRecOn = false
     
     if pathBool == false then
         createTXTFile()
         startRecording()
         pathRecorder.Visible = true
+        isPathRecOn = true
     else
         startRecording()
         pathRecorder.Visible = false
+        isPathRecOn = false
     end
 end)
 
 recExit.MouseButton1Down:Connect(function()
     pathRecorder.Visible = false
     startRecording()
-end)
-
-recWindmill.MouseButton1Down:Connect(function()
-    recordWindmill()
-end)
-
-recOutlaws.MouseButton1Down:Connect(function()
-    recordOutlaws()
-end)
-
-recHowling.MouseButton1Down:Connect(function()
-    recordHowling()
-end)
-
-recDelores.MouseButton1Down:Connect(function()
-    recordDelores()
-end)
-
-recReservation.MouseButton1Down:Connect(function()
-    recordReservation()
-end)
-
-recPuerto.MouseButton1Down:Connect(function()
-    recordPuerto()
-end)
-
-recBronze.MouseButton1Down:Connect(function()
-    recordBronze()
 end)
 
 recPosButton.MouseButton1Down:Connect(function()
@@ -1582,6 +1537,9 @@ end)
 -- Exit button.
 Exit.MouseButton1Down:Connect(function()
     Templar:Destroy()
+    if isPathRecOn == true then
+        startRecording()
+    end
 end)
 
 -- Autofarm button.
