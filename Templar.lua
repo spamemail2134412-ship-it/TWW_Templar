@@ -2,8 +2,6 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
-local slot = plrgui.Hotbar.Container.HotbarList.Body
-if slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1] == nil then print("No item in slot 4.") return end
 
 local parentDirectory = "../"
 local folderName = "TWW_Templar"
@@ -91,7 +89,6 @@ if not attributeSet then
 end
 
 if attributeSet.Value == false then
-    print("ok")
     attributeSet.Value = true
     local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
 
@@ -1136,11 +1133,8 @@ local function closestVender()
     local venders = {}
 end
 
+local slot = plrgui.Hotbar.Container.HotbarList.Body
 local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
-
-print(slotItem .. " selected.")
-print(("LoadoutItem/" .. pickaxeSelected))
-print(character)
 
 local function nearestOreFarm()
         pathfindSuccess = nil
