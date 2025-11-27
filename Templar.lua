@@ -7,9 +7,7 @@ local parentDirectory = "../"
 local folderName = "TWW_Templar"
 local fullFolderPath = parentDirectory .. folderName
 
-if game.Workspace:FindFirstChild("Path") then
-
-    else
+if not game.Workspace:FindFirstChild("Path") then
         folder = Instance.new("Folder")
         folder.Parent = game.Workspace
         folder.Name = "Path"
@@ -47,7 +45,9 @@ local smallestPlayers = math.huge
 local Next = nil
 local allServers = {}
 
-repeat
+local function tp()
+    
+    repeat
     local ServerList = ListServers(Next)
     
     if ServerList and ServerList.data then
@@ -67,8 +67,7 @@ repeat
     end
     
 until not Next or smallestServer
-
-local function tp()
+    
     if smallestServer then
         print("Teleporting to server with " .. smallestPlayers .. " players")
         TeleportService:TeleportToPlaceInstance(game.PlaceId, smallestServer.id, game.Players.LocalPlayer)
@@ -242,6 +241,7 @@ Frame.Transparency = 1
 Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Frame.ZIndex = 0
 Frame.ClipsDescendants = true
+Frame.BackgroundTransparency = 1
 
 local uicornerFrame = Instance.new("UICorner")
 uicornerFrame.Parent = Frame
@@ -824,17 +824,17 @@ local function calculatePaths()
                     end
                 end
             end
-            
+
                 local success, errorMessage = pcall(function()
                     path:ComputeAsync(wrkspceEnt.Players[plrname].HumanoidRootPart.Position, ore.PrimaryPart.Position - Vector3.new(modifier,modifier,modifier))
                 end)
                 if success and path.Status == Enum.PathStatus.Success then
                     calcPathDistance(path:GetWaypoints(), i, ore)
                     successes = successes + 1
-                    
+
                 elseif path.Status == Enum.PathStatus.NoPath then
                     failures = failures + 1
-                    
+
                 else
                     unknown = unknown + 1
                 end
@@ -851,14 +851,14 @@ local nearestWaypoints = {}
 waypointOrder = {}
 
 function FindNearestOre()
-nearestOres = {}
-oreIndex = {}
-closestOreDistance = math.huge
-closestOre = nil
-finalpos = nil
-oreHierarchy = nil
-oreCheckpoints = {}
-sortedOreIndex = {}
+    nearestOres = {}
+    oreIndex = {}
+    closestOreDistance = math.huge
+    closestOre = nil
+    finalpos = nil
+    oreHierarchy = nil
+    oreCheckpoints = {}
+    sortedOreIndex = {}
 
     calculatePaths()
     
@@ -875,7 +875,7 @@ sortedOreIndex = {}
         local i = data.index
         local ore = oreIndex[i]
         local pos = ore.PrimaryPart.Position
-        
+
         table.insert(oreCheckpoints, pos)
         table.insert(nearestWaypoints, waypointTable[i])
         table.insert(sortedOreIndex, ore)
@@ -917,10 +917,10 @@ local isRagdollFlying = false
 
 local function enableRagdollFly()
     if isRagdollFlying then return end
-    
+
     Global.PlayerCharacter:Ragdoll(nil, true)
     task.wait(0.5)
-    
+
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("Motor6D") then
             part.Enabled = true
@@ -929,63 +929,62 @@ local function enableRagdollFly()
             part.Enabled = false
         end
     end
-    
+
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.P = 10000
     bodyVelocity.Parent = humanoidrootpart
-    
+
     bodyGyro = Instance.new("BodyGyro")
     bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     bodyGyro.P = 10000
     bodyGyro.D = 500
     bodyGyro.CFrame = CFrame.new()
     bodyGyro.Parent = humanoidrootpart
-    
+
     local undergroundPos = humanoidrootpart.Position - Vector3.new(0, 3, 0)
     humanoidrootpart.CFrame = CFrame.new(undergroundPos)
-    
+
     isRagdollFlying = true
 end
 
 local function disableRagdollFly()
     if not isRagdollFlying then return end
-    
+
     if bodyVelocity then bodyVelocity:Destroy() end
     if bodyGyro then bodyGyro:Destroy() end
-    
+
     for _, weld in pairs(humanoidrootpart:GetChildren()) do
         if weld:IsA("WeldConstraint") then
             weld:Destroy()
         end
     end
-    
-    
+
+
     Global.PlayerCharacter:GetUp()
     task.wait(1.5)
-    
+
     isRagdollFlying = false
 end
-
 
 local function ragdollMoveTo(targetPos)
     if not isRagdollFlying then 
         return false 
     end
-    
+
     local speed = 75
-    
+
     targetPos = Vector3.new(targetPos.X, targetPos.Y - 3, targetPos.Z)
-    
+
     local stuckTimer = 0
     local lastPos = humanoidrootpart.Position
-    
+
     while true do
         local currentPos = humanoidrootpart.Position
         local direction = (targetPos - currentPos)
         local distance = direction.Magnitude
-        
+
         if (currentPos - lastPos).Magnitude < 0.1 then
             stuckTimer = stuckTimer + 1
             if stuckTimer > 30 then
@@ -995,12 +994,12 @@ local function ragdollMoveTo(targetPos)
             stuckTimer = 0
             lastPos = currentPos
         end
-        
+
         if distance < 5 then
             bodyVelocity.Velocity = Vector3.new(0, 0, 0)
             return true
         end
-        
+
         bodyVelocity.Velocity = direction.Unit * speed
         local horizontalLook = Vector3.new(direction.X, 0, direction.Z)
         if horizontalLook.Magnitude > 0 then
@@ -1019,7 +1018,7 @@ function waypointVisualizer()
     for i, waypoints in pairs(waypointOrder) do
         for i, waypoint in pairs(waypoints) do
             if i < #waypoints then
-            
+
                 local a = waypoints[i].Position
                 local b = waypoints[i+1].Position
                 local dir = b - a
@@ -1069,7 +1068,6 @@ function waypointVisualizer()
     print("Path loaded")
 end
 
-
 function pathfind(index)
 closestOre = sortedOreIndex[index]
 finalpos = oreCheckpoints[index]
@@ -1078,9 +1076,9 @@ pathfindSuccess = nil
 print(path.Status)
 
 	if nearestWaypoints[1] then
-    
+
     	enableRagdollFly()
-    
+
     	print("Moving to pos: ", finalpos)
 
     	for i, waypoint in ipairs(waypointOrder[index]) do
@@ -1089,7 +1087,7 @@ print(path.Status)
 	    	local maxTime = 10
 	    	local jumpTime = 5
 	    	local timeElapsed = 0
-        
+
         	ragdollMoveTo(waypoint.Position + Vector3.new(0,10,0))
     	end
 	else
@@ -1194,7 +1192,7 @@ local function buttonHover()
         button.MouseEnter:Connect(function()
             button.BackgroundTransparency = 0
         end)
-        
+
         button.MouseLeave:Connect(function()
             button.BackgroundTransparency = 1
         end)
@@ -1236,9 +1234,9 @@ local function recordMine()
     local text = "mine, " .. oreType .. ", " .. oreID .. [[
 
 ]]
-    
+
     appendfile(fullPath, text)
-    
+
 end
 
 local camera = workspace.CurrentCamera
@@ -1249,11 +1247,11 @@ local function onClick(input, gameProcessed)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         local mousePos = input.Position
         local ray = camera:ScreenPointToRay(mousePos.X, mousePos.Y)
-        
+
         local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
         if result then
             local part = result.Instance
-            
+
             if part.Parent and part.Parent:IsA("Model") and string.find(part.Name, "Rock") then
                 print("Ore: ", part.Parent.Name)
                 print("Ore Type: ", part.Parent.Parent.Name)
@@ -1274,7 +1272,7 @@ local function recordPosition()
     local text = "move, " .. posString .. [[
 
 ]]
-    
+
     appendfile(fullPath, text)
 end
 
@@ -1284,7 +1282,7 @@ local function recordSellPosition()
     local text = "sell, " .. posString .. [[
 
 ]]
-    
+
     appendfile(fullPath, text)
 end
 
@@ -1292,7 +1290,7 @@ local function recordSpawn(spawnLocation)
     local text = spawnLocation .. [[
 
 ]]
-    
+
     appendfile(fullPath, text)
 end
 
@@ -1373,19 +1371,19 @@ mineconfig.MouseButton1Down:Connect(function()
     if isCon then
         return
     else
-        
+
         for i,v in pairs(buttonsDeletedTabConfig) do
             v.Visible = true
         end
-        
+
         for i, v in pairs(buttonsDeletedTabAutomine) do
             v.Visible = false
         end
-        
+
         for i,v in pairs(buttonsDeletedTabWebhooks) do
             v.Visible = false
         end
-        
+
         isAMon = false
         isWHon = false
         isCon = true
@@ -1396,19 +1394,19 @@ webhook.MouseButton1Down:Connect(function()
     if isWHon == true then
         return
     else
-        
+
         for i,v in pairs(buttonsDeletedTabWebhooks) do
             v.Visible = true
         end
-        
+
         for i,v in pairs(buttonsDeletedTabAutomine) do
             v.Visible = false
         end
-        
+
         for i,v in pairs(buttonsDeletedTabConfig) do
             v.Visible = false
         end
-        
+
         isAMon = false
         isWHon = true
         isCon = false
@@ -1430,7 +1428,7 @@ automine.MouseButton1Down:Connect(function()
         for i,v in pairs(buttonsDeletedTabWebhooks) do
             v.Visible = false
         end
-        
+
         isAMon = true
         isWHon = false
         isCon = false
