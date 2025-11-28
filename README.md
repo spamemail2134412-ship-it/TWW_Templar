@@ -2,7 +2,7 @@ Templar is an autofarm script that is currently in development for https://www.r
 
 **HOW TO USE:**
 
-  Path Recorder:
+  <u>Path Recorder:<u>
   - The parser for premade paths will iterate through the ``txt`` file and complete every action in the order in which it's listed (and wait for it to finish before continuing with the next action).
   - In the spawns section, when a record button is pressed it will copy the spawn location to the ``txt`` file. Each spawn has its own button, you should record a path respawn at the start of every path file.
   - The record sell button simply moves the character to the registered position (similar to the move button) and will press F to sell loot.
