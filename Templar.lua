@@ -132,8 +132,9 @@ if attributeSet.Value == false then
     end
 end
 
-exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
+exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton"}
 fullExemption = {"automineTab", "webhooksTab", "configTab"}
+tweenExemption = {"automine", "webhook", "mineconfig"}
 
 taskbarButtons = {}
 
@@ -208,6 +209,7 @@ webhooksTab.Position = UDim2.new(0.5, -400, 0.5, -300)
 webhooksTab.BackgroundTransparency = 1
 webhooksTab.ZIndex = 0
 webhooksTab.ClipsDescendants = true
+webhooksTab.Visible = false
 
 configTab = Instance.new("Frame")
 configTab.Parent = draggable
@@ -217,6 +219,7 @@ configTab.Position = UDim2.new(0.5, -400, 0.5, -300)
 configTab.BackgroundTransparency = 1
 configTab.ZIndex = 0
 configTab.ClipsDescendants = true
+configTab.Visible = false
 
 sliderFrame = Instance.new("Frame")
 sliderFrame.Parent = automineTab
@@ -243,8 +246,8 @@ local sliderUIDetector = Instance.new("UIDragDetector")
 sliderUIDetector.Parent = slider
 sliderUIDetector.DragStyle = Enum.UIDragDetectorDragStyle.TranslateLine
 sliderUIDetector.DragAxis = Vector2.new(1,0)
-sliderUIDetector.MinDragTranslation = UDim2.new(-0.5,0,0)
-sliderUIDetector.MaxDragTranslation = UDim2.new(0.5,0,0)
+sliderUIDetector.MinDragTranslation = UDim2.new(-0.501,0,0)
+sliderUIDetector.MaxDragTranslation = UDim2.new(0.50,0,0)
 sliderUIDetector.ReferenceUIInstance = sliderFrame
 
 sliderText = Instance.new("TextLabel")
@@ -294,14 +297,26 @@ sliderUIDetector.DragContinue:Connect(function()
     if difference == 0 then
         text = pickaxeTiers[1]
     else
-        local multiplier = difference / 21
+        multiplier = difference / 21
         text = pickaxeTiers[multiplier + 1]
     end
-    
     sliderText.Text = "Pickaxe Tier: " .. text
 
-    pickaxeSelected = pickaxeTiers[nearestIndex + 1]
+end)
 
+sliderUIDetector.DragEnd:Connect(function()
+    local currentPos = slider.Position
+    local difference = currentPos.X.Offset - 105
+    
+    local text = nil
+    
+    if difference == 0 then
+        text = pickaxeTiers[1]
+    else
+        multiplier = difference / 21
+        text = pickaxeTiers[multiplier + 1]
+    end
+    pickaxeSelected = pickaxeTiers[multiplier + 1]
 end)
 
 local dragDetector = Instance.new("UIDragDetector")
@@ -706,7 +721,7 @@ pathrecSpawnLabel.TextColor3 = Color3.fromRGB(255,255,255)
 pathrecSpawnLabel.Text = "Spawns:"
 
 pathrecButton = Instance.new("TextButton")
-pathrecButton.Parent = Frame
+pathrecButton.Parent = configTab
 pathrecButton.Text = "Path Recorder"
 pathrecButton.Size = UDim2.new(0, 300, 0, 50)
 pathrecButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -715,7 +730,6 @@ pathrecButton.TextColor3 = Color3.fromRGB(255,255,255)
 pathrecButton.Font = Enum.Font.SourceSansBold
 pathrecButton.Position = UDim2.new(0.5, -350, 0, 140)
 pathrecButton.Name = "pathrecButton"
-pathrecButton.Visible = false
 
 local pathrecButtonCorner = Instance.new("UICorner")
 pathrecButtonCorner.Parent = pathrecButton
@@ -1177,7 +1191,7 @@ end
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
-local function input(inputType, inputButton, timeInterval)
+local function input(inputType, inputButton, timeInterval, amount)
     task.defer(function()
         if inputType == "leftclick" then
             local camera = workspace.CurrentCamera
@@ -1187,9 +1201,11 @@ local function input(inputType, inputButton, timeInterval)
             wait(0.2)
             virtualinputmanager:SendMouseButtonEvent(centerX,centerY,0,false,game,1)
         elseif inputType == "pressbutton" then
-            virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
-            wait(timeInterval)
-            virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
+            for i = 1, amount do
+                virtualinputmanager:SendKeyEvent(true, inputButton, false, game)
+                wait(timeInterval)
+                virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
+            end
         elseif inputType == "holdLeftClick" then
             virtualinputmanager:SendMouseButtonEvent(0,0,0,true,game,1)
         elseif inputType == "abortLeftClick" then
@@ -1222,7 +1238,7 @@ local function nearestOreFarm()
             if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
                 print("Pickaxe not selected!")
                 wait(1)
-                input("pressbutton", Enum.KeyCode.Four)
+                input("pressbutton", Enum.KeyCode.Four, 1)
                 local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
                 local equippeditem = playerChar:GetEquippedItem()
                 local pickaxeItem = playerChar:GetItem(pickaxeSelected)
@@ -1235,10 +1251,10 @@ local function nearestOreFarm()
                     end
                 end)
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                    input("pressbutton", Enum.KeyCode.E, 1)
+                    input("pressbutton", Enum.KeyCode.E, 1, 1)
                     wait(1)
                 end
-                input("pressbutton", Enum.KeyCode.Four)
+                input("pressbutton", Enum.KeyCode.Four, 1)
             elseif slotItem == nil then print("No pickaxe found in slot 4.")
             elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
             else
@@ -1250,7 +1266,7 @@ local function nearestOreFarm()
                     end
                 end)
                 while closestOre.DepositInfo.OreRemaining.Value > 0 do
-                    input("pressbutton", Enum.KeyCode.E, 1)
+                    input("pressbutton", Enum.KeyCode.E, 1, 1)
                     wait(1)
                 end
                 input("abortLeftClick")
@@ -1276,21 +1292,6 @@ local clockwise = true
 local isRunning = false
 
 buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector,pathrecButton}
-buttonsDeletedTabAutomine = {startAutoFarm,sliderFrame,sliderText,slider,pathedAutoFarm,pathSelector}
-buttonsDeletedTabConfig = {pathrecButton}
-buttonsDeletedTabWebhooks = {}
-
-local isAMon = true
-local isWHon = false
-local isCon = false
-
-local function showTab(tab)
-    automineFrame.Visible = false
-    webhooksFrame.Visible = false
-    configFrame.Visible = false
-
-    tab.Visible = true
-end
 
 local UserInputService = game:GetService("UserInputService")
 
@@ -1403,6 +1404,23 @@ until success
 Network:InvokeServer("Respawn", spawnLocation)
 end
 
+local function tabCycle(tab)
+    if tab ~= automineTab and automineTab.Visible == true then
+        automineTab.Visible = false
+    elseif tab ~= configTab and configTab.Visible == true then
+        configTab.Visible = false
+    else
+        webhooksTab.Visible = false
+    end
+    tab.Visible = true
+end
+
+local isAFRunning = false
+
+local function sell()
+    input("pressbutton", Enum.KeyCode.F, 0.1, 3)
+end
+
 local function applyButtonFunctionality()
 
 for _,table in pairs(recordSpawns) do
@@ -1442,79 +1460,21 @@ end)
 
 	-- Config tab
 mineconfig.MouseButton1Down:Connect(function()
-    if isCon then
-        return
-    else
-
-        for i,v in pairs(buttonsDeletedTabConfig) do
-            v.Visible = true
-        end
-
-        for i, v in pairs(buttonsDeletedTabAutomine) do
-            v.Visible = false
-        end
-
-        for i,v in pairs(buttonsDeletedTabWebhooks) do
-            v.Visible = false
-        end
-
-        isAMon = false
-        isWHon = false
-        isCon = true
-    end
+    tabCycle(configTab)
 end)
 	-- Webhooks tab
 webhook.MouseButton1Down:Connect(function()
-    if isWHon == true then
-        return
-    else
-
-        for i,v in pairs(buttonsDeletedTabWebhooks) do
-            v.Visible = true
-        end
-
-        for i,v in pairs(buttonsDeletedTabAutomine) do
-            v.Visible = false
-        end
-
-        for i,v in pairs(buttonsDeletedTabConfig) do
-            v.Visible = false
-        end
-
-        isAMon = false
-        isWHon = true
-        isCon = false
-    end
+    tabCycle(webhooksTab)
 end)
 	-- Automine tab
 automine.MouseButton1Down:Connect(function()
-    if isAMon == true then
-        return
-    else
-        for i,v in pairs(buttonsDeletedTabAutomine) do
-            v.Visible = true
-        end
-        
-        for i,v in pairs(buttonsDeletedTabConfig) do
-            v.Visible = false
-        end
-        
-        for i,v in pairs(buttonsDeletedTabWebhooks) do
-            v.Visible = false
-        end
-
-        isAMon = true
-        isWHon = false
-        isCon = false
-    end
+    tabCycle(automineTab)
 end)
 
 -- OverviewPanel exit button
 overviewExit.MouseButton1Down:Connect(function()
     Templar:Destroy()
 end)
-
-local isAFRunning = false
 
 -- Settings button
 settings.MouseButton1Down:Connect(function()
@@ -1553,30 +1513,36 @@ settings.MouseButton1Down:Connect(function()
         for i = 1, numBars do
             table.insert(buttonsDeleted, separators[i])
         end
+        tweeninfo = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
-                local part = button
                 if button:IsA("TextLabel") then 
-                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 1})
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
+                elseif not table.find(tweenExemption, button.Name) then
+                    tween = tweenservice:Create(button,tweeninfo,{Transparency = 1})
+                    tween:Play()
+                    print(button)
                 else
-                    tween = tweenservice:Create(part,tweeninfo,{Transparency = 1})
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
                 end
                 task.spawn(function()
                 wait(1)
+                print(button)
                 button.Visible = false
                 end)
             end
         else
             for _,button in pairs(buttonsDeleted) do
-                local part = button
                 if button:IsA("TextLabel") then 
-                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
                 elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
-                    tween = tweenservice:Create(part,tweeninfo,{TextTransparency = 0})
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
+                    print(button, "yo")
                 else
-                    tween = tweenservice:Create(part,tweeninfo,{Transparency = 0})
+                    tween = tweenservice:Create(button,tweeninfo,{Transparency = 0})
+                    print(button)
                 end
                 tween:Play()
                 button.Visible = true
