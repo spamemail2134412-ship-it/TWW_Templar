@@ -2,6 +2,9 @@ local player = game.Players.LocalPlayer
 local plrgui = player:WaitForChild("PlayerGui")
 local plrname = player.Name
 
+if plrgui:FindFirstChild("Templar") then
+return
+else
 
 local parentDirectory = "../"
 local folderName = "TWW_Templar"
@@ -11,7 +14,7 @@ if not game.Workspace:FindFirstChild("Path") then
         folder = Instance.new("Folder")
         folder.Parent = game.Workspace
         folder.Name = "Path"
-end  
+end
 
 sortedOreIndex = {}
 
@@ -21,6 +24,28 @@ else
     if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) end) then
         print("Function makefolder not supported.")
     end
+end
+
+local settingsCfg = "TWW_Templar/settings.cfg"
+
+local settingsText = [[
+BasicPickaxe
+-- File name
+]]
+
+if isfile(settingsCfg) then
+    print("Settings config already exists.")
+else
+    if not pcall(function() writefile(settingsCfg, settingsText) print("Settings config created at: " .. fullFolderPath) end) then
+        print("Function makefolder not supported.")
+    end
+end
+
+local fileContent = readfile(settingsCfg)
+
+local lines = {}
+for line in fileContent:gmatch("[^\r\n]+") do
+    table.insert(lines, line)
 end
 
 local TeleportService = game:GetService("TeleportService")
@@ -65,7 +90,7 @@ local function tp()
     else
         break
     end
-    
+
 until not Next or smallestServer
     
     if smallestServer then
@@ -107,17 +132,16 @@ if attributeSet.Value == false then
     end
 end
 
-local exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
+exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector"}
+fullExemption = {"automineTab", "webhooksTab", "configTab"}
 
-local taskbarButtons = {}
+taskbarButtons = {}
 
--- pickaxeTiers used for pickaxe selection slider
-local pickaxeSelected = "BasicPickaxe"
+local pickaxeSelected = lines[1]
 local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
 local old = {9, 137, 207}
 local colourTheme = {255, 255, 255}
--- pickaxe tiers, planned to be used on the pathfinding update.
 
 _G.Tier0 = {"Coal", "Copper"}
 _G.Tier1 = {"Coal", "Copper"}
@@ -156,10 +180,6 @@ local mining = wrkspceInt.Mining
 local oredeposits = mining.OreDeposits
 local ores = oredeposits:GetDescendants()
 
-if plrgui:FindFirstChild("Templar") then
-return
-else
-
 Templar = Instance.new("ScreenGui")
 Templar.Parent = plrgui
 Templar.Name = "Templar"
@@ -171,22 +191,49 @@ draggable.Transparency = 1
 draggable.Size = UDim2.new(0, 800, 0, 600)
 draggable.Position = UDim2.new(0.5, -400, 0.5, -400)
 
+automineTab = Instance.new("Frame")
+automineTab.Parent = draggable
+automineTab.Name = "automineTab"
+automineTab.Size = UDim2.new(0, 800, 0, 600)
+automineTab.Position = UDim2.new(0.5, -400, 0.5, -300)
+automineTab.BackgroundTransparency = 1
+automineTab.ZIndex = 0
+automineTab.ClipsDescendants = true
+
+webhooksTab = Instance.new("Frame")
+webhooksTab.Parent = draggable
+webhooksTab.Name = "webhooksTab"
+webhooksTab.Size = UDim2.new(0, 800, 0, 600)
+webhooksTab.Position = UDim2.new(0.5, -400, 0.5, -300)
+webhooksTab.BackgroundTransparency = 1
+webhooksTab.ZIndex = 0
+webhooksTab.ClipsDescendants = true
+
+configTab = Instance.new("Frame")
+configTab.Parent = draggable
+configTab.Name = "configTab"
+configTab.Size = UDim2.new(0, 800, 0, 600)
+configTab.Position = UDim2.new(0.5, -400, 0.5, -300)
+configTab.BackgroundTransparency = 1
+configTab.ZIndex = 0
+configTab.ClipsDescendants = true
+
 sliderFrame = Instance.new("Frame")
-sliderFrame.Parent = draggable
+sliderFrame.Parent = automineTab
 sliderFrame.Transparency = 1
 sliderFrame.Size = UDim2.new(0, 200, 0, 15)
 sliderFrame.Position = UDim2.new(0.5, -300, 0, 265)
 sliderFrame.Name = "SliderFrame"
-sliderFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+sliderFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 
 local sliderUI = Instance.new("UICorner")
 sliderUI.Parent = sliderFrame
 
 slider = Instance.new("Frame")
-slider.Parent = sliderFrame
+slider.Parent = automineTab
 slider.Transparency = 1
 slider.Size = UDim2.new(0, 10, 0, 30)
-slider.Position = UDim2.new(0,0,0.15,-10)
+slider.Position = UDim2.new(0,105,0,256)
 slider.Name = "Slider"
 slider.BackgroundColor3 = Color3.fromRGB(0,0,0)
 slider.BorderSizePixel = 2
@@ -201,10 +248,10 @@ sliderUIDetector.MaxDragTranslation = UDim2.new(0.5,0,0)
 sliderUIDetector.ReferenceUIInstance = sliderFrame
 
 sliderText = Instance.new("TextLabel")
-sliderText.Parent = draggable
+sliderText.Parent = automineTab
 sliderText.BackgroundTransparency = 1
 sliderText.TextTransparency = 1
-sliderText.Text = "Pickaxe Tier: BasicPickaxe"
+sliderText.Text = "Pickaxe Tier: " .. pickaxeSelected
 sliderText.Size = UDim2.new(0, 300, 0, 50)
 sliderText.TextSize = 25
 sliderText.Font = Enum.Font.GothamBold
@@ -212,9 +259,23 @@ sliderText.Position = UDim2.new(0.5, -350, 0, 200)
 sliderText.TextColor3 = Color3.fromRGB(unpack(colourTheme))
 sliderText.Name = "sliderText"
 
+local function updateSliderPos()
+    local totalWidth = sliderFrame.AbsoluteSize.X - slider.AbsoluteSize.X
+    local intervalCount = #pickaxeTiers
+    local intervalWidth = totalWidth / (intervalCount - 1)
+
+    local index = table.find(pickaxeTiers, pickaxeSelected)
+
+    local pos = (index - 1) * 21
+
+    slider.Position = UDim2.new(0, 105 + pos, 0, 256)
+end
+
+updateSliderPos()
+
 sliderUIDetector.DragContinue:Connect(function()
 
-    local totalWidth = sliderFrame.AbsoluteSize.X - slider.AbsoluteSize.X
+    local totalWidth = sliderFrame.AbsoluteSize.X - slider.AbsoluteSize.X - 1
     local intervalCount = 10
     local intervalWidth = totalWidth / (intervalCount - 1)
 
@@ -224,7 +285,20 @@ sliderUIDetector.DragContinue:Connect(function()
     local snappedX = nearestIndex * intervalWidth
     
     slider.Position = UDim2.new(0, snappedX, slider.Position.Y.Scale, slider.Position.Y.Offset)
-    sliderText.Text = "Pickaxe Tier: " .. pickaxeTiers[nearestIndex + 1]
+    
+    local currentPos = slider.Position
+    local difference = currentPos.X.Offset - 105
+    
+    local text = nil
+    
+    if difference == 0 then
+        text = pickaxeTiers[1]
+    else
+        local multiplier = difference / 21
+        text = pickaxeTiers[multiplier + 1]
+    end
+    
+    sliderText.Text = "Pickaxe Tier: " .. text
 
     pickaxeSelected = pickaxeTiers[nearestIndex + 1]
 
@@ -241,7 +315,7 @@ Frame.Transparency = 1
 Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Frame.ZIndex = 0
 Frame.ClipsDescendants = true
-Frame.BackgroundTransparency = 1
+Frame.Name = "backgroundFrame"
 
 local uicornerFrame = Instance.new("UICorner")
 uicornerFrame.Parent = Frame
@@ -270,7 +344,7 @@ title.Font = Enum.Font.GothamBold
 title.Position = UDim2.new(0,-325,0,-20)
 
 startAutoFarm = Instance.new("TextButton")
-startAutoFarm.Parent = Frame
+startAutoFarm.Parent = automineTab
 startAutoFarm.Text = "Nearest Ore (deprecated)"
 startAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 startAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -443,7 +517,7 @@ local separationFrameCorner = Instance.new("UICorner")
 separationFrameCorner.Parent = separationFrame
 
 pathedAutoFarm = Instance.new("TextButton")
-pathedAutoFarm.Parent = Frame
+pathedAutoFarm.Parent = automineTab
 pathedAutoFarm.Text = "Premade Route"
 pathedAutoFarm.Size = UDim2.new(0, 300, 0, 50)
 pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -459,7 +533,7 @@ pathedAutoFarmCorner.Parent = pathedAutoFarm
 
 pathSelector = Instance.new("TextBox")
 pathSelector.Text = "-- File name"
-pathSelector.Parent = Frame
+pathSelector.Parent = automineTab
 pathSelector.Size = UDim2.new(0, 250, 0, 40)
 pathSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 pathSelector.BorderSizePixel = 1
@@ -705,7 +779,7 @@ function createTXTFile()
             print("No name was entered. Please enter a valid name.")
         else
             userInputName = nameSelector.Text
-            local fileName = userInputName .. ".txt"
+            local fileName = userInputName .. ".dat"
             fullPath = folderName .. "/" .. fileName
 
             writefile(fullPath, "")
@@ -738,7 +812,7 @@ isTweenFinished = false
 local Mouse = player:GetMouse()
 
 for i, element in pairs(tweenParts) do
-    if element:IsA("Frame") or table.find(exemption, element.Name) then
+    if element:IsA("Frame") and not table.find(fullExemption, element.Name) or table.find(exemption, element.Name) then
         if table.find(exemption,element.Name) then finaltransparency = 0 else finaltransparency = 0.3 end
 
         local tween = tweenservice:Create(element, tweenInfo, {Transparency = finaltransparency})
