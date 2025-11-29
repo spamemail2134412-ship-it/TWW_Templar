@@ -1,6 +1,6 @@
-local player = game.Players.LocalPlayer
-local plrgui = player:WaitForChild("PlayerGui")
-local plrname = player.Name
+player = game.Players.LocalPlayer
+plrgui = player:WaitForChild("PlayerGui")
+plrname = player.Name
 
 if plrgui:FindFirstChild("Templar") then
 return
@@ -174,8 +174,8 @@ local function toggleWalkSpeed()
     end
 end
 
-local wrkspceInt = game.Workspace.WORKSPACE_Interactables
-local wrkspceEnt = game.Workspace.WORKSPACE_Entities
+wrkspceInt = game.Workspace.WORKSPACE_Interactables
+wrkspceEnt = game.Workspace.WORKSPACE_Entities
 
 local mining = wrkspceInt.Mining
 local oredeposits = mining.OreDeposits
@@ -767,8 +767,7 @@ nameSelector.Position = UDim2.new(0.5,0,0.5,0)
 nameSelector.Visible = false
 
 function lineFormatter()
-    local fileContent = readfile("TWW_Templar/yiggers.dat")
-
+    fileContent = readfile("TWW_Templar/" .. pathSelector.Text)
     parseLines = {}
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(parseLines, line)
@@ -1011,14 +1010,16 @@ local Global = require(ReplicatedStorage.SharedModules.Global)
 
 local bodyVelocity = nil
 local bodyGyro = nil
-local isRagdollFlying = false
+isRagdollFlying = false
 
-local function enableRagdollFly()
+function enableRagdollFly()
     if isRagdollFlying then return end
 
     Global.PlayerCharacter:Ragdoll(nil, true)
     task.wait(0.5)
-
+    
+    character = wrkspceEnt.Players[plrname]
+    
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("Motor6D") then
             part.Enabled = true
@@ -1047,7 +1048,7 @@ local function enableRagdollFly()
     isRagdollFlying = true
 end
 
-local function disableRagdollFly()
+function disableRagdollFly()
     if not isRagdollFlying then return end
 
     if bodyVelocity then bodyVelocity:Destroy() end
@@ -1066,20 +1067,27 @@ local function disableRagdollFly()
     isRagdollFlying = false
 end
 
-local function ragdollMoveTo(targetPos)
+moveComplete = false
+
+function ragdollMoveTo(targetPos)
     if not isRagdollFlying then 
         return false 
     end
-
+    
+    hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
+    
+    bodyVelocity.Parent = hrp
+    bodyGyro.Parent = hrp
+    
     local speed = 75
 
     targetPos = Vector3.new(targetPos.X, targetPos.Y - 3, targetPos.Z)
 
     local stuckTimer = 0
-    local lastPos = humanoidrootpart.Position
+    local lastPos = hrp.Position
 
     while true do
-        local currentPos = humanoidrootpart.Position
+        local currentPos = hrp.Position
         local direction = (targetPos - currentPos)
         local distance = direction.Magnitude
 
@@ -1108,6 +1116,7 @@ local function ragdollMoveTo(targetPos)
 
         task.wait()
     end
+    moveComplete = true
 end
 
 function waypointVisualizer()
@@ -1343,6 +1352,7 @@ local function onClick(input, gameProcessed)
                 oreType = part.Parent.Parent
                 orePart = part.Parent.PrimaryPart
                 oreID = part.Parent:GetAttribute("UniqueOreID")
+                print(oreID)
                 recordMine()
             end
         else
@@ -1387,31 +1397,31 @@ end
 local recordSpawns = {
     {button = recBronze, string = "Bronze"},
     {button = recPuerto, string = "Dorado"},
-    {button = recReservation, string = "Reservation"},
+    {button = recReservation, string = "Tribal"},
     {button = recDelores, string = "Delores"},
     {button = recHowling, string = "Howling"},
-    {button = recOutlaws, string = "Outlaws"},
-    {button = recWindmill, string = "Windmill"}
+    {button = recOutlaws, string = "CanyonCamp"},
+    {button = recWindmill, string = "WindmillCamp"}
 }
 
 local function automineSpawn(spawnLocation)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UI = require(ReplicatedStorage.Modules.UI.NewUI.UI)
-local Network = require(ReplicatedStorage.SharedModules.Global.Network)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local UI = require(ReplicatedStorage.Modules.UI.NewUI.UI)
+    local Network = require(ReplicatedStorage.SharedModules.Global.Network)
 
-local success, errorMessage
+    local success, errorMessage
 
-repeat
-    success, errorMessage = pcall(function()
-        Network:FireServer("RespawnTriggered")
-    end)
+    repeat
+        success, errorMessage = pcall(function()
+            Network:FireServer("RespawnTriggered")
+        end)
 
-    if not success then
-        task.wait(0.5)
-    end
-until success
+        if not success then
+            task.wait(0.5)
+        end
+    until success
 
-Network:InvokeServer("Respawn", spawnLocation)
+    Network:InvokeServer("Respawn", spawnLocation)
 end
 
 local function tabCycle(tab)
@@ -1484,7 +1494,7 @@ end
 
 local spawnLookup = {}
 for _, spawn in ipairs(recordSpawns) do
-    spawnLookup[spawn.string:lower()] = true
+    spawnLookup[spawn.string] = true
 end
 
 local function parsePath(lines)
@@ -1495,21 +1505,28 @@ local function parsePath(lines)
         if action then
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
+                enableRagdollFly()
+                repeat task.wait() until isRagdollFlying == true
                 ragdollMoveTo(position)
                 sell()
             elseif action == "move" then
+                wrkspceEnt.Players:WaitForChild(plrname)
+                enableRagdollFly()
+                repeat task.wait() until isRagdollFlying == true
                 ragdollMoveTo(position)
+                repeat task.wait() until moveComplete == true
+                moveComplete = false
             else
                 warn("Unknown action with coordinates:", line)
             end
 
         else
-            local mineAction, oreName, oreID = line:match("^mine,%s*(%w+)%s*,?%s*(%d*)$")
+            local mineAction, oreName, oreID = line:match("^mine,%s*(%w+)%s*,%s*([%d_]+)%s*$")
             if mineAction then
                 mineOre(oreName, oreID)
 
-            elseif spawnLookup[line:lower()] then
-                automineSpawn(line:lower())
+            elseif spawnLookup[line] then
+                automineSpawn(line)
             else
                 warn("Unknown line:", line)
             end
@@ -1518,7 +1535,7 @@ local function parsePath(lines)
 end
 
 
-wait(10)
+wait(5)
 
 lineFormatter()
 
