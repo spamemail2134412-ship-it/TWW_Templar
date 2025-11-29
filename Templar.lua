@@ -112,21 +112,34 @@ if not attributeSet then
     attributeSet = game.Workspace:WaitForChild("attributeSet")
 end
 
+local function generateUniqueID(ore)
+    local primary = ore.PrimaryPart or ore:FindFirstChildWhichIsA("BasePart")
+    if not primary then return nil end
+    
+    local pos = primary.Position
+    local size = primary.Size
+    
+    local id = string.format("%s_%.0f_%.0f_%.0f_%.1f_%.1f_%.1f_%d",
+        ore.Parent.Name,
+        math.floor(pos.X),
+        math.floor(pos.Y),
+        math.floor(pos.Z),
+        size.X, size.Y, size.Z,
+        #ore:GetChildren()
+    )
+    
+    return id
+end
+
 if attributeSet.Value == false then
     attributeSet.Value = true
     local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-
     for _, model in ipairs(oreFolder:GetDescendants()) do
         if model:IsA("Model") then
-            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-            if primary then
-                local pos = primary.Position
-                local id =
-                math.floor(pos.X + 0.5) ..
-                "_" .. math.floor(pos.Y + 0.5) ..
-                "_" .. math.floor(pos.Z + 0.5)
-
+            local id = generateUniqueID(model)
+            if id then
                 model:SetAttribute("UniqueOreID", id)
+                print("Assigned:", id)
             end
         end
     end
@@ -138,7 +151,7 @@ tweenExemption = {"automine", "webhook", "mineconfig"}
 
 taskbarButtons = {}
 
-local pickaxeSelected = lines[1]
+pickaxeSelected = lines[1]
 local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
 local old = {9, 137, 207}
@@ -1006,13 +1019,16 @@ local function pathCalculator()
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Global = require(ReplicatedStorage.SharedModules.Global)
+Global = require(ReplicatedStorage.SharedModules.Global)
 
 local bodyVelocity = nil
 local bodyGyro = nil
 isRagdollFlying = false
 
+isRagdollEnabled = false
+
 function enableRagdollFly()
+    isRagdollEnabled = true
     if isRagdollFlying then return end
 
     Global.PlayerCharacter:Ragdoll(nil, true)
@@ -1049,18 +1065,21 @@ function enableRagdollFly()
 end
 
 function disableRagdollFly()
+    isRagdollEnabled = false
     if not isRagdollFlying then return end
 
     if bodyVelocity then bodyVelocity:Destroy() end
     if bodyGyro then bodyGyro:Destroy() end
-
-    for _, weld in pairs(humanoidrootpart:GetChildren()) do
+    
+    hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
+    
+    for _, weld in pairs(hrp:GetChildren()) do
         if weld:IsA("WeldConstraint") then
             weld:Destroy()
         end
     end
-
-
+    Global.PlayerCharacter:Ragdoll()
+    wait(0.1)
     Global.PlayerCharacter:GetUp()
     task.wait(1.5)
 
@@ -1273,7 +1292,7 @@ local function nearestOreFarm()
                 end
                 input("pressbutton", Enum.KeyCode.Four, 1)
             elseif slotItem == nil then print("No pickaxe found in slot 4.")
-            elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
+            elseif string.find(slotItem, "Pickaxe") then warn("The selected pickaxe was not found in slot 4.", pickaxeSelected)
             else
                 task.spawn(function()
                     while closestOre.DepositInfo.OreRemaining.Value > 0 do
@@ -1440,49 +1459,37 @@ local function sell()
 end
 
 local function pathMine(ore)
-    if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
+    print(ore)
+    disableRagdollFly()
+    wait(0.1)
+    input("pressbutton", Enum.KeyCode.Four, 1, 1)
+    local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
+    local equippeditem = playerChar:GetEquippedItem()
+    local pickaxeItem = playerChar:GetItem("BasicPickaxe")
+    wait(0.5)
+    pickaxeItem.CameraFreeLook = true
+    local orePos = ore.PrimaryPart.Position
+    task.spawn(function()
+        while ore.DepositInfo.OreRemaining.Value > 0 do
+            wait(0.1)
+            humanoidrootpart.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
+            pickaxeItem:Swing()
+            print(ore.DepositInfo.OreRemaining.Value)
+        end
+    end)
+    while ore.DepositInfo.OreRemaining.Value > 0 do
+        input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
-        input("pressbutton", Enum.KeyCode.Four, 1)
-        local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
-        local equippeditem = playerChar:GetEquippedItem()
-        local pickaxeItem = playerChar:GetItem(pickaxeSelected)
-        pickaxeItem.CameraFreeLook = true
-        task.spawn(function()
-            while ore.DepositInfo.OreRemaining.Value > 0 do
-                wait(0.1)
-                humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                pickaxeItem:Swing()
-            end
-        end)
-        while ore.DepositInfo.OreRemaining.Value > 0 do
-            input("pressbutton", Enum.KeyCode.E, 1, 1)
-            wait(1)
-        end
-        input("pressbutton", Enum.KeyCode.Four, 1)
-    elseif slotItem == nil then print("No pickaxe found in slot 4.")
-    elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
-    else
-        task.spawn(function()
-            while ore.DepositInfo.OreRemaining.Value > 0 do
-                wait(0.1)
-                humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
-                pickaxeItem:Swing()
-            end
-        end)
-        while ore.DepositInfo.OreRemaining.Value > 0 do
-            input("pressbutton", Enum.KeyCode.E, 1, 1)
-            wait(1)
-        end
-        input("abortLeftClick")
-        input("pressbutton", Enum.KeyCode.Four)
     end
+    input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
-local function mineOre(oreType, id)
-    local ores = workspace.WORKSPACE_Interactables.Mining.OreDeposits.oreType:GetChildren()
+local function mineOre(oreName, oreID)
+    local ores = workspace.WORKSPACE_Interactables.Mining.OreDeposits[oreName]:GetChildren()
     
     for _,ore in pairs(ores) do
-        if ore:GetAttribute("UniqueOreID") == id then
+        if ore:GetAttribute("UniqueOreID") == oreID then
+            print(id)
             targetOre = ore
             break
         end
@@ -1508,8 +1515,8 @@ local function parsePath(lines)
             elseif action == "move" then
                 
                 wrkspceEnt.Players:WaitForChild(plrname)
-                if first == true then enableRagdollFly() end
-                if first == true then repeat task.wait() until isRagdollFlying == true end
+                if first == true or isRagdollEnabled == false then enableRagdollFly() end
+                if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
                 moveComplete = false
                 ragdollMoveTo(position)
                 repeat task.wait() until moveComplete == true
@@ -1519,10 +1526,11 @@ local function parsePath(lines)
             end
 
         else
-            local mineAction, oreName, oreID = line:match("^mine,%s*(%w+)%s*,%s*([%d_]+)%s*$")
-            if mineAction then
+            local oreName, oreID = line:match("^mine,%s*([^,]+)%s*,%s*([^,]+)%s*$")
+            if oreName and oreID then
+                print(oreName)
+                print(oreID)
                 mineOre(oreName, oreID)
-
             elseif spawnLookup[line] then
                 automineSpawn(line)
             else
