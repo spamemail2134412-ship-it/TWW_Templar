@@ -1532,12 +1532,11 @@ local function parsePath(lines)
             if action == "sell" then
                 sell()
             elseif action == "move" then
-                
                 wrkspceEnt.Players:WaitForChild(plrname)
                 if first == true or isRagdollEnabled == false then enableRagdollFly() end
                 if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
                 moveComplete = false
-                ragdollMoveTo(position)
+                ragdollMoveTo(position + Vector3.new(0,10,0))
                 repeat task.wait() until moveComplete == true
                 first = false
             else
@@ -1591,6 +1590,7 @@ local function pathAutomine(customCall)
     end
 end
 
+wait(5)
 task.spawn(function()
     pathAutomine(true)
 end)
