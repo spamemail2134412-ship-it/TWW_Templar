@@ -766,10 +766,10 @@ nameSelector.AnchorPoint = Vector2.new(0.5, 0.5)
 nameSelector.Position = UDim2.new(0.5,0,0.5,0)
 nameSelector.Visible = false
 
-local function lineFormatter()
-    local fileContent = readfile("TWW_Templar/" .. nameSelector.Name)
+function lineFormatter()
+    local fileContent = readfile("TWW_Templar/yiggers.dat")
 
-    local parseLines = {}
+    parseLines = {}
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(parseLines, line)
     end
@@ -1385,13 +1385,13 @@ local function startRecording()
 end
 
 local recordSpawns = {
-    {button = recBronze, string = "bronze"},
-    {button = recPuerto, string = "dorado"},
-    {button = recReservation, string = "reservation"},
-    {button = recDelores, string = "delores"},
-    {button = recHowling, string = "howling"},
-    {button = recOutlaws, string = "outlaws"},
-    {button = recWindmill, string = "windmill"}
+    {button = recBronze, string = "Bronze"},
+    {button = recPuerto, string = "Dorado"},
+    {button = recReservation, string = "Reservation"},
+    {button = recDelores, string = "Delores"},
+    {button = recHowling, string = "Howling"},
+    {button = recOutlaws, string = "Outlaws"},
+    {button = recWindmill, string = "Windmill"}
 }
 
 local function automineSpawn(spawnLocation)
@@ -1471,7 +1471,7 @@ local function pathMine(ore)
 end
 
 local function mineOre(oreType, id)
-    local ores = oredeposits.OreType:GetChildren()
+    local ores = workspace.WORKSPACE_Interactables.Mining.OreDeposits.oreType:GetChildren()
     
     for _,ore in pairs(ores) do
         if ore:GetAttribute("UniqueOreID") == id then
@@ -1515,6 +1515,11 @@ local function parsePath(lines)
     end
 end
 
+wait(10)
+
+lineFormatter()
+
+parsePath(parseLines)
 
 local function applyButtonFunctionality()
 
