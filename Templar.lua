@@ -1408,7 +1408,8 @@ local function recordPosition()
 end
 
 local function recordSellPosition()
-    local pos = humanoidrootpart.Position
+    hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
+    local pos = hrp.Position
     local posString = tostring(pos)
     local text = "sell, " .. posString .. [[
 
@@ -1533,10 +1534,10 @@ local function parsePath(lines)
                 sell()
             elseif action == "move" then
                 wrkspceEnt.Players:WaitForChild(plrname)
-                if first == true or isRagdollEnabled == false then enableRagdollFly() end
+                if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
                 if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
                 moveComplete = false
-                ragdollMoveTo(position + Vector3.new(0,10,0))
+                ragdollMoveTo(position + Vector3.new(0,5,0))
                 repeat task.wait() until moveComplete == true
                 first = false
             else
@@ -1590,7 +1591,6 @@ local function pathAutomine(customCall)
     end
 end
 
-wait(5)
 task.spawn(function()
     pathAutomine(true)
 end)
