@@ -1070,15 +1070,14 @@ end
 moveComplete = false
 
 function ragdollMoveTo(targetPos)
-    if not isRagdollFlying then 
+    if not isRagdollFlying then
         return false 
     end
-    
     hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
     
     bodyVelocity.Parent = hrp
     bodyGyro.Parent = hrp
-    
+
     local speed = 75
 
     targetPos = Vector3.new(targetPos.X, targetPos.Y - 3, targetPos.Z)
@@ -1090,10 +1089,10 @@ function ragdollMoveTo(targetPos)
         local currentPos = hrp.Position
         local direction = (targetPos - currentPos)
         local distance = direction.Magnitude
-
+        
         if (currentPos - lastPos).Magnitude < 0.1 then
             stuckTimer = stuckTimer + 1
-            if stuckTimer > 30 then
+            if stuckTimer > 100 then
                 return false
             end
         else
@@ -1101,8 +1100,9 @@ function ragdollMoveTo(targetPos)
             lastPos = currentPos
         end
 
-        if distance < 5 then
+        if distance < 1 then
             bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            moveComplete = true
             return true
         end
 
@@ -1113,10 +1113,8 @@ function ragdollMoveTo(targetPos)
         else
             bodyGyro.CFrame = CFrame.fromEulerAnglesXYZ(math.rad(90), 0, 0)
         end
-
         task.wait()
     end
-    moveComplete = true
 end
 
 function waypointVisualizer()
@@ -1498,7 +1496,8 @@ for _, spawn in ipairs(recordSpawns) do
 end
 
 local function parsePath(lines)
-    for _, line in ipairs(lines) do
+    first = true
+    for i, line in ipairs(lines) do
         line = line:match("^%s*(.-)%s*$")
 
         local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
@@ -1510,12 +1509,14 @@ local function parsePath(lines)
                 ragdollMoveTo(position)
                 sell()
             elseif action == "move" then
+                
                 wrkspceEnt.Players:WaitForChild(plrname)
-                enableRagdollFly()
-                repeat task.wait() until isRagdollFlying == true
+                if first == true then enableRagdollFly() end
+                if first == true then repeat task.wait() until isRagdollFlying == true end
+                moveComplete = false
                 ragdollMoveTo(position)
                 repeat task.wait() until moveComplete == true
-                moveComplete = false
+                first = false
             else
                 warn("Unknown action with coordinates:", line)
             end
