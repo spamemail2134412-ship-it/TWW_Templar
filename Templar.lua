@@ -1455,11 +1455,12 @@ end
 local isAFRunning = false
 
 local function sell()
-    input("pressbutton", Enum.KeyCode.F, 0.1, 3)
+    disableRagdollFly()
+    input("pressbutton", Enum.KeyCode.F, 1, 3)
 end
 
 local function pathMine(ore)
-    print(ore)
+    hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
     disableRagdollFly()
     wait(0.1)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
@@ -1472,9 +1473,8 @@ local function pathMine(ore)
     task.spawn(function()
         while ore.DepositInfo.OreRemaining.Value > 0 do
             wait(0.1)
-            humanoidrootpart.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
+            hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
             pickaxeItem:Swing()
-            print(ore.DepositInfo.OreRemaining.Value)
         end
     end)
     while ore.DepositInfo.OreRemaining.Value > 0 do
