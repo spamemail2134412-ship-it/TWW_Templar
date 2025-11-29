@@ -766,6 +766,16 @@ nameSelector.AnchorPoint = Vector2.new(0.5, 0.5)
 nameSelector.Position = UDim2.new(0.5,0,0.5,0)
 nameSelector.Visible = false
 
+local function lineFormatter()
+    local fileContent = readfile("TWW_Templar/" .. nameSelector.Name)
+
+    local parseLines = {}
+    for line in fileContent:gmatch("[^\r\n]+") do
+        table.insert(parseLines, line)
+    end
+    return parseLines
+end
+
 local UserInputService = game:GetService("UserInputService")
 
 local function waitForEnter()
@@ -1420,6 +1430,91 @@ local isAFRunning = false
 local function sell()
     input("pressbutton", Enum.KeyCode.F, 0.1, 3)
 end
+
+local function pathMine(ore)
+    if slotItem == pickaxeSelected and character:FindFirstChild("LoadoutItem/" .. slotItem) then
+        wait(1)
+        input("pressbutton", Enum.KeyCode.Four, 1)
+        local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
+        local equippeditem = playerChar:GetEquippedItem()
+        local pickaxeItem = playerChar:GetItem(pickaxeSelected)
+        pickaxeItem.CameraFreeLook = true
+        task.spawn(function()
+            while ore.DepositInfo.OreRemaining.Value > 0 do
+                wait(0.1)
+                humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                pickaxeItem:Swing()
+            end
+        end)
+        while ore.DepositInfo.OreRemaining.Value > 0 do
+            input("pressbutton", Enum.KeyCode.E, 1, 1)
+            wait(1)
+        end
+        input("pressbutton", Enum.KeyCode.Four, 1)
+    elseif slotItem == nil then print("No pickaxe found in slot 4.")
+    elseif string.find(slotItem, "Pickaxe") then print("The selected pickaxe was not found in slot 4.", pickaxeSelected) return
+    else
+        task.spawn(function()
+            while ore.DepositInfo.OreRemaining.Value > 0 do
+                wait(0.1)
+                humanoidrootpart.CFrame = CFrame.lookAt(humanoidrootpart.Position, Vector3.new(finalpos.X, humanoidrootpart.Position.Y, finalpos.Z))
+                pickaxeItem:Swing()
+            end
+        end)
+        while ore.DepositInfo.OreRemaining.Value > 0 do
+            input("pressbutton", Enum.KeyCode.E, 1, 1)
+            wait(1)
+        end
+        input("abortLeftClick")
+        input("pressbutton", Enum.KeyCode.Four)
+    end
+end
+
+local function mineOre(oreType, id)
+    local ores = oredeposits.OreType:GetChildren()
+    
+    for _,ore in pairs(ores) do
+        if ore:GetAttribute("UniqueOreID") == id then
+            targetOre = ore
+            break
+        end
+    end
+    pathMine(targetOre)
+end
+
+local spawnLookup = {}
+for _, spawn in ipairs(recordSpawns) do
+    spawnLookup[spawn.string:lower()] = true
+end
+
+local function parsePath(lines)
+    for _, line in ipairs(lines) do
+        line = line:match("^%s*(.-)%s*$")
+
+        local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
+        if action then
+            local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+            if action == "sell" then
+                ragdollMoveTo(position)
+                sell()
+            elseif action == "move" then
+                ragdollMoveTo(position)
+            end
+
+        else
+            local mineAction, oreName, coords = line:match("^(mine),%s*(%w+),%s*(.-)$")
+            if mineAction then
+                mineOre(oreName)
+            
+            elseif spawnLookup[line:lower()] then
+                automineSpawn(line)
+            else
+                warn("Unknown line:", line)
+            end
+        end
+    end
+end
+
 
 local function applyButtonFunctionality()
 
