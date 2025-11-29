@@ -1499,21 +1499,24 @@ local function parsePath(lines)
                 sell()
             elseif action == "move" then
                 ragdollMoveTo(position)
+            else
+                warn("Unknown action with coordinates:", line)
             end
 
         else
-            local mineAction, oreName, coords = line:match("^(mine),%s*(%w+),%s*(.-)$")
+            local mineAction, oreName, oreID = line:match("^mine,%s*(%w+)%s*,?%s*(%d*)$")
             if mineAction then
-                mineOre(oreName)
-            
+                mineOre(oreName, oreID)
+
             elseif spawnLookup[line:lower()] then
-                automineSpawn(line)
+                automineSpawn(line:lower())
             else
                 warn("Unknown line:", line)
             end
         end
     end
 end
+
 
 wait(10)
 
