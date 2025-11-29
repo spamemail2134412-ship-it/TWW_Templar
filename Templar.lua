@@ -45,7 +45,7 @@ end
 
 local fileContent = readfile(settingsCfg)
 
-local lines = {}
+lines = {}
 for line in fileContent:gmatch("[^\r\n]+") do
     table.insert(lines, line)
 end
@@ -72,7 +72,7 @@ local smallestPlayers = math.huge
 local Next = nil
 local allServers = {}
 
-local function tp()
+function tp()
     
     repeat
     local ServerList = ListServers(Next)
@@ -562,7 +562,7 @@ local pathedAutoFarmCorner = Instance.new("UICorner")
 pathedAutoFarmCorner.Parent = pathedAutoFarm
 
 pathSelector = Instance.new("TextBox")
-pathSelector.Text = "-- File name"
+pathSelector.Text = lines[2]
 pathSelector.Parent = automineTab
 pathSelector.Size = UDim2.new(0, 250, 0, 40)
 pathSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -892,9 +892,6 @@ for i, element in pairs(tweenParts) do
     end
 end
 local pathfindingservice = game:GetService("PathfindingService")
-character = wrkspceEnt.Players[plrname]
-local humanoid = character.Humanoid
-humanoidrootpart = character.HumanoidRootPart
 
 path = pathfindingservice:CreatePath({
     AgentHeight = 7.459118,
@@ -1057,7 +1054,8 @@ function enableRagdollFly()
     task.wait(0.5)
     
     character = wrkspceEnt.Players[plrname]
-    
+    hrp = character.HumanoidRootPart
+
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("Motor6D") then
             part.Enabled = true
@@ -1080,8 +1078,8 @@ function enableRagdollFly()
     bodyGyro.CFrame = CFrame.new()
     bodyGyro.Parent = humanoidrootpart
 
-    local undergroundPos = humanoidrootpart.Position - Vector3.new(0, 3, 0)
-    humanoidrootpart.CFrame = CFrame.new(undergroundPos)
+    local undergroundPos = hrp.Position - Vector3.new(0, 3, 0)
+    hrp.CFrame = CFrame.new(undergroundPos)
 
     isRagdollFlying = true
 end
@@ -1279,10 +1277,9 @@ local function closestVender()
     local venders = {}
 end
 
-local slot = plrgui.Hotbar.Container.HotbarList.Body
-local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
-
 local function nearestOreFarm()
+        local slot = plrgui.Hotbar.Container.HotbarList.Body
+        local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
         pathfindSuccess = nil
         FindNearestOre()
         waypointVisualizer()
@@ -1459,7 +1456,6 @@ local function automineSpawn(spawnLocation)
             task.wait(0.5)
         end
     until success
-
     Network:InvokeServer("Respawn", spawnLocation)
 end
 
@@ -1488,7 +1484,7 @@ local function pathMine(ore)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
     local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
     local equippeditem = playerChar:GetEquippedItem()
-    local pickaxeItem = playerChar:GetItem("BasicPickaxe")
+    local pickaxeItem = playerChar:GetItem(pickaxeSelected)
     wait(0.5)
     pickaxeItem.CameraFreeLook = true
     local orePos = ore.PrimaryPart.Position
@@ -1565,20 +1561,25 @@ local function parsePath(lines)
 end
 
 local function pathAutomine(customCall)
-    local key, value = line:match("^%s*([%w_]+)%s*=%s*(.+)%s*$")
-    if key and value then
 
+    local line = lines[3]
+    if line then
+        local value = line:match("=%s*(.+)%s*$")
         if value == "true" then
-            value = true
+            isAutoFarmRunning = true
         elseif value == "false" then
-            value = false
+            isAutoFarmRunning = false
         elseif value == "nil" then
-            value = nil
+            isAutoFarmRunning = nil
         end
+    end
 
-        if key == "isAutoFarmRunning" then
-            isRunning = value
-        elseif key == "pathFileRunning" then
+    line = lines[4]
+    if line then
+        local value = line:match("=%s*(.+)%s*$")
+        if value == "nil" then
+            pathFileRunning = nil
+        else
             pathFileRunning = value
         end
     end
@@ -1590,9 +1591,9 @@ local function pathAutomine(customCall)
     end
 end
 
-wait(5)
-
-pathAutomine(true)
+task.spawn(function()
+    pathAutomine(true)
+end)
 
 local function applyButtonFunctionality()
 
