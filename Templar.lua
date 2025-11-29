@@ -1504,9 +1504,6 @@ local function parsePath(lines)
         if action then
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
-                enableRagdollFly()
-                repeat task.wait() until isRagdollFlying == true
-                ragdollMoveTo(position)
                 sell()
             elseif action == "move" then
                 
