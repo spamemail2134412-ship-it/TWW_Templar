@@ -31,6 +31,8 @@ local settingsCfg = "TWW_Templar/settings.cfg"
 local settingsText = [[
 BasicPickaxe
 -- File name
+isAutoFarmRunning = false
+pathFileRunning = nil
 ]]
 
 if isfile(settingsCfg) then
@@ -779,12 +781,32 @@ nameSelector.AnchorPoint = Vector2.new(0.5, 0.5)
 nameSelector.Position = UDim2.new(0.5,0,0.5,0)
 nameSelector.Visible = false
 
+local function updateConfig(path, autoFarmVal, fileRunningVal)
+    if not isfile(path) then return end
+
+    local content = readfile(path)
+    local newLines = {}
+
+    for line in content:gmatch("[^\r\n]+") do
+        if line:match("^%s*isAutoFarmRunning%s*=") then
+            table.insert(newLines, "isAutoFarmRunning = " .. tostring(autoFarmVal))
+        elseif line:match("^%s*pathFileRunning%s*=") then
+            table.insert(newLines, "pathFileRunning = " .. tostring(fileRunningVal))
+        else
+            table.insert(newLines, line)
+        end
+    end
+
+    writefile(path, table.concat(newLines, "\n"))
+end
+
 function lineFormatter()
     fileContent = readfile("TWW_Templar/" .. pathSelector.Text)
     parseLines = {}
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(parseLines, line)
     end
+    updateConfig(settingsCfg, true, pathSelector.Text)
     return parseLines
 end
 
@@ -1504,6 +1526,7 @@ end
 
 local function parsePath(lines)
     first = true
+    pathCompleted = false
     for i, line in ipairs(lines) do
         line = line:match("^%s*(.-)%s*$")
 
@@ -1538,14 +1561,38 @@ local function parsePath(lines)
             end
         end
     end
+    pathCompleted = true
 end
 
+local function pathAutomine(customCall)
+    local key, value = line:match("^%s*([%w_]+)%s*=%s*(.+)%s*$")
+    if key and value then
+
+        if value == "true" then
+            value = true
+        elseif value == "false" then
+            value = false
+        elseif value == "nil" then
+            value = nil
+        end
+
+        if key == "isAutoFarmRunning" then
+            isRunning = value
+        elseif key == "pathFileRunning" then
+            pathFileRunning = value
+        end
+    end
+    if isAutoFarmRunning == true or customCall == true then
+        lineFormatter()
+        parsePath(parseLines)
+        repeat task.wait() until pathCompleted == true
+        tp()
+    end
+end
 
 wait(5)
 
-lineFormatter()
-
-parsePath(parseLines)
+pathAutomine(true)
 
 local function applyButtonFunctionality()
 
