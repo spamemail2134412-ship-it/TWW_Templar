@@ -1485,7 +1485,7 @@ local function oreScan()
     for i,v in pairs(wrkspceInt.DroppedItems:GetChildren()) do
         if string.find(v.Name, "Ore") then
             input("pressbutton", Enum.KeyCode.E, 1, 1)
-            wait(1)
+            task.wait(1)
         end
     end
 end
@@ -1610,12 +1610,24 @@ local function pathAutomine(customCall)
     end
 end
 
+if isAutoFarmRunning == true then
+    pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
+end
+
 local function applyButtonFunctionality()
 
 pathedAutoFarm.MouseButton1Down:Connect(function()
-    task.spawn(function()
-        pathAutomine(true)
-    end)
+    if isAutoFarmRunning == false then
+        pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
+        task.spawn(function()
+            pathAutomine(true)
+        end)
+    else
+        pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        print("Autofarm stopped. Finishing last path.")
+        repeat task.wait() until pathCompleted == true
+        lines[3] = "isAutoFarmRunning = false"
+    end
 end)
 
 for _,table in pairs(recordSpawns) do
