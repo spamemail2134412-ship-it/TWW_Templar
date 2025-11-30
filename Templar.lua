@@ -1481,6 +1481,15 @@ local function sell()
     input("pressbutton", Enum.KeyCode.F, 1, 3)
 end
 
+local function oreScan()
+    for i,v in pairs(wrkspceInt.DroppedItems:GetChildren()) do
+        if string.find(v.Name, "Ore") then
+            input("pressbutton", Enum.KeyCode.E, 1, 1)
+            wait(1)
+        end
+    end
+end
+
 local function pathMine(ore)
     if not ore or ore.DepositInfo.OreRemaining.Value == 0 then return end
     hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
@@ -1504,7 +1513,7 @@ local function pathMine(ore)
         input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
     end
-    wait(1)
+    oreScan()
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
