@@ -1614,6 +1614,8 @@ if isAutoFarmRunning == true then
     pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 end
 
+pathAutomine(false)
+
 local function applyButtonFunctionality()
 
 pathedAutoFarm.MouseButton1Down:Connect(function()
