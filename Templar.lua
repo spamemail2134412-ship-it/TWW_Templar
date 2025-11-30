@@ -1247,6 +1247,8 @@ end
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
+finishedKeypress = false
+
 local function input(inputType, inputButton, timeInterval, amount)
     task.defer(function()
         if inputType == "leftclick" then
@@ -1262,6 +1264,7 @@ local function input(inputType, inputButton, timeInterval, amount)
                 wait(timeInterval)
                 virtualinputmanager:SendKeyEvent(false, inputButton, false, game)
             end
+        finishedKeypress = true
         elseif inputType == "holdLeftClick" then
             virtualinputmanager:SendMouseButtonEvent(0,0,0,true,game,1)
         elseif inputType == "abortLeftClick" then
@@ -1479,6 +1482,7 @@ local function sell()
 end
 
 local function pathMine(ore)
+    if not ore or ore.DepositInfo.OreRemaining.Value == 0 then return end
     hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
     disableRagdollFly()
     wait(0.1)
@@ -1500,6 +1504,7 @@ local function pathMine(ore)
         input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
     end
+    wait(1)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
@@ -1560,8 +1565,9 @@ local function parsePath(lines)
     pathCompleted = true
 end
 
-local function pathAutomine(customCall)
+local promptOverlay = game.CoreGui.RobloxPromptGui.promptOverlay
 
+local function pathAutomine(customCall)
     local line = lines[3]
     if line then
         local value = line:match("=%s*(.+)%s*$")
@@ -1584,18 +1590,24 @@ local function pathAutomine(customCall)
         end
     end
     if isAutoFarmRunning == true or customCall == true then
+        promptOverlay.ChildAdded:Connect(function()
+            tp()
+        end)
         lineFormatter()
         parsePath(parseLines)
-        repeat task.wait() until pathCompleted == true
+        repeat task.wait() until pathCompleted == true and finishedKeypress == true
+        wait(1)
         tp()
     end
 end
 
-task.spawn(function()
-    pathAutomine(true)
-end)
-
 local function applyButtonFunctionality()
+
+pathedAutoFarm.MouseButton1Down:Connect(function()
+    task.spawn(function()
+        pathAutomine(true)
+    end)
+end)
 
 for _,table in pairs(recordSpawns) do
     table.button.MouseButton1Click:Connect(function()
