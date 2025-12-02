@@ -48,7 +48,7 @@ end
 
 local fileContent = readfile(settingsCfg)
 
-lines = {}
+lines = {}"
 for line in fileContent:gmatch("[^\r\n]+") do
     table.insert(lines, line)
 end
@@ -1550,7 +1550,7 @@ local function parsePath(lines)
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
                 sell()
-            elseif action == "move" and capacity ~= "30 / 30" then
+            elseif action == "move" then
                 wrkspceEnt.Players:WaitForChild(plrname)
                 if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
                 if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
@@ -1564,7 +1564,7 @@ local function parsePath(lines)
 
         else
             local oreName, oreID = line:match("^mine,%s*([^,]+)%s*,%s*([^,]+)%s*$")
-            if oreName and oreID then
+            if oreName and oreID and capacity ~= "30 / 30" then
                 print(oreName)
                 print(oreID)
                 mineOre(oreName, oreID)
