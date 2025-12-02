@@ -1,3 +1,6 @@
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
 player = game.Players.LocalPlayer
 plrgui = player:WaitForChild("PlayerGui")
 plrname = player.Name
@@ -26,7 +29,7 @@ else
     end
 end
 
-local settingsCfg = "TWW_Templar/settings.cfg"
+settingsCfg = "TWW_Templar/settings.cfg"
 
 local settingsText = [[
 BasicPickaxe
@@ -1485,7 +1488,7 @@ local function oreScan()
     for i,v in pairs(wrkspceInt.DroppedItems:GetChildren()) do
         if string.find(v.Name, "Ore") then
             input("pressbutton", Enum.KeyCode.E, 1, 1)
-            task.wait(1)
+            wait(1)
         end
     end
 end
@@ -1539,6 +1542,7 @@ local function parsePath(lines)
     first = true
     pathCompleted = false
     for i, line in ipairs(lines) do
+        local capacity = plrgui.InventoryUI.Inventory.Container.BottomBar.Body.NumSlots.Text
         line = line:match("^%s*(.-)%s*$")
 
         local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
@@ -1546,7 +1550,7 @@ local function parsePath(lines)
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
                 sell()
-            elseif action == "move" then
+            elseif action == "move" and capacity ~= "30 / 30" then
                 wrkspceEnt.Players:WaitForChild(plrname)
                 if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
                 if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
@@ -1576,7 +1580,7 @@ end
 
 local promptOverlay = game.CoreGui.RobloxPromptGui.promptOverlay
 
-local function pathAutomine(customCall)
+local function updateSettings()
     local line = lines[3]
     if line then
         local value = line:match("=%s*(.+)%s*$")
@@ -1598,37 +1602,64 @@ local function pathAutomine(customCall)
             pathFileRunning = value
         end
     end
-    if isAutoFarmRunning == true or customCall == true then
+end
+
+local function pathAutomine(customCall)
+    updateSettings()
+    if isAutoFarmRunning or customCall == true then
         promptOverlay.ChildAdded:Connect(function()
             tp()
         end)
         lineFormatter()
-        parsePath(parseLines)
-        repeat task.wait() until pathCompleted == true and finishedKeypress == true
+
+        task.spawn(function()
+            parsePath(parseLines)
+        end)
+
+        repeat
+            task.wait()
+            local pc = require(game.ReplicatedStorage.Modules.Character.PlayerCharacter)
+            if pc.IsDead then tp() end
+        until pathCompleted == true and finishedKeypress == true
+
         wait(1)
-        tp()
+        updateSettings()
+        if isAutoFarmRunning then tp() end
     end
 end
 
-if isAutoFarmRunning == true then
+
+task.spawn(function()
+    pathAutomine()
+end)
+
+if isAutoFarmRunning then
     pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 end
-
-pathAutomine(false)
 
 local function applyButtonFunctionality()
 
 pathedAutoFarm.MouseButton1Down:Connect(function()
-    if isAutoFarmRunning == false then
+    local currentContent = readfile(settingsCfg)
+    local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
+
+    if currentState == "false" or currentState == "nil" then
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
+
+        local l = string.split(currentContent, "\n")
+        l[3] = "isAutoFarmRunning = true"
+        writefile(settingsCfg, table.concat(l, "\n"))
+
         task.spawn(function()
             pathAutomine(true)
         end)
     else
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25,25,25)
         print("Autofarm stopped. Finishing last path.")
-        repeat task.wait() until pathCompleted == true
-        lines[3] = "isAutoFarmRunning = false"
+        
+        local l = string.split(currentContent, "\n")
+        l[3] = "isAutoFarmRunning = false"
+        writefile(settingsCfg, table.concat(l, "\n"))
     end
 end)
 
