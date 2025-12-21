@@ -1041,7 +1041,16 @@ local function pathCalculator()
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-Global = require(ReplicatedStorage.SharedModules.Global)
+
+local success, errorMessage = pcall(function()
+    Global = require(ReplicatedStorage.SharedModules.Global)
+end)
+
+if success then
+    print("Global module required successfully.")
+else
+    warn("Your executor does not support the require function, the autofarm will not work without the setthreadidentity method. A level 8 executor is recommended for complete functionality.")
+end
 
 local bodyVelocity = nil
 local bodyGyro = nil
