@@ -48,7 +48,7 @@ end
 
 local fileContent = readfile(settingsCfg)
 
-lines = {}"
+lines = {}
 for line in fileContent:gmatch("[^\r\n]+") do
     table.insert(lines, line)
 end
