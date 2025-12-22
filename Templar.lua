@@ -5,6 +5,8 @@ player = game.Players.LocalPlayer
 plrgui = player:WaitForChild("PlayerGui")
 plrname = player.Name
 
+local successes = {}
+
 if plrgui:FindFirstChild("Templar") then
 return
 else
@@ -23,9 +25,11 @@ sortedOreIndex = {}
 
 if isfolder(folderName) then
     print("Paths folder already exists.")
+    table.insert(successes, 6, true)
 else
-    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) end) then
+    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) table.insert(successes, 6, true) end) then
         print("Function makefolder not supported.")
+        table.insert(successes, 6, false)
     end
 end
 
@@ -40,17 +44,27 @@ pathFileRunning = nil
 
 if isfile(settingsCfg) then
     print("Settings config already exists.")
+    table.insert(successes, 3, true)
+    table.insert(successes, 2, true)
 else
-    if not pcall(function() writefile(settingsCfg, settingsText) print("Settings config created at: " .. fullFolderPath) end) then
-        print("Function makefolder not supported.")
+    if not pcall(function() writefile(settingsCfg, settingsText) print("Settings config created at: " .. fullFolderPath) table.insert(successes, 3, true) end) then
+        print("Method writefile not supported.")
+        table.insert(successes, 3, false)
     end
 end
 
-local fileContent = readfile(settingsCfg)
+local success, errorMessage = pcall(function()
+    local fileContent = readfile(settingsCfg)
+    lines = {}
+    for line in fileContent:gmatch("[^\r\n]+") do
+        table.insert(lines, line)
+    end
+end)
 
-lines = {}
-for line in fileContent:gmatch("[^\r\n]+") do
-    table.insert(lines, line)
+if success then
+    table.insert(successes, 4, true)
+else
+    table.insert(successes, 4, false)
 end
 
 local TeleportService = game:GetService("TeleportService")
@@ -64,8 +78,10 @@ local function ListServers(cursor)
     end)
 	if not success then
 		warn("Your executor level is too low. Use another to use the script.")
+        table.insert(successes, 7, false)
 		return nil
 	else
+        table.insert(successes, 7, true)
 	    return errorMessage
 	end
 end
@@ -784,6 +800,49 @@ nameSelector.AnchorPoint = Vector2.new(0.5, 0.5)
 nameSelector.Position = UDim2.new(0.5,0,0.5,0)
 nameSelector.Visible = false
 
+loadingScreen = Instance.new("Frame")
+loadingScreen.Parent = Templar
+loadingScreen.BackgroundColor3 = Color3.fromRGB(0,0,0)
+loadingScreen.Size = UDim2.new(0,800,0,600)
+loadingScreen.Position = UDim2.new(0.5, -400, 0.5, -300)
+loadingScreen.ZIndex = 1
+loadingScreen.Name = "loadingScreen"
+loadingScreen.BackgroundTransparency = 0.3
+
+local loadingScreenUICorner = Instance.new("UICorner")
+loadingScreenUICorner.Parent = loadingScreen
+
+printToLabel = Instance.new("TextLabel")
+printToLabel.Parent = loadingScreen
+printToLabel.TextColor3 = Color3.fromRGB(255,255,255)
+printToLabel.RichText = true
+printToLabel.TextSize = 14
+printToLabel.TextWrapped = true
+printToLabel.Size = UDim2.new(0, 775, 0, 466)
+printToLabel.Position = UDim2.new(0, 15, 0.025, 0.18)
+printToLabel.BackgroundTransparency = 1
+printToLabel.Text = ""
+printToLabel.TextXAlignment = "Left"
+printToLabel.TextYAlignment = "Top"
+
+lsExit = Instance.new("TextButton")
+lsExit.Parent = loadingScreen
+lsExit.Text = "X"
+lsExit.Size = UDim2.new(0, 30, 0, 30)
+lsExit.BackgroundColor3 = Color3.fromRGB(30,30,30)
+lsExit.Font = Enum.Font.SourceSansBold
+lsExit.Position = UDim2.new(1, -40, 0, 5)
+lsExit.TextSize = 20
+lsExit.TextColor3 = Color3.fromRGB(255,255,255)
+lsExit.Name = "lsExit"
+lsExit.BackgroundTransparency = 1
+
+local lsExitCorner = Instance.new("UICorner")
+lsExitCorner.Parent = lsExit
+
+local lsDragDetect = Instance.new("UIDragDetector")
+lsDragDetect.Parent = loadingScreen
+
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
 
@@ -852,6 +911,115 @@ function createTXTFile()
     end
 end
 
+local txtSuccess = {
+	"Global module required successfully.",
+	"Settings.cfg folder successfully created.",
+	"Method writefile is active.",
+	"Method readfile is active.",
+	"Method getrawmetatable is active.",
+	"Method makefolder is active.",
+	"Method request is active."
+}
+local txtFail = {
+	"Global module required unsuccessfully.",
+	"Settings.cfg folder creation unsuccessful.",
+	"Method writefile is not active.",
+	"Method readfile is not active.",
+	"Method getrawmetatable is not active.",
+	"Method makefolder is not active.",
+	"Method request is not active."
+}
+
+local errorMsgs = {
+	"Your executor does not support the setthreadidentity method. This is script breaking, a level 8 executor is recommended.",
+	"ignore",
+	"Your executor does not support the writefile method. You will have to manually create files for the script to work.",
+	"Your executor does not support the readfile method. This is script breaking, a level 8 executor is recommended for complete functionality.",
+	"Your executor does not support the getrawmetatable method. The script will work, however will use clicks instead of calling the swing function directly.",
+	"Your executor does not support the makefolder method. This script will work, however you will have to manually create the TWW_Templar folder.",
+	"Your executor does not support the makefolder method. The script will (kind of) work, however it will not server hop."
+}
+
+loadInitiated = false
+
+function initiateLoading()
+    local RunService = game:GetService("RunService")
+
+    local line = 1
+    local char = 1
+    local interval = 0.01
+    local acc = 0
+
+    local randomChars = {}
+    for i = 33, 126 do
+	    local char = string.char(i)
+	    if char ~= "<" and char ~= ">" and char ~= "&" and char ~= '"' and char ~= "'" then
+		    table.insert(randomChars, char)
+	    end
+    end
+
+    local function getRandomChar()
+	    return randomChars[math.random(1, #randomChars)]
+    end
+
+    local completedLines = ""
+
+    local successesValue = 0
+
+    for _,v in successes do
+	    if v then
+		    successesValue += 1
+	    end
+    end
+
+    local connection
+
+    connection = RunService.Heartbeat:Connect(function(dt)
+	    acc += dt
+	    if acc < interval then return end
+	    acc -= interval
+
+	    if line > #txtSuccess then 
+		    local text = ""
+		
+		    if not successes[1] or successes[2] then
+			    text = "EXECUTOR LEVEL TOO LOW."
+		    end
+		
+		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess .. " tests passed. " .. text
+		    for i,v in errorMsgs do
+			    if not successes[i] and i ~= 2 then
+				    printToLabel.Text = printToLabel.Text .. "\n\n" .. v 
+			    end
+		    end
+		    connection:Disconnect()
+		    return
+	    end
+
+	local currentText = (successes[line] and txtSuccess[line] or txtFail[line])
+	local color = successes[line] and "0,255,0" or "255,0,0"
+
+	if char > #currentText then
+		completedLines = completedLines .. string.format('<font color="rgb(%s)">%s</font>\n', color, currentText)
+		printToLabel.Text = completedLines
+		line += 1
+		char = 1
+		return
+	end
+
+	local confirmed = currentText:sub(1, char - 1)
+	local nextChar = currentText:sub(char, char)
+	local randomChar = (char < #currentText) and getRandomChar() or ""
+	local displayChar = (randomChar ~= "" and randomChar or nextChar)
+
+	printToLabel.Text = completedLines .. string.format('<font color="rgb(%s)">%s%s</font>', color, confirmed, displayChar)
+
+	char += 1
+    end)
+end
+
+initiateLoading()
+
 numBars = 4
 local startX = 60
 local endX   = 745
@@ -872,28 +1040,49 @@ isTweenFinished = false
 
 local Mouse = player:GetMouse()
 
-for i, element in pairs(tweenParts) do
-    if element:IsA("Frame") and not table.find(fullExemption, element.Name) or table.find(exemption, element.Name) then
-        if table.find(exemption,element.Name) then finaltransparency = 0 else finaltransparency = 0.3 end
+function guiTween()
+    for i, element in pairs(tweenParts) do
+        if element:IsA("Frame") and not table.find(fullExemption, element.Name) or table.find(exemption, element.Name) then
+            if table.find(exemption,element.Name) then finaltransparency = 0 else finaltransparency = 0.3 end
 
-        local tween = tweenservice:Create(element, tweenInfo, {Transparency = finaltransparency})
-        tween:Play()
-    elseif element:IsA("TextLabel") or element:IsA("TextButton") then
-        local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0})
-        textTween:Play()
+            local tween = tweenservice:Create(element, tweenInfo, {Transparency = finaltransparency})
+            tween:Play()
+        elseif element:IsA("TextLabel") or element:IsA("TextButton") then
+            local textTween = tweenservice:Create(element, tweenInfo, {TextTransparency = 0})
+            textTween:Play()
+            if i == #tweenParts then
+                wait(1)
+                isTweenFinished = true
+            end
+        elseif element:IsA("ImageButton") then
+            local textTween = tweenservice:Create(element, tweenInfo, {ImageTransparency = 0})
+            textTween:Play()
+        end
         if i == #tweenParts then
             wait(1)
             isTweenFinished = true
         end
-    elseif element:IsA("ImageButton") then
-        local textTween = tweenservice:Create(element, tweenInfo, {ImageTransparency = 0})
-        textTween:Play()
-    end
-    if i == #tweenParts then
-        wait(1)
-        isTweenFinished = true
     end
 end
+
+lsExit.MouseEnter:Connect(function()
+    lsExit.BackgroundTransparency = 0
+end)
+
+lsExit.MouseLeave:Connect(function()
+    lsExit.BackgroundTransparency = 1
+end)
+
+lsExit.MouseButton1Down:Connect(function()
+    loadInitiated = true 
+    loadingScreen.Visible = false
+end)
+
+task.spawn(function()
+    repeat task.wait() until loadInitiated == true
+    guiTween()
+end)
+
 local pathfindingservice = game:GetService("PathfindingService")
 
 path = pathfindingservice:CreatePath({
@@ -1048,8 +1237,10 @@ end)
 
 if success then
     print("Global module required successfully.")
+    table.insert(successes, 1, true)
 else
     warn("Your executor does not support the require function, the autofarm will not work without the setthreadidentity method. A level 8 executor is recommended for complete functionality.")
+    table.insert(successes, 1, false)
 end
 
 local bodyVelocity = nil
@@ -1290,6 +1481,22 @@ local function closestVender()
     local closestVenderDistance = math.huge
     local finalVenderPos = nil
     local venders = {}
+end
+
+local canGetMeta = false
+
+if type(getrawmetatable) == "function" then
+
+    local success, result = pcall(function()
+        return getrawmetatable({})
+    end)
+
+    if success and type(result) == "table" then
+        canGetMeta = true
+        table.insert(successes, 5, true)
+    else
+        table.insert(successes, 5, false)
+    end
 end
 
 local function nearestOreFarm()
