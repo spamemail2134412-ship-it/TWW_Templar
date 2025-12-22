@@ -1003,7 +1003,7 @@ function initiateLoading()
 	    if line > #txtSuccess then 
 		    local text = ""
 		
-		    if not successes[1] or successes[2] then
+		    if not successes[1] or successes[2] or successes[4] then
 			    text = "EXECUTOR LEVEL TOO LOW."
             else
                 text = "EXECUTOR LEVEL IS OPTIMAL"
