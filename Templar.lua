@@ -40,6 +40,7 @@ BasicPickaxe
 -- File name
 isAutoFarmRunning = false
 pathFileRunning = nil
+firstStartUp = true
 ]]
 
 if isfile(settingsCfg) then
@@ -60,6 +61,8 @@ local success, errorMessage = pcall(function()
         table.insert(lines, line)
     end
 end)
+
+firstStartUp = lines[5]:match("=%s*(.+)")
 
 if success then
     table.insert(successes, 4, true)
@@ -166,7 +169,7 @@ if attributeSet.Value == false then
     end
 end
 
-exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton"}
+exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark"}
 fullExemption = {"automineTab", "webhooksTab", "configTab"}
 tweenExemption = {"automine", "webhook", "mineconfig"}
 
@@ -843,6 +846,21 @@ lsExitCorner.Parent = lsExit
 local lsDragDetect = Instance.new("UIDragDetector")
 lsDragDetect.Parent = loadingScreen
 
+executorBenchmark = Instance.new("TextButton")
+executorBenchmark.Parent = settingsFrame
+executorBenchmark.Text = "Test Executor Compatability"
+executorBenchmark.Size = UDim2.new(0, 300, 0, 50)
+executorBenchmark.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+executorBenchmark.TextSize = 20
+executorBenchmark.TextColor3 = Color3.fromRGB(255,255,255)
+executorBenchmark.Font = Enum.Font.SourceSansBold
+executorBenchmark.Transparency = 1
+executorBenchmark.Position = UDim2.new(0.5, -350, 0, 140)
+executorBenchmark.Name = "executorBenchmark"
+
+local executorBenchmarkCorner = Instance.new("UICorner")
+executorBenchmarkCorner.Parent = executorBenchmark
+
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
 
@@ -942,7 +960,10 @@ local errorMsgs = {
 
 loadInitiated = false
 
+isLoading = false
+
 function initiateLoading()
+    isLoading = true
     local RunService = game:GetService("RunService")
 
     local line = 1
@@ -984,6 +1005,8 @@ function initiateLoading()
 		
 		    if not successes[1] or successes[2] then
 			    text = "EXECUTOR LEVEL TOO LOW."
+            else
+                text = "EXECUTOR LEVEL IS OPTIMAL"
 		    end
 		
 		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess .. " tests passed. " .. text
@@ -992,6 +1015,7 @@ function initiateLoading()
 				    printToLabel.Text = printToLabel.Text .. "\n\n" .. v 
 			    end
 		    end
+            isLoading = false
 		    connection:Disconnect()
 		    return
 	    end
@@ -1018,7 +1042,11 @@ function initiateLoading()
     end)
 end
 
-initiateLoading()
+if firstStartUp == "true" then
+    initiateLoading()
+else
+    loadingScreen.Visible = false
+end
 
 numBars = 4
 local startX = 60
@@ -1076,12 +1104,19 @@ end)
 lsExit.MouseButton1Down:Connect(function()
     loadInitiated = true 
     loadingScreen.Visible = false
+    isLoading = false
 end)
 
-task.spawn(function()
-    repeat task.wait() until loadInitiated == true
+if firstStartUp == "true" then
+    task.spawn(function()
+        repeat task.wait() until loadInitiated == true
+        lines[5] = "firstStartUp = false"
+        writefile(settingsCfg, table.concat(lines, "\n"))
+        guiTween()
+    end)
+else
     guiTween()
-end)
+end
 
 local pathfindingservice = game:GetService("PathfindingService")
 
@@ -1855,6 +1890,12 @@ end
 
 local function applyButtonFunctionality()
 
+executorBenchmark.MouseButton1Down:Connect(function()
+    if isLoading == false then
+        loadingScreen.Visible = true
+        initiateLoading()
+    end
+end)
 pathedAutoFarm.MouseButton1Down:Connect(function()
     local currentContent = readfile(settingsCfg)
     local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
