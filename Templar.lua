@@ -60,9 +60,8 @@ local success, errorMessage = pcall(function()
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(lines, line)
     end
+    firstStartUp = lines[5]:match("=%s*(.+)")
 end)
-
-firstStartUp = lines[5]:match("=%s*(.+)")
 
 if success then
     table.insert(successes, 4, true)
@@ -931,7 +930,7 @@ end
 
 local txtSuccess = {
 	"Global module required successfully.",
-	"Settings.cfg folder successfully created.",
+	"Settings.cfg file successfully created.",
 	"Method writefile is active.",
 	"Method readfile is active.",
 	"Method getrawmetatable is active.",
@@ -940,7 +939,7 @@ local txtSuccess = {
 }
 local txtFail = {
 	"Global module required unsuccessfully.",
-	"Settings.cfg folder creation unsuccessful.",
+	"Settings.cfg file creation unsuccessful.",
 	"Method writefile is not active.",
 	"Method readfile is not active.",
 	"Method getrawmetatable is not active.",
@@ -1042,7 +1041,7 @@ function initiateLoading()
     end)
 end
 
-if firstStartUp == "true" then
+if firstStartUp == "true" or nil then
     initiateLoading()
 else
     loadingScreen.Visible = false
@@ -1752,16 +1751,22 @@ local function pathMine(ore)
     wait(0.1)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
     local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
-    local equippeditem = playerChar:GetEquippedItem()
-    local pickaxeItem = playerChar:GetItem(pickaxeSelected)
-    wait(0.5)
-    pickaxeItem.CameraFreeLook = true
+    if canGetMeta then
+        local equippeditem = playerChar:GetEquippedItem()
+        local pickaxeItem = playerChar:GetItem(pickaxeSelected)
+        wait(0.5)
+        pickaxeItem.CameraFreeLook = true
+    end
     local orePos = ore.PrimaryPart.Position
     task.spawn(function()
         while ore.DepositInfo.OreRemaining.Value > 0 do
             wait(0.1)
             hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
-            pickaxeItem:Swing()
+            if canGetMeta then 
+                pickaxeItem:Swing()
+            else
+                input("holdLeftClick")
+            end
         end
     end)
     while ore.DepositInfo.OreRemaining.Value > 0 do
