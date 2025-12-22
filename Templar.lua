@@ -955,7 +955,7 @@ local errorMsgs = {
 	"Your executor does not support the readfile method. This is script breaking, a level 8 executor is recommended for complete functionality.",
 	"Your executor does not support the getrawmetatable method. The script will work, however will use clicks instead of calling the swing function directly.",
 	"Your executor does not support the makefolder method. This script will work, however you will have to manually create the TWW_Templar folder.",
-	"Your executor does not support the makefolder method. The script will (kind of) work, however it will not server hop."
+	"Your executor does not support the request method. The script will (kind of) work, however it will not server hop."
 }
 
 loadInitiated = false
@@ -1105,6 +1105,7 @@ lsExit.MouseButton1Down:Connect(function()
     loadInitiated = true 
     loadingScreen.Visible = false
     isLoading = false
+    draggable.Visible = true
 end)
 
 if firstStartUp == "true" then
@@ -1891,7 +1892,10 @@ end
 local function applyButtonFunctionality()
 
 executorBenchmark.MouseButton1Down:Connect(function()
+    printToLabel.Text = ""
+    loadInititated = false
     if isLoading == false then
+        draggable.Visible = false
         loadingScreen.Visible = true
         initiateLoading()
     end
