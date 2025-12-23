@@ -2107,6 +2107,7 @@ pathedAutoFarm.MouseButton1Down:Connect(function()
     local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
 
     if currentState == "false" or currentState == "nil" then
+        pcall function() callWebhook("Starting Path...", "", "Path started: " .. pathSelector.Text, "", nil, nil) end)
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 
         lines[3] = "isAutoFarmRunning = true"
@@ -2219,7 +2220,7 @@ settings.MouseButton1Down:Connect(function()
         tweeninfo = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button) then
                     print(button, "IN FIRST")
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
@@ -2227,7 +2228,7 @@ settings.MouseButton1Down:Connect(function()
                     tween = tweenservice:Create(button,tweeninfo,{Transparency = 1})
                     tween:Play()
                     print(button, "IN SECOND")
-                elseif not table.find(txtLabelExemption, button.Name) then
+                elseif not table.find(txtLabelExemption, button) then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
                 else
@@ -2243,7 +2244,7 @@ settings.MouseButton1Down:Connect(function()
             end
         else
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then 
+                if button:IsA("TextLabel") then 
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
                 elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
