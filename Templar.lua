@@ -860,26 +860,56 @@ executorBenchmark.Name = "executorBenchmark"
 local executorBenchmarkCorner = Instance.new("UICorner")
 executorBenchmarkCorner.Parent = executorBenchmark
 
-notifFrame = Instance.new("Frame")
-notifFrame.Parent = Templar
-notifFrame.BackgroundTransparency = 1
-notifFrame.ClipsDescendants = true
+local notifFrame = Instance.new("Frame")
 notifFrame.Name = "notifFrame"
-notifFrame.Size = UDim2.new(0, 165, 0, 73)
-notifFrame.Position = UDim2.new(1, 0, 1, 0)
-notifFrame.AnchorPoint = Vector2.new(1,1)
+notifFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+notifFrame.AnchorPoint = Vector2.new(1, 1)
+notifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+notifFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+notifFrame.BorderSizePixel = 0
+notifFrame.Position = UDim2.new(0.967471659, 0, 0.914893627, 0)
+notifFrame.Size = UDim2.new(0, 169, 0, 90)
 
-notifLabel = Instance.new("TextLabel")
-notifLabel.Parent = notifFrame
-notifLabel.Name = "notifLabel"
-notifLabel.Size = UDim2.new(0, 165, 0, 73)
-notifLabel.Position = UDim2.new(1, 0, 2, 0)
-notifLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
-notifLabel.Text = ""
-notifLabel.AnchorPoint = Vector2.new(1,1)
+local notifDescription = Instance.new("TextLabel")
+notifDescription.Name = "notifDescription"
+notifDescription.Parent = notifFrame
+notifDescription.AnchorPoint = Vector2.new(1, 1)
+notifDescription.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+notifDescription.BorderColor3 = Color3.fromRGB(255, 255, 255)
+notifDescription.Position = UDim2.new(1, 0, 0.999997973, 0)
+notifDescription.Size = UDim2.new(0, 169, 0, 64)
+notifDescription.ZIndex = 3
+notifDescription.Font = Enum.Font.GothamBold
+notifDescription.Text = ""
+notifDescription.TextColor3 = Color3.fromRGB(255, 255, 255)
+notifDescription.TextSize = 14.000
+notifDescription.TextXAlignment = Enum.TextXAlignment.Left
+notifDescription.TextYAlignment = Enum.TextYAlignment.Top
 
-local notifLabelCorner = Instance.new("UICorner")
-notifLabelCorner.Parent = notifLabel
+local notifTitle = Instance.new("TextLabel")
+notifTitle.Name = "notifTitle"
+notifTitle.Parent = notifFrame
+notifTitle.AnchorPoint = Vector2.new(1, 1)
+notifTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+notifTitle.BorderColor3 = Color3.fromRGB(255, 255, 255)
+notifTitle.Position = UDim2.new(1, 0, 0.285503477, 0)
+notifTitle.Size = UDim2.new(0, 169, 0, 26)
+notifTitle.ZIndex = 3
+notifTitle.Font = Enum.Font.GothamBold
+notifTitle.Text = ""
+notifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+notifTitle.TextSize = 14.000
+notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+notifTitle.TextYAlignment = Enum.TextYAlignment.Top
+
+notifFrameCorner = Instance.new("UICorner")
+notifFrameCorner.Parent = notifFrame
+
+notifDescriptionCorner = Instance.new("UICorner")
+notifDescriptionCorner.Parent = notifTitle
+
+notifTitleCorner = Instance.new("UICorner")
+notifTitleCorner.Parent = notifFrame
 
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
