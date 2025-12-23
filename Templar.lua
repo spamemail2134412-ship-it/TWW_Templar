@@ -860,7 +860,7 @@ executorBenchmark.Name = "executorBenchmark"
 local executorBenchmarkCorner = Instance.new("UICorner")
 executorBenchmarkCorner.Parent = executorBenchmark
 
-local notifFrame = Instance.new("Frame")
+notifFrame = Instance.new("Frame")
 notifFrame.Name = "notifFrame"
 notifFrame.Parent = Templar
 notifFrame.AnchorPoint = Vector2.new(1, 1)
@@ -869,7 +869,7 @@ notifFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 notifFrame.Position = UDim2.new(1, 0, 2, 0)
 notifFrame.Size = UDim2.new(0, 169, 0, 90)
 
-local notifDescription = Instance.new("TextLabel")
+notifDescription = Instance.new("TextLabel")
 notifDescription.Name = "notifDescription"
 notifDescription.Parent = notifFrame
 notifDescription.AnchorPoint = Vector2.new(1, 1)
@@ -885,7 +885,7 @@ notifDescription.TextXAlignment = Enum.TextXAlignment.Left
 notifDescription.TextYAlignment = Enum.TextYAlignment.Top
 notifDescription.TextWrapped = true
 
-local notifTitle = Instance.new("TextLabel")
+notifTitle = Instance.new("TextLabel")
 notifTitle.Name = "notifTitle"
 notifTitle.Parent = notifFrame
 notifTitle.AnchorPoint = Vector2.new(1, 1)
@@ -1857,7 +1857,8 @@ local tweenservice = game:GetService("TweenService")
 local tweenIn = game:GetService("TweenService"):Create(notifFrame, tweeninfo, {Position = UDim2.new(1,0,1,0)})
 tweenIn:Play()
 
-notifLabel.Text = title .. extra .. "\n\n" .. description
+notifTitle.Text = title .. extra
+notifDescription.Text = description
 
 task.wait(3.25)
 	
@@ -1865,7 +1866,8 @@ local tweenOut = tweenservice:Create(notifFrame, tweeninfo, {Position = UDim2.ne
 tweenOut:Play()
 task.wait(0.25)
 notifActive = false
-notifLabel.Text = ""
+notifTitle.Text = ""
+notifDescription.Text = ""
 end
 
 local function parsePath(lines)
