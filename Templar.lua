@@ -169,7 +169,7 @@ if attributeSet.Value == false then
 end
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark"}
-fullExemption = {"automineTab", "webhooksTab", "configTab"}
+fullExemption = {"automineTab", "webhooksTab", "configTab", "notifFrame"}
 tweenExemption = {"automine", "webhook", "mineconfig"}
 
 taskbarButtons = {}
@@ -859,6 +859,25 @@ executorBenchmark.Name = "executorBenchmark"
 
 local executorBenchmarkCorner = Instance.new("UICorner")
 executorBenchmarkCorner.Parent = executorBenchmark
+
+notifFrame = Instance.new("Frame")
+notifFrame.Parent = Templar
+notifFrame.BackgroundTransparency = 1
+notifFrame.ClipsDescendants = true
+notifFrame.Name = "notifFrame"
+notifFrame.Size = UDim2.new(0, 165, 0, 73)
+notifFrame.Position = UDim2.new(1, 0, 1, 0)
+
+notifLabel = Instance.new("TextLabel")
+notifLabel.Parent = notifFrame
+notifLabel.Name = "notifLabel"
+notifLabel.Size = UDim2.new(0, 165, 0, 73)
+notifLabel.Position = UDim2.new(1, 0, 2, 0)
+notifLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+notifLabel.Text = ""
+
+local notifLabelCorner = Instance.new("UICorner")
+notifLabelCorner.Parent = notifLabel
 
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
@@ -1795,6 +1814,29 @@ for _, spawn in ipairs(recordSpawns) do
     spawnLookup[spawn.string] = true
 end
 
+local notifActive = false
+
+local function callNotif(title, extra, description)
+notifActive = false
+local time = 0.25
+
+local tweeninfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0)
+local tweenservice = game:GetService("TweenService")
+
+local tweenIn = game:GetService("TweenService"):Create(notifLabel, tweeninfo, {Position = UDim2.new(1,0,1,0)})
+tweenIn:Play()
+
+notifLabel.Text = title .. extra .. "\n\n" .. description
+
+task.wait(3.25)
+	
+local tweenOut = tweenservice:Create(notifLabel, tweeninfo, {Position = UDim2.new(1, 0, 2, 0)})
+tweenOut:Play()
+task.wait(0.25)
+notifActive = false
+notifLabel.Text = ""
+end
+
 local function parsePath(lines)
     first = true
     pathCompleted = false
@@ -1807,6 +1849,7 @@ local function parsePath(lines)
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
                 sell()
+				callNotif("Selling...", "", line)
             elseif action == "move" then
                 wrkspceEnt.Players:WaitForChild(plrname)
                 if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
@@ -1827,8 +1870,10 @@ local function parsePath(lines)
                 mineOre(oreName, oreID)
             elseif spawnLookup[line] then
                 automineSpawn(line)
+				callNotif("Spawning at", line, line)
             else
                 warn("Unknown line:", line)
+				callNotif("Unknown line.", "", line)
             end
         end
     end
