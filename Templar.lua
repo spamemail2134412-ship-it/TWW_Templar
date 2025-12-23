@@ -1921,12 +1921,12 @@ local function pathAutomine(customCall)
         repeat
             task.wait()
             local pc = require(game.ReplicatedStorage.Modules.Character.PlayerCharacter)
-            if pc.IsDead then tp() end
+            if pc.IsDead then callNotif("Server hopping...", "", "Reason: Player death.") tp() end
         until pathCompleted == true and finishedKeypress == true
 
         wait(1)
         updateSettings()
-        if isAutoFarmRunning then tp() end
+        if isAutoFarmRunning then callNotif("Server hopping...", "", "Reason: End of path.") tp() end
     end
 end
 
