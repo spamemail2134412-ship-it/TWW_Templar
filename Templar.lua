@@ -867,6 +867,7 @@ notifFrame.ClipsDescendants = true
 notifFrame.Name = "notifFrame"
 notifFrame.Size = UDim2.new(0, 165, 0, 73)
 notifFrame.Position = UDim2.new(1, 0, 1, 0)
+notifFrame.AnchorPoint = Vector2.new(1,1)
 
 notifLabel = Instance.new("TextLabel")
 notifLabel.Parent = notifFrame
@@ -875,6 +876,7 @@ notifLabel.Size = UDim2.new(0, 165, 0, 73)
 notifLabel.Position = UDim2.new(1, 0, 2, 0)
 notifLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
 notifLabel.Text = ""
+notifLabel.AnchorPoint = Vector2.new(1,1)
 
 local notifLabelCorner = Instance.new("UICorner")
 notifLabelCorner.Parent = notifLabel
