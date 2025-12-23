@@ -220,6 +220,7 @@ local ores = oredeposits:GetDescendants()
 Templar = Instance.new("ScreenGui")
 Templar.Parent = plrgui
 Templar.Name = "Templar"
+Templar.DisplayOrder = 999
 
 draggable = Instance.new("Frame")
 draggable.Parent = Templar
@@ -874,9 +875,9 @@ notifDescription.Name = "notifDescription"
 notifDescription.Parent = notifFrame
 notifDescription.AnchorPoint = Vector2.new(1, 1)
 notifDescription.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-notifDescription.Position = UDim2.new(1, 0, 2, 0)
+notifDescription.Position = UDim2.new(1,0,1,0)
 notifDescription.Size = UDim2.new(0, 169, 0, 64)
-notifDescription.ZIndex = 0
+notifDescription.ZIndex = 1
 notifDescription.Font = Enum.Font.GothamBold
 notifDescription.Text = ""
 notifDescription.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -890,9 +891,9 @@ notifTitle.Name = "notifTitle"
 notifTitle.Parent = notifFrame
 notifTitle.AnchorPoint = Vector2.new(1, 1)
 notifTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-notifTitle.Position = UDim2.new(1, 0, 2, 0)
+notifTitle.Position = UDim2.new(1,0,0.25,0)
 notifTitle.Size = UDim2.new(0, 169, 0, 26)
-notifTitle.ZIndex = 0
+notifTitle.ZIndex = 1
 notifTitle.Font = Enum.Font.GothamBold
 notifTitle.Text = ""
 notifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -905,10 +906,10 @@ notifFrameCorner = Instance.new("UICorner")
 notifFrameCorner.Parent = notifFrame
 
 notifDescriptionCorner = Instance.new("UICorner")
-notifDescriptionCorner.Parent = notifTitle
+notifDescriptionCorner.Parent = notifDescription
 
 notifTitleCorner = Instance.new("UICorner")
-notifTitleCorner.Parent = notifFrame
+notifTitleCorner.Parent = notifTitle
 
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
@@ -1848,26 +1849,26 @@ end
 local notifActive = false
 
 local function callNotif(title, extra, description)
-notifActive = false
-local time = 0.25
+    notifActive = false
+    local time = 0.5
 
-local tweeninfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0)
-local tweenservice = game:GetService("TweenService")
+    local tweeninfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, false, 0)
+    local tweenservice = game:GetService("TweenService")
 
-local tweenIn = game:GetService("TweenService"):Create(notifFrame, tweeninfo, {Position = UDim2.new(1,0,1,0)})
-tweenIn:Play()
+    local tweenIn = game:GetService("TweenService"):Create(notifFrame, tweeninfo, {Position = UDim2.new(1,0,1,0)})
+    tweenIn:Play()
 
-notifTitle.Text = title .. extra
-notifDescription.Text = description
+    notifTitle.Text = title .. extra
+    notifDescription.Text = description
 
-task.wait(3.25)
+    task.wait(3.5)
 	
-local tweenOut = tweenservice:Create(notifFrame, tweeninfo, {Position = UDim2.new(1, 0, 2, 0)})
-tweenOut:Play()
-task.wait(0.25)
-notifActive = false
-notifTitle.Text = ""
-notifDescription.Text = ""
+    local tweenOut = tweenservice:Create(notifFrame, tweeninfo, {Position = UDim2.new(1, 0, 2, 0)})
+    tweenOut:Play()
+    task.wait(0.5)
+    notifActive = false
+    notifTitle.Text = ""
+    notifDescription.Text = ""
 end
 
 local function parsePath(lines)
@@ -1902,8 +1903,8 @@ local function parsePath(lines)
                 print(oreID)
                 mineOre(oreName, oreID)
             elseif spawnLookup[line] then
+                callNotif("Spawning at ", line, line)
                 automineSpawn(line)
-				callNotif("Spawning at", line, line)
             else
                 warn("Unknown line:", line)
 				callNotif("Unknown line.", "", line)
@@ -2057,6 +2058,8 @@ end)
 
 -- OverviewPanel exit button
 overviewExit.MouseButton1Down:Connect(function()
+    lines[2] = pathSelector.Text
+    writefile(settingsCfg, table.concat(lines, "\n"))
     Templar:Destroy()
 end)
 
@@ -2153,6 +2156,8 @@ end)
 -- Exit button.
 Exit.MouseButton1Down:Connect(function()
     Templar:Destroy()
+    lines[2] = pathSelector.Text
+    writefile(settingsCfg, table.concat(lines, "\n"))
     if isPathRecOn == true then
         startRecording()
     end
