@@ -41,6 +41,8 @@ BasicPickaxe
 isAutoFarmRunning = false
 pathFileRunning = nil
 firstStartUp = true
+-- Webhook URL
+webhookEnabled = false
 ]]
 
 if isfile(settingsCfg) then
@@ -61,6 +63,9 @@ local success, errorMessage = pcall(function()
         table.insert(lines, line)
     end
     firstStartUp = lines[5]:match("=%s*(.+)")
+    webhookEnabled = lines[7]:match("=%s*(.+)")
+    webhookURL = lines[6]
+
 end)
 
 if success then
@@ -168,9 +173,10 @@ if attributeSet.Value == false then
     end
 end
 
-exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark"}
+exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
 fullExemption = {"automineTab", "webhooksTab", "configTab", "notifFrame"}
 tweenExemption = {"automine", "webhook", "mineconfig"}
+txtLabelExemption = {"webhookTXTLabel"}
 
 taskbarButtons = {}
 
@@ -596,6 +602,7 @@ pathSelector.Font = Enum.Font.SourceSansBold
 pathSelector.Transparency = 1
 pathSelector.Position = UDim2.new(0.5, 75, 0, 215)
 pathSelector.Name = "pathSelector"
+pathSelector.ClipsDescendants = true
 
 pathRecorder = Instance.new("Frame")
 pathRecorder.Parent = Templar
@@ -910,6 +917,49 @@ notifDescriptionCorner.Parent = notifDescription
 
 notifTitleCorner = Instance.new("UICorner")
 notifTitleCorner.Parent = notifTitle
+
+webhookSelector = Instance.new("TextBox")
+webhookSelector.Text = lines[6]
+webhookSelector.Parent = webhooksTab
+webhookSelector.Size = UDim2.new(0, 250, 0, 40)
+webhookSelector.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+webhookSelector.BorderSizePixel = 1
+webhookSelector.BorderColor3 = Color3.fromRGB(unpack(colourTheme))
+webhookSelector.TextSize = 20
+webhookSelector.TextColor3 = Color3.fromRGB(255,255,255)
+webhookSelector.Font = Enum.Font.SourceSansBold
+webhookSelector.Transparency = 1
+webhookSelector.Position = UDim2.new(0.5, -350, 0, 140)
+webhookSelector.Name = "webhookSelector"
+webhookSelector.ClipsDescendants = true
+
+webhookTXTLabel = Instance.new("TextLabel")
+webhookTXTLabel.Parent = webhooksTab
+webhookTXTLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+webhookTXTLabel.Text = "Enable Webhooks:"
+webhookTXTLabel.Size = UDim2.new(0, 200, 0, 30)
+webhookTXTLabel.Position = UDim2.new(0.5, -350, 0, 200)
+webhookTXTLabel.Name = "webhookTXTLabel"
+webhookTXTLabel.TextColor3 = Color3.fromRGB(255,255,255)
+webhookTXTLabel.TextSize = 14
+webhookTXTLabel.Font = "GothamBold"
+
+local webhookLabelCorner = Instance.new("UICorner")
+webhookLabelCorner.Parent = webhookTXTLabel
+
+webhookActive = Instance.new("TextButton")
+webhookActive.Parent = webhooksTab
+webhookActive.BackgroundColor3 = Color3.fromRGB(30,30,30)
+webhookActive.TextColor3 = Color3.fromRGB(0,150,0)
+webhookActive.Size = UDim2.new(0,30,0,30)
+webhookActive.Position = UDim2.new(0.5, -140, 0, 200)
+if webhookEnabled == "true" then webhookActive.Text = "X" else webhookActive.Text = "" end
+webhookActive.Font = "Gotham"
+webhookActive.TextSize = 25
+webhookActive.Name = "webhookActive"
+
+webhookActiveUICorner = Instance.new("UICorner")
+webhookActiveUICorner.Parent = webhookActive
 
 local function updateConfig(path, autoFarmVal, fileRunningVal)
     if not isfile(path) then return end
@@ -1654,7 +1704,7 @@ end
 local clockwise = true
 local isRunning = false
 
-buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector,pathrecButton}
+buttonsDeleted = {startAutoFarm,sliderFrame,sliderText,slider,separationFrame,automine,webhook,mineconfig,pathedAutoFarm,pathSelector,pathrecButton,webhookSelector,webhookTXTLabel,webhookActive}
 
 local UserInputService = game:GetService("UserInputService")
 
@@ -1871,7 +1921,55 @@ local function callNotif(title, extra, description)
     notifDescription.Text = ""
 end
 
+local function callWebhook(title, extra, description, infoTitle, info, extra)
+    local HttpService = game:GetService("HttpService")
+
+    local webhookUrl = webhookSelector.Text
+
+    local data = {
+	    embeds = {
+	    	{
+			    title = title,
+			    description = description,
+			    color = 0x00FF00, -- green
+	    		fields = {
+		    		{
+                        name = infoTitle ~= nil and "Money earnt (from path)",
+                        value = info ~= nil and "$2316",
+                        inline = true
+    				},
+	    			{
+		    			name = "Time",
+			    		value = os.date("%Y-%m-%d %H:%M:%S"),
+				    	inline = true
+			    	}
+	    		},
+			    footer = {
+				    text = "TWW_Templar"
+			    }
+	    }
+	    }
+    }
+
+local response = HttpService:RequestAsync({
+	Url = webhookUrl,
+	Method = "POST",
+	Headers = {
+		["Content-Type"] = "application/json"
+	},
+	Body = HttpService:JSONEncode(data)
+})
+
+print(response.StatusCode)
+end
+
+local plrInfo = plrgui.PlayerInfo
+local moneyEarnt = 0
+
 local function parsePath(lines)
+    local money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
+    local gsubMoney = money:gsub("[$,]", "")
+    local currentMoney = tonumber(gsubMoney)
     first = true
     pathCompleted = false
     for i, line in ipairs(lines) do
@@ -1882,16 +1980,19 @@ local function parsePath(lines)
         if action then
             local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             if action == "sell" then
-                sell()
+                pcall(function() sell() end)
 				callNotif("Selling...", "", line)
+                if webhookEnabled == "true" then pcall(function()callWebhook("Selling...", "", "Selling loot - About to server hop.", "", nil, nil) end) end
             elseif action == "move" then
                 wrkspceEnt.Players:WaitForChild(plrname)
-                if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
-                if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
-                moveComplete = false
-                ragdollMoveTo(position + Vector3.new(0,5,0))
-                repeat task.wait() until moveComplete == true
-                first = false
+                pcall(function()
+                    if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
+                    if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
+                    moveComplete = false
+                    ragdollMoveTo(position + Vector3.new(0,5,0))
+                    repeat task.wait() until moveComplete == true
+                    first = false
+                    end)
             else
                 warn("Unknown action with coordinates:", line)
             end
@@ -1901,16 +2002,20 @@ local function parsePath(lines)
             if oreName and oreID and capacity ~= "30 / 30" then
                 print(oreName)
                 print(oreID)
-                mineOre(oreName, oreID)
+                pcall(function() mineOre(oreName, oreID) end)
             elseif spawnLookup[line] then
+                pcall(function() automineSpawn(line) end)
                 callNotif("Spawning at ", line, line)
-                automineSpawn(line)
+                if webhookEnabled == "true" then pcall(function() callWebhook("Spawning at ", line, "Beginning path at ", line, nil, nil) end) end
             else
                 warn("Unknown line:", line)
 				callNotif("Unknown line.", "", line)
             end
         end
     end
+    money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
+    local moneyEarntGSub = money:gsub("[$,]", "")
+    moneyEarnt = tonumber(moneyEarntGSub) - currentMoney
     pathCompleted = true
 end
 
@@ -1955,12 +2060,11 @@ local function pathAutomine(customCall)
         repeat
             task.wait()
             local pc = require(game.ReplicatedStorage.Modules.Character.PlayerCharacter)
-            if pc.IsDead then callNotif("Server hopping...", "", "Reason: Player death.") tp() end
+            if pc.IsDead then callNotif("Server hopping...", "", "Reason: Player death.") if webhookEnabled == "true" then pcall(function() callWebhook("Server hopping...", "", "Reason: Player death.", "", nil, nil) end) end tp() end
         until pathCompleted == true and finishedKeypress == true
-
         wait(1)
         updateSettings()
-        if isAutoFarmRunning then callNotif("Server hopping...", "", "Reason: End of path.") tp() end
+        if isAutoFarmRunning then callNotif("Server hopping...", "", "Reason: End of path.") if webhookEnabled == "true" then pcall(function() callWebhook("Server hopping...", "", "Reason: End of path.", "", "Money earnt (from path)", "$" .. moneyEarnt) end) end tp() end
     end
 end
 
@@ -1974,6 +2078,20 @@ if isAutoFarmRunning then
 end
 
 local function applyButtonFunctionality()
+
+webhookActive.MouseButton1Down:Connect(function()
+    if webhookEnabled == "true" then
+        lines[7] = "webhookEnabled = false"
+        writefile(settingsCfg, table.concat(lines, "\n"))
+        webhookActive.Text = ""
+        webhookEnabled = "false"
+    else
+        lines[7] = "webhookEnabled = true"
+        writefile(settingsCfg, table.concat(lines, "\n"))
+        webhookActive.Text = "X"
+        webhookEnabled = "true"
+    end
+end)
 
 executorBenchmark.MouseButton1Down:Connect(function()
     printToLabel.Text = ""
@@ -1991,9 +2109,8 @@ pathedAutoFarm.MouseButton1Down:Connect(function()
     if currentState == "false" or currentState == "nil" then
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 
-        local l = string.split(currentContent, "\n")
-        l[3] = "isAutoFarmRunning = true"
-        writefile(settingsCfg, table.concat(l, "\n"))
+        lines[3] = "isAutoFarmRunning = true"
+        writefile(settingsCfg, table.concat(lines, "\n"))
 
         task.spawn(function()
             pathAutomine(true)
@@ -2002,9 +2119,8 @@ pathedAutoFarm.MouseButton1Down:Connect(function()
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(25,25,25)
         print("Autofarm stopped. Finishing last path.")
         
-        local l = string.split(currentContent, "\n")
-        l[3] = "isAutoFarmRunning = false"
-        writefile(settingsCfg, table.concat(l, "\n"))
+        lines[3] = "isAutoFarmRunning = false"
+        writefile(settingsCfg, table.concat(lines, "\n"))
     end
 end)
 
@@ -2103,15 +2219,20 @@ settings.MouseButton1Down:Connect(function()
         tweeninfo = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") then 
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then
+                    print(button, "IN FIRST")
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
                 elseif not table.find(tweenExemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{Transparency = 1})
                     tween:Play()
-                    print(button)
-                else
+                    print(button, "IN SECOND")
+                elseif not table.find(txtLabelExemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
+                    tween:Play()
+                else
+                    print("OK FUCKER?")
+                    tween = tweenservice:Create(button,tweeninfo,{BackgroundTransparency = 1})
                     tween:Play()
                 end
                 task.spawn(function()
@@ -2122,14 +2243,12 @@ settings.MouseButton1Down:Connect(function()
             end
         else
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") then 
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then 
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
                 elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
-                    print(button, "yo")
                 else
                     tween = tweenservice:Create(button,tweeninfo,{Transparency = 0})
-                    print(button)
                 end
                 tween:Play()
                 button.Visible = true
@@ -2157,6 +2276,8 @@ end)
 Exit.MouseButton1Down:Connect(function()
     Templar:Destroy()
     lines[2] = pathSelector.Text
+    writefile(settingsCfg, table.concat(lines, "\n"))
+    lines[6] = webhookSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
     if isPathRecOn == true then
         startRecording()
