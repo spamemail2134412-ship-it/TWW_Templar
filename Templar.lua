@@ -1247,6 +1247,7 @@ end
 
 waypointTable = {}
 
+-- deprecated
 local function calcPathDistance(waypoints, i, ore) -- Calculates the overall distance by taking the distances between each waypoint and summing them.
     local localDistance = {}
     local waypointPos -- A variable that contains the distance between two points
@@ -1272,7 +1273,7 @@ local function calcPathDistance(waypoints, i, ore) -- Calculates the overall dis
     table.insert(waypointTable, waypoints)
 end
 
-local function calculatePaths()
+local function calculatePaths() -- deprecated
     local successes = 0
     local failures = 0
     local unknown = 0
@@ -1314,7 +1315,7 @@ local nearestWaypoints = {}
 
 waypointOrder = {}
 
-function FindNearestOre()
+function FindNearestOre() -- deprecated
     nearestOres = {}
     oreIndex = {}
     closestOreDistance = math.huge
@@ -1353,7 +1354,7 @@ function FindNearestOre()
     end
 end
 
-local function pathCalculator()
+local function pathCalculator() -- deprecated
     local index = 0
     for i, waypoints in pairs(nearestWaypoints) do
         index = index + 1
@@ -1558,7 +1559,7 @@ function waypointVisualizer()
     print("Path loaded")
 end
 
-function pathfind(index)
+function pathfind(index) -- deprecated
 closestOre = sortedOreIndex[index]
 finalpos = oreCheckpoints[index]
 print("Closest ore found: " .. closestOreDistance)
@@ -1642,7 +1643,7 @@ if type(getrawmetatable) == "function" then
     end
 end
 
-local function nearestOreFarm()
+local function nearestOreFarm() -- deprecated
         local slot = plrgui.Hotbar.Container.HotbarList.Body
         local slotItem = slot.HotbarSlot_Utility_1.Container.Slot.ViewportFrame:GetChildren()[1].Name
         pathfindSuccess = nil
@@ -1975,6 +1976,56 @@ local response = HttpService:RequestAsync({
 print(response.StatusCode)
 end
 
+local function preProcessor(lines)
+	local isFirst = true
+	for i, line in ipairs(lines) do
+		line = line:match("^%s*(.-)%s*$")
+		local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
+		lastWaypointPos = nil
+		
+		if action and not isFirst then
+			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+			if action == "move" then
+                local a = lastWaypointPos
+                local b = waypoints[i].Position
+                local dir = b - a
+                local dist = dir.Magnitude
+                local mid = (a + b) / 2
+                local thickness = 0.4
+
+                local part = Instance.new("Part")
+                part.Material = "Neon"
+                part.Anchored = true
+                part.CanCollide = false
+                part.Shape = "Ball"
+                part.Position = waypoint.Position
+                part.Parent = game.Workspace:WaitForChild("Path")
+                part.Name = "part"..i
+                part.Size = Vector3.new(3, 1, 1)
+
+                local connection = Instance.new("Part")
+                connection.Shape = "Cylinder"
+                connection.Material = "Neon"
+                connection.Anchored = true
+                connection.CanCollide = false
+                connection.Parent = game.Workspace:WaitForChild("Path")
+                connection.Size = Vector3.new(dist, thickness, thickness)
+                connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
+                connection.Name = "Connection" .. i
+                connection.Color = Color3.fromRGB(213, 115, 61)
+                local up = Vector3.new(0,1,0)
+                local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
+                connection.CFrame = rotation
+				
+			end
+		elseif action and isFirst then
+			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+			isFirst = false
+			lastWaypoint = position
+		end
+	end
+end
+
 local function parsePath(lines)
     task.spawn(function()
         plrInfo = plrgui:WaitForChild("PlayerInfo")
@@ -2079,11 +2130,27 @@ local function pathAutomine(customCall)
         repeat
             task.wait()
             local pc = require(game.ReplicatedStorage.Modules.Character.PlayerCharacter)
-            if pc.IsDead then callNotif("Server hopping...", "", "Reason: Player death.") if webhookEnabled == "true" then pcall(function() callWebhook("Server hopping...", "", "Reason: Player death.", "", nil, nil) end) end tp() end
+            if pc.IsDead then
+				callNotif("Server hopping...", "", "Reason: Player death.")
+				if webhookEnabled == "true" then
+					pcall(function()
+						callWebhook("Server hopping...", "", "Reason: Player death.", "", nil, nil) 
+					end) 
+				end 
+				tp() 
+			end
         until pathCompleted == true and finishedKeypress == true
         wait(1)
         updateSettings()
-        if isAutoFarmRunning then callNotif("Server hopping...", "", "Reason: End of path.") if webhookEnabled == "true" then pcall(function() callWebhook("Server hopping...", "", "Reason: End of path.", "", "Money earnt (from path)", "$" .. moneyEarnt) end) end tp() end
+        if isAutoFarmRunning then
+			callNotif("Server hopping...", "", "Reason: End of path.") 
+			if webhookEnabled == "true" then 
+				pcall(function()
+					callWebhook("Server hopping...", "", "Reason: End of path.", "", "Money earnt (from path)", "$" .. moneyEarnt)
+				end) 
+			end 
+			tp()
+		end
     end
 end
 
@@ -2240,37 +2307,22 @@ settings.MouseButton1Down:Connect(function()
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
                 if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then
-                    print(button, "IN FIRST")
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
                 elseif not table.find(tweenExemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{Transparency = 1})
                     tween:Play()
-                    print(button, "IN SECOND")
-                elseif not table.find(txtLabelExemption, button) then
+                else then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
-                    tween:Play()
-                else
-                    print("OK FUCKER?")
-                    tween = tweenservice:Create(button,tweeninfo,{BackgroundTransparency = 1})
                     tween:Play()
                 end
                 task.spawn(function()
                 wait(1)
-                print(button)
                 button.Visible = false
                 end)
             end
         else
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then 
-                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
-                elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
-                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
-                else
-                    tween = tweenservice:Create(button,tweeninfo,{Transparency = 0})
-                end
-                tween:Play()
                 button.Visible = true
             end
         end
