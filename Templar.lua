@@ -1921,10 +1921,26 @@ local function callNotif(title, extra, description)
     notifDescription.Text = ""
 end
 
-local function callWebhook(title, extra, description, infoTitle, info, extra)
+local function callWebhook(title, extra, description, infoTitle, info, extra2)
     local HttpService = game:GetService("HttpService")
 
     local webhookUrl = webhookSelector.Text
+
+local fields = {
+    {
+        name = "Time",
+        value = os.date("%Y-%m-%d %H:%M:%S"),
+        inline = true
+    }
+}
+
+if infoTitle ~= nil then
+        table.insert(fields, {
+        name = infoTitle,
+        value = info,
+        inline = true
+    })
+end
 
     local data = {
 	    embeds = {
@@ -1932,24 +1948,13 @@ local function callWebhook(title, extra, description, infoTitle, info, extra)
 			    title = title,
 			    description = description,
 			    color = 0x00FF00, -- green
-	    		fields = {
-		    		{
-                        name = infoTitle ~= nil and "Money earnt (from path)",
-                        value = info ~= nil and "$2316",
-                        inline = true
-    				},
-	    			{
-		    			name = "Time",
-			    		value = os.date("%Y-%m-%d %H:%M:%S"),
-				    	inline = true
-			    	}
+	    		fields = fields,
 	    		},
 			    footer = {
 				    text = "TWW_Templar"
 			    }
+	        }
 	    }
-	    }
-    }
 
 local response = HttpService:RequestAsync({
 	Url = webhookUrl,
@@ -1983,7 +1988,7 @@ local function parsePath(lines)
             if action == "sell" then
                 pcall(function() sell() end)
 				callNotif("Selling...", "", line)
-                if webhookEnabled == "true" then pcall(function()callWebhook("Selling...", "", "Selling loot - About to server hop.", "", nil, nil) end) end
+                if webhookEnabled == "true" then pcall(function() callWebhook("Selling...", "", "Selling loot - About to server hop.", "", nil, nil) end) end
             elseif action == "move" then
                 wrkspceEnt.Players:WaitForChild(plrname)
                 pcall(function()
