@@ -938,7 +938,7 @@ webhookTXTLabel.Parent = webhooksTab
 webhookTXTLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
 webhookTXTLabel.Text = "Enable Webhooks:"
 webhookTXTLabel.Size = UDim2.new(0, 200, 0, 30)
-webhookTXTLabel.Position = UDim2.new(0.5, -350, 0, 200)
+webhookTXTLabel.Position = UDim2.new(0.5, -340, 0, 200)
 webhookTXTLabel.Name = "webhookTXTLabel"
 webhookTXTLabel.TextColor3 = Color3.fromRGB(255,255,255)
 webhookTXTLabel.TextSize = 14
@@ -952,7 +952,7 @@ webhookActive.Parent = webhooksTab
 webhookActive.BackgroundColor3 = Color3.fromRGB(30,30,30)
 webhookActive.TextColor3 = Color3.fromRGB(0,150,0)
 webhookActive.Size = UDim2.new(0,30,0,30)
-webhookActive.Position = UDim2.new(0.5, -140, 0, 200)
+webhookActive.Position = UDim2.new(0.5, -130, 0, 200)
 if webhookEnabled == "true" then webhookActive.Text = "X" else webhookActive.Text = "" end
 webhookActive.Font = "Gotham"
 webhookActive.TextSize = 25
@@ -1963,13 +1963,14 @@ local response = HttpService:RequestAsync({
 print(response.StatusCode)
 end
 
-local plrInfo = plrgui.PlayerInfo
-local moneyEarnt = 0
-
 local function parsePath(lines)
-    local money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
-    local gsubMoney = money:gsub("[$,]", "")
-    local currentMoney = tonumber(gsubMoney)
+    task.spawn(function()
+        plrInfo = plrgui:WaitForChild("PlayerInfo")
+        money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
+        gsubMoney = money:gsub("[$,]", "")
+        currentMoney = tonumber(gsubMoney)
+    end)
+    moneyEarnt = 0
     first = true
     pathCompleted = false
     for i, line in ipairs(lines) do
@@ -2013,9 +2014,15 @@ local function parsePath(lines)
             end
         end
     end
-    money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
-    local moneyEarntGSub = money:gsub("[$,]", "")
-    moneyEarnt = tonumber(moneyEarntGSub) - currentMoney
+    local success, errorMsg = pcall(function()
+        money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
+        local moneyEarntGSub = money:gsub("[$,]", "")
+        moneyEarnt = tonumber(moneyEarntGSub) - currentMoney
+        moneyEarnt = tostring(moneyEarnt)
+    end)
+    if errorMsg then
+        moneyEarnt = "ERROR: moneyEarnt is nil."
+    end
     pathCompleted = true
 end
 
@@ -2107,7 +2114,7 @@ pathedAutoFarm.MouseButton1Down:Connect(function()
     local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
 
     if currentState == "false" or currentState == "nil" then
-        pcall function() callWebhook("Starting Path...", "", "Path started: " .. pathSelector.Text, "", nil, nil) end)
+        pcall(function() callWebhook("Starting Path...", "", "Path started: " .. pathSelector.Text, "", nil, nil) end)
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 
         lines[3] = "isAutoFarmRunning = true"
@@ -2220,7 +2227,7 @@ settings.MouseButton1Down:Connect(function()
         tweeninfo = TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out,0,false,0)
         if visible == true then
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button) then
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then
                     print(button, "IN FIRST")
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
@@ -2244,7 +2251,7 @@ settings.MouseButton1Down:Connect(function()
             end
         else
             for _,button in pairs(buttonsDeleted) do
-                if button:IsA("TextLabel") then 
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then 
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
                 elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
