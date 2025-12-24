@@ -17,9 +17,11 @@ Templar is an autofarm script that is currently in development for https://www.r
 
   What executor do I use?:
   - A level 8 executor is recommended or the script may not work, use Velocity or Volcano. Both are free.
-
+  - Executor compatability can be tested on first script startup, or by accessing settings. (Lacking setthreadidentity or request is considered script breaking)
+  
   Features:
   - Automine player/Paths parser
   - Path recorder
+  - Webhook functionality
   
 -- Once released, Templar will be free.
