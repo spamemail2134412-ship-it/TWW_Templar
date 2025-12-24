@@ -2077,12 +2077,12 @@ local function parsePath(lines)
                 pcall(function()
                     if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
                     if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
+                end)
                     moveComplete = false
                     ragdollMoveTo(position + Vector3.new(0,5,0))
                     repeat task.wait() until moveComplete == true
-    				lastCheckpoint.Color = Color3.fromRGB(60,60,60)
+    				lastCheckpoint.Color = Color3.fromRGB(100,100,100)
                     first = false
-                    end)
             else
                 warn("Unknown action with coordinates:", line)
             end
