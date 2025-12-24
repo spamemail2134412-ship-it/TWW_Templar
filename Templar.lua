@@ -71,7 +71,7 @@ end)
 if success then
     table.insert(successes, 4, true)
 	local settingsLines = string.split(settingsText, "\n")
-	for i <= 7 do
+	for i = 1, #lines do
 		if lines[i] == nil then
     		lines[i] = settingsLines[i]
     		writefile(settingsCfg, table.concat(lines, "\n"))
@@ -1978,30 +1978,33 @@ end
 
 local function preProcessor(lines)
 	local isFirst = true
+    local lastWaypointPos = nil
+    local trackMoves = 0
 	for i, line in ipairs(lines) do
 		line = line:match("^%s*(.-)%s*$")
 		local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
-		lastWaypointPos = nil
 		
 		if action and not isFirst then
 			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+            print(position)
 			if action == "move" then
+                trackMoves += 1
                 local a = lastWaypointPos
-                local b = waypoints[i].Position
+                local b = position
                 local dir = b - a
                 local dist = dir.Magnitude
                 local mid = (a + b) / 2
                 local thickness = 0.4
 
-                local part = Instance.new("Part")
-                part.Material = "Neon"
-                part.Anchored = true
-                part.CanCollide = false
-                part.Shape = "Ball"
-                part.Position = waypoint.Position
-                part.Parent = game.Workspace:WaitForChild("Path")
-                part.Name = "part"..i
-                part.Size = Vector3.new(3, 1, 1)
+                local checkpoint = Instance.new("Part")
+                checkpoint.Material = "Neon"
+                checkpoint.Anchored = true
+                checkpoint.CanCollide = false
+                checkpoint.Shape = "Ball"
+                checkpoint.Position = position
+                checkpoint.Parent = game.Workspace:WaitForChild("Path")
+                checkpoint.Name = "part".. trackMoves
+                checkpoint.Size = Vector3.new(3, 1, 1)
 
                 local connection = Instance.new("Part")
                 connection.Shape = "Cylinder"
@@ -2011,19 +2014,31 @@ local function preProcessor(lines)
                 connection.Parent = game.Workspace:WaitForChild("Path")
                 connection.Size = Vector3.new(dist, thickness, thickness)
                 connection.CFrame = CFrame.new(mid, b) * CFrame.Angles(math.rad(90), 0, 0)
-                connection.Name = "Connection" .. i
+                connection.Name = "Connection" .. trackMoves
                 connection.Color = Color3.fromRGB(213, 115, 61)
                 local up = Vector3.new(0,1,0)
                 local rotation = CFrame.fromMatrix(mid, dir.Unit, up:Cross(dir.Unit), dir.Unit:Cross(up:Cross(dir.Unit)))
                 connection.CFrame = rotation
 				
+                lastWaypointPos = position
 			end
 		elseif action and isFirst then
+            trackMoves += 1
 			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
 			isFirst = false
-			lastWaypoint = position
+			lastWaypointPos = position
+            local checkpoint = Instance.new("Part")
+            checkpoint.Material = "Neon"
+            checkpoint.Anchored = true
+            checkpoint.CanCollide = false
+            checkpoint.Shape = "Ball"
+            checkpoint.Position = position
+            checkpoint.Parent = game.Workspace:WaitForChild("Path")
+            checkpoint.Name = "part".. trackMoves
+            checkpoint.Size = Vector3.new(3, 1, 1)
 		end
 	end
+    return trackMoves
 end
 
 local function parsePath(lines)
@@ -2033,7 +2048,7 @@ local function parsePath(lines)
         gsubMoney = money:gsub("[$,]", "")
         currentMoney = tonumber(gsubMoney)
     end)
-	preProcessor(lines)
+	local totalCheckpoints = preProcessor(lines)
     moneyEarnt = 0
     first = true
     pathCompleted = false
@@ -2051,8 +2066,12 @@ local function parsePath(lines)
 				callNotif("Selling...", "", line)
                 if webhookEnabled == "true" then pcall(function() callWebhook("Selling...", "", "Selling loot - About to server hop.", "", nil, nil) end) end
             elseif action == "move" then
+                if checkpointIndex >= totalCheckpoints then
+                    break
+                end
 				checkpointIndex += 1
 				lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
+                print("part" .. tostring(checkpointIndex))
 				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
                 wrkspceEnt.Players:WaitForChild(plrname)
                 pcall(function()
@@ -2061,6 +2080,7 @@ local function parsePath(lines)
                     moveComplete = false
                     ragdollMoveTo(position + Vector3.new(0,5,0))
                     repeat task.wait() until moveComplete == true
+    				lastCheckpoint.Color = Color3.fromRGB(60,60,60)
                     first = false
                     end)
             else
@@ -2319,17 +2339,25 @@ settings.MouseButton1Down:Connect(function()
                 elseif not table.find(tweenExemption, button.Name) then
                     tween = tweenservice:Create(button,tweeninfo,{Transparency = 1})
                     tween:Play()
-                else then
+                else
                     tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 1})
                     tween:Play()
                 end
                 task.spawn(function()
-                wait(1)
-                button.Visible = false
+                    wait(1)
+                    button.Visible = false
                 end)
             end
         else
             for _,button in pairs(buttonsDeleted) do
+                if button:IsA("TextLabel") and not table.find(txtLabelExemption, button.Name) then 
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
+                elseif button:IsA("TextButton") and not table.find(exemption, button.Name) then
+                    tween = tweenservice:Create(button,tweeninfo,{TextTransparency = 0})
+                else
+                    tween = tweenservice:Create(button,tweeninfo,{Transparency = 0})
+                end
+                tween:Play()
                 button.Visible = true
             end
         end
