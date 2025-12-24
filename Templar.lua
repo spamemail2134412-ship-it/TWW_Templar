@@ -2070,18 +2070,23 @@ local function parsePath(lines)
                     break
                 end
 				checkpointIndex += 1
-				lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
-                print("part" .. tostring(checkpointIndex))
-				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
+                if first then
+				    lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
+                    lastCheckpoint.Color = Color3.fromRGB(13, 105, 172)
+                elseif checkpointIndex ~= trackMoves then
+                    lastCheckpoint.Color = Color3.fromRGB(100,100,100)
+				    lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
+                    game.Workspace.Path:FindFirstChild("part" .. checkpointIndex).Color = Color3.fromRGB(13, 105, 172)                 
+                end
                 wrkspceEnt.Players:WaitForChild(plrname)
                 pcall(function()
                     if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
-                    if first == true or isRagdollEnabled == false then repeat task.wait() until isRagdollFlying == true end
+                    if first == true or isRagdollEnabled == false then repeat wait() until isRagdollFlying == true end
                 end)
                     moveComplete = false
                     ragdollMoveTo(position + Vector3.new(0,5,0))
                     repeat task.wait() until moveComplete == true
-    				lastCheckpoint.Color = Color3.fromRGB(100,100,100)
+    				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
                     first = false
             else
                 warn("Unknown action with coordinates:", line)
