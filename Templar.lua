@@ -2033,9 +2033,12 @@ local function parsePath(lines)
         gsubMoney = money:gsub("[$,]", "")
         currentMoney = tonumber(gsubMoney)
     end)
+	preProcessor(lines)
     moneyEarnt = 0
     first = true
     pathCompleted = false
+	lastCheckpoint = nil
+	checkpointIndex = 0
     for i, line in ipairs(lines) do
         local capacity = plrgui.InventoryUI.Inventory.Container.BottomBar.Body.NumSlots.Text
         line = line:match("^%s*(.-)%s*$")
@@ -2048,6 +2051,9 @@ local function parsePath(lines)
 				callNotif("Selling...", "", line)
                 if webhookEnabled == "true" then pcall(function() callWebhook("Selling...", "", "Selling loot - About to server hop.", "", nil, nil) end) end
             elseif action == "move" then
+				checkpointIndex += 1
+				lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
+				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
                 wrkspceEnt.Players:WaitForChild(plrname)
                 pcall(function()
                     if first == true or isRagdollEnabled == false then enableRagdollFly() Global.PlayerCharacter:Ragdoll(nil, true) end
@@ -2066,6 +2072,7 @@ local function parsePath(lines)
             if oreName and oreID and capacity ~= "30 / 30" then
                 print(oreName)
                 print(oreID)
+				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
                 pcall(function() mineOre(oreName, oreID) end)
             elseif spawnLookup[line] then
                 pcall(function() automineSpawn(line) end)
