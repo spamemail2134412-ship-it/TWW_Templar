@@ -70,6 +70,13 @@ end)
 
 if success then
     table.insert(successes, 4, true)
+	local settingsLines = string.split(settingsText, "\n")
+	for i <= 7 do
+		if lines[i] == nil then
+    		lines[i] = settingsLines[i]
+    		writefile(settingsCfg, table.concat(lines, "\n"))
+		end
+	end
 else
     table.insert(successes, 4, false)
 end
