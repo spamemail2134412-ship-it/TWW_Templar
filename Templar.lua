@@ -25,11 +25,11 @@ sortedOreIndex = {}
 
 if isfolder(folderName) then
     print("Paths folder already exists.")
-    table.insert(successes, 6, true)
+    successes[6] = true
 else
-    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) table.insert(successes, 6, true) end) then
+    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) successes[6] = true end) then
         print("Function makefolder not supported.")
-        table.insert(successes, 6, false)
+        successes[6] =  false
     end
 end
 
@@ -47,12 +47,13 @@ webhookEnabled = false
 
 if isfile(settingsCfg) then
     print("Settings config already exists.")
-    table.insert(successes, 3, true)
-    table.insert(successes, 2, true)
+    successes[3] = true
+    successes[2] = true
 else
     if not pcall(function() writefile(settingsCfg, settingsText) print("Settings config created at: " .. fullFolderPath) table.insert(successes, 3, true) end) then
         print("Method writefile not supported.")
-        table.insert(successes, 3, false)
+        successes[3] = false
+        successes[2] = false
     end
 end
 
@@ -69,7 +70,7 @@ local success, errorMessage = pcall(function()
 end)
 
 if success then
-    table.insert(successes, 4, true)
+    successes[4] = true
 	local settingsLines = string.split(settingsText, "\n")
 	for i = 1, #lines do
 		if lines[i] == nil then
@@ -78,7 +79,7 @@ if success then
 		end
 	end
 else
-    table.insert(successes, 4, false)
+    successes[4] = false
 end
 
 local TeleportService = game:GetService("TeleportService")
@@ -92,13 +93,14 @@ local function ListServers(cursor)
     end)
 	if not success then
 		warn("Your executor level is too low. Use another to use the script.")
-        table.insert(successes, 7, false)
 		return nil
 	else
-        table.insert(successes, 7, true)
 	    return errorMessage
 	end
 end
+
+local ok,d=pcall(game:GetService("HttpService").JSONDecode,game:GetService("HttpService"),'{"a":1,"b":2,"c":[3,4,5]}')
+if ok then successes[7] = true else successes[7] = false end
 
 local smallestServer = nil
 local smallestPlayers = math.huge
@@ -1097,6 +1099,7 @@ function initiateLoading()
     for _,v in successes do
 	    if v then
 		    successesValue += 1
+        else
 	    end
     end
 
@@ -1110,16 +1113,16 @@ function initiateLoading()
 	    if line > #txtSuccess then 
 		    local text = ""
 		
-		    if not successes[1] or successes[2] or successes[4] then
+		    if not successes[1] or not successes[4] then
 			    text = "EXECUTOR LEVEL TOO LOW."
             else
                 text = "EXECUTOR LEVEL IS OPTIMAL"
 		    end
 		
-		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess - 1 .. " tests passed. " .. text
+		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess .. " tests passed. " .. text
 		    for i,v in errorMsgs do
 			    if not successes[i] and i ~= 2 then
-				    printToLabel.Text = printToLabel.Text .. "\n\n" .. v 
+				    printToLabel.Text = printToLabel.Text .. "\n\n" .. v
 			    end
 		    end
             isLoading = false
@@ -1381,10 +1384,10 @@ end)
 
 if success then
     print("Global module required successfully.")
-    table.insert(successes, 1, true)
+    successes[1] = true
 else
     warn("Your executor does not support the require function, the autofarm will not work without the setthreadidentity method. A level 8 executor is recommended for complete functionality.")
-    table.insert(successes, 1, false)
+    successes[1] = false
 end
 
 local bodyVelocity = nil
@@ -1629,18 +1632,15 @@ end
 
 local canGetMeta = false
 
-if type(getrawmetatable) == "function" then
+local testMetatable = { __test = true }
+local testObject = setmetatable({}, testMetatable)
+local success, returnedMetatable = pcall(getrawmetatable, testObject)
 
-    local success, result = pcall(function()
-        return getrawmetatable({})
-    end)
-
-    if success and type(result) == "table" then
-        canGetMeta = true
-        table.insert(successes, 5, true)
-    else
-        table.insert(successes, 5, false)
-    end
+if success then
+    canGetMeta = true
+    successes[5] = true
+else 
+    successes[5] = false
 end
 
 local function nearestOreFarm() -- deprecated
