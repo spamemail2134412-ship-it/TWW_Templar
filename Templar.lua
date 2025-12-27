@@ -50,7 +50,13 @@ if isfile(settingsCfg) then
     successes[3] = true
     successes[2] = true
 else
-    if not pcall(function() writefile(settingsCfg, settingsText) print("Settings config created at: " .. fullFolderPath) table.insert(successes, 3, true) end) then
+    success, errorMessage = pcall(function()
+        writefile(settingsCfg, settingsText)
+        print("Settings config created at: " .. fullFolderPath)
+        successes[3] = true
+        successes[2] = true
+    end)
+    if errorMessage then
         print("Method writefile not supported.")
         successes[3] = false
         successes[2] = false
@@ -1071,6 +1077,33 @@ loadInitiated = false
 
 isLoading = false
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local success, errorMessage = pcall(function()
+    Global = require(ReplicatedStorage.SharedModules.Global)
+end)
+
+if success then
+    print("Global module required successfully.")
+    successes[1] = true
+else
+    warn("Your executor does not support the require function, the autofarm will not work without the setthreadidentity method. A level 8 executor is recommended for complete functionality.")
+    successes[1] = false
+end
+
+local canGetMeta = false
+
+local testMetatable = { __test = true }
+local testObject = setmetatable({}, testMetatable)
+local success, returnedMetatable = pcall(getrawmetatable, testObject)
+
+if success then
+    canGetMeta = true
+    successes[5] = true
+else 
+    successes[5] = false
+end
+
 function initiateLoading()
     isLoading = true
     local RunService = game:GetService("RunService")
@@ -1097,9 +1130,9 @@ function initiateLoading()
     local successesValue = 0
 
     for _,v in successes do
+        print(successes[6])
 	    if v then
 		    successesValue += 1
-        else
 	    end
     end
 
@@ -1112,13 +1145,13 @@ function initiateLoading()
 
 	    if line > #txtSuccess then 
 		    local text = ""
-		
+
 		    if not successes[1] or not successes[4] then
 			    text = "EXECUTOR LEVEL TOO LOW."
             else
                 text = "EXECUTOR LEVEL IS OPTIMAL"
 		    end
-		
+
 		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess .. " tests passed. " .. text
 		    for i,v in errorMsgs do
 			    if not successes[i] and i ~= 2 then
@@ -1376,20 +1409,6 @@ local function pathCalculator() -- deprecated
     end
 end
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local success, errorMessage = pcall(function()
-    Global = require(ReplicatedStorage.SharedModules.Global)
-end)
-
-if success then
-    print("Global module required successfully.")
-    successes[1] = true
-else
-    warn("Your executor does not support the require function, the autofarm will not work without the setthreadidentity method. A level 8 executor is recommended for complete functionality.")
-    successes[1] = false
-end
-
 local bodyVelocity = nil
 local bodyGyro = nil
 isRagdollFlying = false
@@ -1628,19 +1647,6 @@ local function closestVender()
     local closestVenderDistance = math.huge
     local finalVenderPos = nil
     local venders = {}
-end
-
-local canGetMeta = false
-
-local testMetatable = { __test = true }
-local testObject = setmetatable({}, testMetatable)
-local success, returnedMetatable = pcall(getrawmetatable, testObject)
-
-if success then
-    canGetMeta = true
-    successes[5] = true
-else 
-    successes[5] = false
 end
 
 local function nearestOreFarm() -- deprecated
