@@ -1315,7 +1315,8 @@ local function calculatePaths() -- deprecated
     local unknown = 0
     
     for i, ore in pairs(ores) do
-        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) then
+    local capacity = plrgui.InventoryUI.Inventory.Container.BottomBar.Body.NumSlots.Text
+        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) and capacity ~= "30 / 30" then
             collisionOff(ore)
             local modifier = 0
             if string.find(ore.Parent.Name, "Vein") then
@@ -1420,7 +1421,7 @@ function enableRagdollFly()
     if isRagdollFlying then return end
 
     Global.PlayerCharacter:Ragdoll(nil, true)
-    task.wait(0.5)
+    task.wait(0.25)
     
     character = wrkspceEnt.Players[plrname]
     hrp = character.HumanoidRootPart
@@ -1868,7 +1869,7 @@ local function pathMine(ore)
     local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
     local equippeditem = playerChar:GetEquippedItem()
     local pickaxeItem = playerChar:GetItem(pickaxeSelected)
-    wait(0.5)
+    wait(0.25)
     pickaxeItem.CameraFreeLook = true
     local orePos = ore.PrimaryPart.Position
     task.spawn(function()
@@ -2057,7 +2058,6 @@ local function parsePath(lines)
 	lastCheckpoint = nil
 	checkpointIndex = 0
     for i, line in ipairs(lines) do
-        local capacity = plrgui.InventoryUI.Inventory.Container.BottomBar.Body.NumSlots.Text
         line = line:match("^%s*(.-)%s*$")
 
         local action, x, y, z = line:match("^(%w+),%s*([%-%.%d]+),%s*([%-%.%d]+),%s*([%-%.%d]+)")
@@ -2096,7 +2096,7 @@ local function parsePath(lines)
 
         else
             local oreName, oreID = line:match("^mine,%s*([^,]+)%s*,%s*([^,]+)%s*$")
-            if oreName and oreID and capacity ~= "30 / 30" then
+            if oreName and oreID then
                 print(oreName)
                 print(oreID)
 				lastCheckpoint.Color = Color3.fromRGB(0,150,0)
@@ -2238,6 +2238,12 @@ executorBenchmark.MouseButton1Down:Connect(function()
     end
 end)
 pathedAutoFarm.MouseButton1Down:Connect(function()
+    lines[6] = webhookSelector.Text
+    writefile(settingsCfg, table.concat(lines, "\n"))
+
+    lines[2] = pathSelector.Text
+    writefile(settingsCfg, table.concat(lines, "\n"))
+
     local currentContent = readfile(settingsCfg)
     local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
 
