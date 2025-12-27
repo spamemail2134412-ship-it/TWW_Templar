@@ -146,7 +146,7 @@ until not Next or smallestServer
     end
 end
 
-local attributeSet = game.Workspace:FindFirstChild("attributeSet")
+attributeSet = game.Workspace:FindFirstChild("attributeSet")
 
 if not attributeSet then
     attributeSet = Instance.new("BoolValue")
@@ -155,7 +155,7 @@ if not attributeSet then
     attributeSet = game.Workspace:WaitForChild("attributeSet")
 end
 
-local function generateUniqueID(ore)
+function generateUniqueID(ore)
     local primary = ore.PrimaryPart or ore:FindFirstChildWhichIsA("BasePart")
     if not primary then return nil end
     
@@ -172,20 +172,6 @@ local function generateUniqueID(ore)
     )
     
     return id
-end
-
-if attributeSet.Value == false then
-    attributeSet.Value = true
-    local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-    for _, model in ipairs(oreFolder:GetDescendants()) do
-        if model:IsA("Model") then
-            local id = generateUniqueID(model)
-            if id then
-                model:SetAttribute("UniqueOreID", id)
-                print("Assigned:", id)
-            end
-        end
-    end
 end
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
@@ -1039,6 +1025,19 @@ function createTXTFile()
 
             print("File created at:", fullPath)
             nameSelector.Visible = false
+            if attributeSet.Value == false then
+                attributeSet.Value = true
+                local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+                for _, model in ipairs(oreFolder:GetDescendants()) do
+                if model:IsA("Model") then
+                    local id = generateUniqueID(model)
+                    if id then
+                        model:SetAttribute("UniqueOreID", id)
+                        print("Assigned:", id)
+                    end
+                end
+            end
+        end
             return fullPath
         end
     end
@@ -1315,8 +1314,7 @@ local function calculatePaths() -- deprecated
     local unknown = 0
     
     for i, ore in pairs(ores) do
-    local capacity = plrgui.InventoryUI.Inventory.Container.BottomBar.Body.NumSlots.Text
-        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) and capacity ~= "30 / 30" then
+        if ore:IsA("Model") and ore.DepositInfo.OreRemaining.Value > 0 and table.find(_G["Tier" .. pickaxeIndex - 1], ore.Parent.Name) then
             collisionOff(ore)
             local modifier = 0
             if string.find(ore.Parent.Name, "Vein") then
@@ -1848,20 +1846,21 @@ local isAFRunning = false
 
 local function sell()
     disableRagdollFly()
-    input("pressbutton", Enum.KeyCode.F, 1, 3)
+    input("pressbutton", Enum.KeyCode.F, 0.25, 3)
 end
 
 local function oreScan()
     for i,v in pairs(wrkspceInt.DroppedItems:GetChildren()) do
         if string.find(v.Name, "Ore") then
-            input("pressbutton", Enum.KeyCode.E, 1, 1)
-            wait(1)
+            return true
         end
     end
 end
 
 local function pathMine(ore)
-    if not ore or ore.DepositInfo.OreRemaining.Value == 0 then return end
+    pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
+    currentItems = #pc.InventoryContainer.Items
+    if not ore or not ore.DepositInfo.OreRemaining.Value == 0 or currentItems == 30 then return end
     hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
     disableRagdollFly()
     wait(0.1)
@@ -1873,7 +1872,7 @@ local function pathMine(ore)
     pickaxeItem.CameraFreeLook = true
     local orePos = ore.PrimaryPart.Position
     task.spawn(function()
-        while ore.DepositInfo.OreRemaining.Value > 0 do
+        while ore.DepositInfo.OreRemaining.Value > 0 and #pc.InventoryContainer.Items < 30 do
             wait(0.1)
             hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
                 pickaxeItem:Swing()
@@ -1883,7 +1882,11 @@ local function pathMine(ore)
         input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
     end
-    oreScan()
+    getOre = oreScan()
+    if getOre then
+        input("pressbutton", Enum.KeyCode.E, 1, 1)
+        wait(1)
+    end
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
@@ -2046,10 +2049,8 @@ end
 
 local function parsePath(lines)
     task.spawn(function()
-        plrInfo = plrgui:WaitForChild("PlayerInfo")
-        money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
-        gsubMoney = money:gsub("[$,]", "")
-        currentMoney = tonumber(gsubMoney)
+        pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
+        currentMoney = pd.Data.Bucks
     end)
 	local totalCheckpoints = preProcessor(lines)
     moneyEarnt = 0
@@ -2121,10 +2122,8 @@ local function parsePath(lines)
         end
     end
     local success, errorMsg = pcall(function()
-        money = plrInfo.StatBars.PlayerDataFrame.Bucks.Text
-        local moneyEarntGSub = money:gsub("[$,]", "")
-        moneyEarnt = tonumber(moneyEarntGSub) - currentMoney
-        moneyEarnt = tostring(moneyEarnt)
+        money = pd.Data.Bucks
+        moneyEarnt = money - currentMoney
     end)
     if errorMsg then
         moneyEarnt = "ERROR: moneyEarnt is nil."
@@ -2238,6 +2237,21 @@ executorBenchmark.MouseButton1Down:Connect(function()
     end
 end)
 pathedAutoFarm.MouseButton1Down:Connect(function()
+
+    if attributeSet.Value == false then
+        attributeSet.Value = true
+        local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+        for _, model in ipairs(oreFolder:GetDescendants()) do
+            if model:IsA("Model") then
+                local id = generateUniqueID(model)
+                if id then
+                    model:SetAttribute("UniqueOreID", id)
+                    print("Assigned:", id)
+             end
+            end
+        end
+    end
+
     lines[6] = webhookSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
 
