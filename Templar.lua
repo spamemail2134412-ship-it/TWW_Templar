@@ -1116,7 +1116,7 @@ function initiateLoading()
                 text = "EXECUTOR LEVEL IS OPTIMAL"
 		    end
 		
-		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess .. " tests passed. " .. text
+		    printToLabel.Text = printToLabel.Text .. "\n" .. "Summary: " .. successesValue .. "/" .. #txtSuccess - 1 .. " tests passed. " .. text
 		    for i,v in errorMsgs do
 			    if not successes[i] and i ~= 2 then
 				    printToLabel.Text = printToLabel.Text .. "\n\n" .. v 
@@ -1860,24 +1860,18 @@ local function pathMine(ore)
     wait(0.1)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
     local playerChar = require(game:GetService("ReplicatedStorage").Modules.Character.PlayerCharacter)
-    if canGetMeta then
-        local equippeditem = playerChar:GetEquippedItem()
-        local pickaxeItem = playerChar:GetItem(pickaxeSelected)
-        wait(0.5)
-        pickaxeItem.CameraFreeLook = true
-    end
+    local equippeditem = playerChar:GetEquippedItem()
+    local pickaxeItem = playerChar:GetItem(pickaxeSelected)
+    wait(0.5)
+    pickaxeItem.CameraFreeLook = true
     local orePos = ore.PrimaryPart.Position
     task.spawn(function()
         while ore.DepositInfo.OreRemaining.Value > 0 do
             wait(0.1)
             hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
-            if canGetMeta then 
                 pickaxeItem:Swing()
-            else
-                input("holdLeftClick")
             end
-        end
-    end)
+        end)
     while ore.DepositInfo.OreRemaining.Value > 0 do
         input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
@@ -1929,10 +1923,13 @@ local function callNotif(title, extra, description)
     notifDescription.Text = ""
 end
 
+local HttpService = game:GetService("HttpService")
+local req = request or http_request or syn.request
+
 local function callWebhook(title, extra, description, infoTitle, info, extra2)
     local HttpService = game:GetService("HttpService")
 
-    local webhookUrl = webhookSelector.Text
+    local webhookUrl = "https://discordapp.com/api/webhooks/1453049758703812750/YONDVDt56RhwbKntGqgqW4R94aBtJbvUs1xoQQdY4753CuTwRvf673zDvPPqR47--_NR"
 
 local fields = {
     {
@@ -1964,16 +1961,15 @@ end
 	        }
 	    }
 
-local response = HttpService:RequestAsync({
-	Url = webhookUrl,
-	Method = "POST",
-	Headers = {
-		["Content-Type"] = "application/json"
-	},
-	Body = HttpService:JSONEncode(data)
+req({
+    Url = webhookUrl,
+    Method = "POST",
+    Headers = {
+        ["Content-Type"] = "application/json"
+    },
+    Body = HttpService:JSONEncode(data)
 })
 
-print(response.StatusCode)
 end
 
 local function preProcessor(lines)
@@ -2102,7 +2098,16 @@ local function parsePath(lines)
             elseif spawnLookup[line] then
                 pcall(function() automineSpawn(line) end)
                 callNotif("Spawning at ", line, line)
-                if webhookEnabled == "true" then pcall(function() callWebhook("Spawning at ", line, "Beginning path at ", line, nil, nil) end) end
+                if webhookEnabled == "true" then 
+                    print("Spawned")
+                    pcall(function()
+                        callWebhook(
+                        "Spawning at " .. line,
+                        "Beginning path at " .. line,
+                        line
+                    )
+                    end)
+                end
             else
                 warn("Unknown line:", line)
 				callNotif("Unknown line.", "", line)
@@ -2166,7 +2171,7 @@ local function pathAutomine(customCall)
 				callNotif("Server hopping...", "", "Reason: Player death.")
 				if webhookEnabled == "true" then
 					pcall(function()
-						callWebhook("Server hopping...", "", "Reason: Player death.", "", nil, nil) 
+						callWebhook("Server hopping...", "", "Reason: Player death.", "", "", "") 
 					end) 
 				end 
 				tp() 
@@ -2178,7 +2183,13 @@ local function pathAutomine(customCall)
 			callNotif("Server hopping...", "", "Reason: End of path.") 
 			if webhookEnabled == "true" then 
 				pcall(function()
-					callWebhook("Server hopping...", "", "Reason: End of path.", "", "Money earnt (from path)", "$" .. moneyEarnt)
+					callWebhook(
+                    "Server hopping...",
+                    "",
+                    "Reason: End of path.",
+                    "Money earnt (from path)",
+                    "$" .. moneyEarnt
+                    )
 				end) 
 			end 
 			tp()
@@ -2225,7 +2236,7 @@ pathedAutoFarm.MouseButton1Down:Connect(function()
     local currentState = currentContent:match("isAutoFarmRunning%s*=%s*(%a+)")
 
     if currentState == "false" or currentState == "nil" then
-        pcall(function() callWebhook("Starting Path...", "", "Path started: " .. pathSelector.Text, "", nil, nil) end)
+        pcall(function() callWebhook("Starting Path...", "", "Path started: " .. pathSelector.Text, "", "", "") end)
         pathedAutoFarm.BackgroundColor3 = Color3.fromRGB(0,75,0)
 
         lines[3] = "isAutoFarmRunning = true"
