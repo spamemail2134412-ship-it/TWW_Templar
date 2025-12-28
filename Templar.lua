@@ -1859,8 +1859,8 @@ end
 
 local function pathMine(ore)
     pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
-    currentItems = #pc.InventoryContainer.Items
-    if not ore or not ore.DepositInfo.OreRemaining.Value == 0 or currentItems == 30 then return end
+    currentItems = #pd.InventoryContainer.Items
+    if ore.DepositInfo.OreRemaining.Value == 0 or currentItems == 30 then return end
     hrp = wrkspceEnt.Players[plrname].HumanoidRootPart
     disableRagdollFly()
     wait(0.1)
@@ -1872,7 +1872,7 @@ local function pathMine(ore)
     pickaxeItem.CameraFreeLook = true
     local orePos = ore.PrimaryPart.Position
     task.spawn(function()
-        while ore.DepositInfo.OreRemaining.Value > 0 and #pc.InventoryContainer.Items < 30 do
+        while ore.DepositInfo.OreRemaining.Value > 0 and #pd.InventoryContainer.Items < 30 do
             wait(0.1)
             hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
                 pickaxeItem:Swing()
@@ -1939,7 +1939,7 @@ local req = request or http_request or syn.request
 local function callWebhook(title, extra, description, infoTitle, info, extra2)
     local HttpService = game:GetService("HttpService")
 
-    local webhookUrl = "https://discordapp.com/api/webhooks/1453049758703812750/YONDVDt56RhwbKntGqgqW4R94aBtJbvUs1xoQQdY4753CuTwRvf673zDvPPqR47--_NR"
+    local webhookUrl = lines[6]
 
 local fields = {
     {
@@ -2048,6 +2048,21 @@ local function preProcessor(lines)
 end
 
 local function parsePath(lines)
+
+    if attributeSet.Value == false then
+        attributeSet.Value = true
+        local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+        for _, model in ipairs(oreFolder:GetDescendants()) do
+            if model:IsA("Model") then
+                local id = generateUniqueID(model)
+                if id then
+                    model:SetAttribute("UniqueOreID", id)
+                    print("Assigned:", id)
+             end
+            end
+        end
+    end
+
     task.spawn(function()
         pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
         currentMoney = pd.Data.Bucks
@@ -2237,20 +2252,6 @@ executorBenchmark.MouseButton1Down:Connect(function()
     end
 end)
 pathedAutoFarm.MouseButton1Down:Connect(function()
-
-    if attributeSet.Value == false then
-        attributeSet.Value = true
-        local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-        for _, model in ipairs(oreFolder:GetDescendants()) do
-            if model:IsA("Model") then
-                local id = generateUniqueID(model)
-                if id then
-                    model:SetAttribute("UniqueOreID", id)
-                    print("Assigned:", id)
-             end
-            end
-        end
-    end
 
     lines[6] = webhookSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
