@@ -1876,9 +1876,9 @@ local function pathMine(ore)
             wait(0.1)
             hrp.CFrame = CFrame.lookAt(hrp.Position, Vector3.new(orePos.X, hrp.Position.Y, orePos.Z))
                 pickaxeItem:Swing()
-            end
-        end)
-    while ore.DepositInfo.OreRemaining.Value > 0 do
+        end
+    end)
+    while ore.DepositInfo.OreRemaining.Value > 0 and #pd.InventoryContainer.Items < 30 do
         input("pressbutton", Enum.KeyCode.E, 1, 1)
         wait(1)
     end
