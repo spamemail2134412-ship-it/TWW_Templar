@@ -1,6 +1,7 @@
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
+wait(5)
 player = game.Players.LocalPlayer
 plrgui = player:WaitForChild("PlayerGui")
 plrname = player.Name
@@ -361,6 +362,8 @@ sliderUIDetector.DragEnd:Connect(function()
         text = pickaxeTiers[multiplier + 1]
     end
     pickaxeSelected = pickaxeTiers[multiplier + 1]
+    lines[1] = pickaxeTiers[multiplier + 1]
+    writefile(settingsCfg, table.concat(lines, "\n"))
 end)
 
 local dragDetector = Instance.new("UIDragDetector")
@@ -1846,7 +1849,7 @@ local isAFRunning = false
 
 local function sell()
     disableRagdollFly()
-    input("pressbutton", Enum.KeyCode.F, 0.25, 3)
+    input("pressbutton", Enum.KeyCode.F, 0.5, 3)
 end
 
 local function oreScan()
