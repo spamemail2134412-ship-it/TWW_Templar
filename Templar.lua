@@ -141,9 +141,47 @@ until not Next or smallestServer
         print("Teleporting to server with " .. smallestPlayers .. " players")
         TeleportService:TeleportToPlaceInstance(game.PlaceId, smallestServer.id, game.Players.LocalPlayer)
     else
-        local randomServer = allServers[math.random(1, #allServers)]
+        local success, errorMsg = pcall(function()
+            local randomServer = allServers[math.random(1, #allServers)]
+        end)
+        if errorMsg then
+            endLoop = false
+            while not endLoop do
+                wait(5)
+                repeat
+                local ServerList = ListServers(Next)
+                if ServerList and ServerList.data then
+                    for _, server in pairs(ServerList.data) do
+                        if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                            table.insert(allServers, server)
+                            if server.playing < smallestPlayers then
+                                smallestPlayers = server.playing
+                                smallestServer = server
+                            end
+                        end
+                    end
+        
+                    Next = ServerList.nextPageCursor
+                    else
+                        break
+                    end
+
+                until not Next or smallestServer
+
+                if smallestServer then
+                    print("Teleporting to server with " .. smallestPlayers .. " players")
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, smallestServer.id, game.Players.LocalPlayer)
+                else
+                    local success, errorMsg = pcall(function()
+                        local randomServer = allServers[math.random(1, #allServers)]
+                    end)
+                end
+                if success then break end
+            end
+        end
         warn("Could not find lowest player server. Joining random server...")
         TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer.id, game.Players.LocalPlayer)
+        endLoop = true
     end
 end
 
