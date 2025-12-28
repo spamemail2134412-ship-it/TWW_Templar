@@ -2194,7 +2194,15 @@ local function pathAutomine(customCall)
 						callWebhook("Server hopping...", "", "Reason: Player death.", "", "", "") 
 					end) 
 				end 
-				tp() 
+				tp()
+                elseif pc.CanBreakFree{} then
+                callNotif("Server hopping...", "", "Reason: Player lassoed.")
+				if webhookEnabled == "true" then
+					pcall(function()
+						callWebhook("Server hopping...", "", "Reason: Player lassoed.", "", "", "") 
+					end) 
+				end
+                tp()
 			end
         until pathCompleted == true and finishedKeypress == true
         wait(1)
