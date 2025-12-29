@@ -23,7 +23,7 @@ Templar is an autofarm script that is currently in development for https://www.r
   - Paste the URL in the text box and configure however you want.
   
   What executor do I use?:
-  - A level 8 executor is recommended or the script may not work, use Velocity or Volcano. Both are free.
+  - A level 8 executor is recommended or the script may not work, use Bunni.lol as a free alternative, or Potassium as a paid option (Best value).
   - Executor compatability can be tested on first script startup, or by accessing settings. (Lacking setthreadidentity or request is considered script breaking)
   
   Features:
