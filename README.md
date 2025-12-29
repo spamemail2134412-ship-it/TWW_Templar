@@ -15,6 +15,13 @@ Templar is an autofarm script that is currently in development for https://www.r
   - Your executor's auto-execute setting MUST BE TURNED ON FOR THE AUTOFARM TO WORK. Otherwise, server hopping will not work.
   - If your executor does not have auto execute, then download velocity or volcano which both have the functionality.
 
+  Webhook Usage:
+  - Webhooks are a useful way to track autofarm progress whilst running the game in the background and provide live updates on path progress.
+  - They can be enabled in the Webhooks section of the gui and require a webhook URL to function.
+  - To create a webhook URL a discord server is required.
+  - Go to: Server Settings --> Integrations --> Webhooks --> New Webhook --> Right click created webhook --> Copy URL
+  - Paste the URL in the text box and configure however you want.
+  
   What executor do I use?:
   - A level 8 executor is recommended or the script may not work, use Velocity or Volcano. Both are free.
   - Executor compatability can be tested on first script startup, or by accessing settings. (Lacking setthreadidentity or request is considered script breaking)
