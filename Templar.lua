@@ -207,18 +207,20 @@ function generateUniqueID(ore)
     return id
 end
 
-if attributeSet.Value == false then
-    attributeSet.Value = true
-    local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-    for _, model in ipairs(oreFolder:GetDescendants()) do
-        if model:IsA("Model") then
-            local id = generateUniqueID(model)
-            if id then
-                model:SetAttribute("UniqueOreID", id)
-                print("Assigned:", id)
+function setAttributes()
+    if attributeSet.Value == false then
+        attributeSet.Value = true
+        local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+        for _, model in ipairs(oreFolder:GetDescendants()) do
+            if model:IsA("Model") then
+                local id = generateUniqueID(model)
+                if id then
+                    model:SetAttribute("UniqueOreID", id)
+                    print("Assigned:", id)
+                end
             end
-         end
-     end
+        end
+    end
 end
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
@@ -231,7 +233,6 @@ taskbarButtons = {}
 pickaxeSelected = lines[1]
 pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
-local old = {9, 137, 207}
 local colourTheme = {255, 255, 255}
 
 _G.Tier0 = {"Coal", "Copper"}
@@ -1167,7 +1168,6 @@ function initiateLoading()
     local successesValue = 0
 
     for _,v in successes do
-        print(successes[6])
 	    if v then
 		    successesValue += 1
 	    end
@@ -1830,7 +1830,6 @@ end
 UserInputService.InputBegan:Connect(onClick)
 
 local function startRecording()
-    print(recording)
     recording = not recording
 end
 
@@ -2080,6 +2079,7 @@ local function preProcessor(lines)
 end
 
 local function parsePath(lines)
+    setAttributes()
 
     task.spawn(function()
         pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
@@ -2314,6 +2314,7 @@ for _,table in pairs(recordSpawns) do
 end
 
 pathrecButton.MouseButton1Down:Connect(function()
+    setAttributes()
     local pathBool = pathRecorder.Visible
     isPathRecOn = false
     
@@ -2331,7 +2332,7 @@ end)
 
 recExit.MouseButton1Down:Connect(function()
     pathRecorder.Visible = false
-    startRecording()
+    UserInputService.InputBegan:Disconnect()
 end)
 
 recPosButton.MouseButton1Down:Connect(function()
@@ -2456,7 +2457,7 @@ Exit.MouseButton1Down:Connect(function()
     lines[6] = webhookSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
     if isPathRecOn == true then
-        startRecording()
+        UserInputService.InputBegan:Disconnect()
     end
 end)
 
