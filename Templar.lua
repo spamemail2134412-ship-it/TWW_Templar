@@ -1,7 +1,7 @@
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
-wait(5)
+
 player = game.Players.LocalPlayer
 plrgui = player:WaitForChild("PlayerGui")
 plrname = player.Name
@@ -195,22 +195,30 @@ if not attributeSet then
 end
 
 function generateUniqueID(ore)
+    if not ore or not ore:IsA("Model") then return nil end
     local primary = ore.PrimaryPart or ore:FindFirstChildWhichIsA("BasePart")
     if not primary then return nil end
-    
     local pos = primary.Position
-    local size = primary.Size
-    
-    local id = string.format("%s_%.0f_%.0f_%.0f_%.1f_%.1f_%.1f_%d",
-        ore.Parent.Name,
-        math.floor(pos.X),
-        math.floor(pos.Y),
-        math.floor(pos.Z),
-        size.X, size.Y, size.Z,
-        #ore:GetChildren()
-    )
-    
+    local x, y, z = math.floor(pos.X), math.floor(pos.Y), math.floor(pos.Z)
+    local id = string.format("%s_%d_%d_%d", ore.Parent.Name, x, y, z)
+    if not ore:GetAttribute("UniqueOreID") then
+        ore:SetAttribute("UniqueOreID", id)
+    end
     return id
+end
+
+if attributeSet.Value == false then
+    attributeSet.Value = true
+    local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
+    for _, model in ipairs(oreFolder:GetDescendants()) do
+        if model:IsA("Model") then
+            local id = generateUniqueID(model)
+            if id then
+                model:SetAttribute("UniqueOreID", id)
+                print("Assigned:", id)
+            end
+         end
+     end
 end
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
@@ -221,7 +229,7 @@ txtLabelExemption = {"webhookTXTLabel"}
 taskbarButtons = {}
 
 pickaxeSelected = lines[1]
-local pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
+pickaxeTiers = {"BasicPickaxe", "Tier1Pickaxe", "Tier2Pickaxe", "Tier3Pickaxe", "Tier4Pickaxe", "Tier5Pickaxe", "Tier6Pickaxe", "Tier7Pickaxe", "Tier8Pickaxe","Tier9Pickaxe"}
 
 local old = {9, 137, 207}
 local colourTheme = {255, 255, 255}
@@ -395,6 +403,7 @@ sliderUIDetector.DragEnd:Connect(function()
     
     if difference == 0 then
         text = pickaxeTiers[1]
+        multiplier = 0
     else
         multiplier = difference / 21
         text = pickaxeTiers[multiplier + 1]
@@ -1066,18 +1075,6 @@ function createTXTFile()
 
             print("File created at:", fullPath)
             nameSelector.Visible = false
-            if attributeSet.Value == false then
-                attributeSet.Value = true
-                local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-                for _, model in ipairs(oreFolder:GetDescendants()) do
-                if model:IsA("Model") then
-                    local id = generateUniqueID(model)
-                    if id then
-                        model:SetAttribute("UniqueOreID", id)
-                        print("Assigned:", id)
-                    end
-                end
-            end
         end
             return fullPath
         end
@@ -1651,8 +1648,8 @@ print(path.Status)
     	pathfindSuccess = true
     	disableRagdollFly()
     	return pathfindSuccess
-	end
 end
+
 
 local virtualinputmanager = game:GetService("VirtualInputManager")
 
@@ -1784,28 +1781,20 @@ end
 local camera = workspace.CurrentCamera
 
 local function onClick(input, gameProcessed)
-    if not recording then return end
-    if gameProcessed then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local mousePos = input.Position
-        local ray = camera:ScreenPointToRay(mousePos.X, mousePos.Y)
+    if not recording or gameProcessed then return end
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+    if input.UserInputState ~= Enum.UserInputState.Begin then return end
 
-        local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
-        if result then
-            local part = result.Instance
+    local ray = workspace.CurrentCamera:ScreenPointToRay(input.Position.X, input.Position.Y)
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+    if not result then return end
 
-            if part.Parent and part.Parent:IsA("Model") and string.find(part.Name, "Rock") then
-                print("Ore: ", part.Parent.Name)
-                print("Ore Type: ", part.Parent.Parent.Name)
-                oreType = part.Parent.Parent
-                orePart = part.Parent.PrimaryPart
-                oreID = part.Parent:GetAttribute("UniqueOreID")
-                print(oreID)
-                recordMine()
-            end
-        else
-            print("Nothing clicked, data not recorded.")
-        end
+    local part = result.Instance
+    if part.Parent and part.Parent:IsA("Model") and string.find(part.Name, "Rock") then
+        oreType = part.Parent.Parent
+        orePart = part.Parent.PrimaryPart
+        oreID = part.Parent:GetAttribute("UniqueOreID")
+        recordMine()
     end
 end
 
@@ -1838,9 +1827,11 @@ local function recordSpawn(spawnLocation)
     appendfile(fullPath, text)
 end
 
+UserInputService.InputBegan:Connect(onClick)
+
 local function startRecording()
+    print(recording)
     recording = not recording
-    UserInputService.InputBegan:Connect(onClick)
 end
 
 local recordSpawns = {
@@ -2089,20 +2080,6 @@ local function preProcessor(lines)
 end
 
 local function parsePath(lines)
-
-    if attributeSet.Value == false then
-        attributeSet.Value = true
-        local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
-        for _, model in ipairs(oreFolder:GetDescendants()) do
-            if model:IsA("Model") then
-                local id = generateUniqueID(model)
-                if id then
-                    model:SetAttribute("UniqueOreID", id)
-                    print("Assigned:", id)
-             end
-            end
-        end
-    end
 
     task.spawn(function()
         pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
