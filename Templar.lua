@@ -2,6 +2,10 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
+while game.Players.LocalPlayer.PlayerGui:FindFirstChild("LoadingGate") do
+    wait()
+end
+
 player = game.Players.LocalPlayer
 plrgui = player:WaitForChild("PlayerGui")
 plrname = player.Name
@@ -222,6 +226,8 @@ function setAttributes()
         end
     end
 end
+
+setAttributes()
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
 fullExemption = {"automineTab", "webhooksTab", "configTab", "notifFrame"}
@@ -1763,8 +1769,6 @@ local raycastParams = RaycastParams.new()
 raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 raycastParams.FilterDescendantsInstances = {character} -- ignore the player
 
-local recording = false
-
 local oreType = nil
 local oreID = nil
 
@@ -1781,7 +1785,7 @@ end
 local camera = workspace.CurrentCamera
 
 local function onClick(input, gameProcessed)
-    if not recording or gameProcessed then return end
+    if gameProcessed then return end
     if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
     if input.UserInputState ~= Enum.UserInputState.Begin then return end
 
@@ -1827,10 +1831,10 @@ local function recordSpawn(spawnLocation)
     appendfile(fullPath, text)
 end
 
-UserInputService.InputBegan:Connect(onClick)
+UISConnection = nil
 
 local function startRecording()
-    recording = not recording
+    UISConnection = UserInputService.InputBegan:Connect(onClick)
 end
 
 local recordSpawns = {
@@ -1921,17 +1925,32 @@ local function pathMine(ore)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
-local function mineOre(oreName, oreID)
+local function oreSearch()
     local ores = workspace.WORKSPACE_Interactables.Mining.OreDeposits[oreName]:GetChildren()
-    
+    oreFetched = false
+
     for _,ore in pairs(ores) do
         if ore:GetAttribute("UniqueOreID") == oreID then
             print(id)
             targetOre = ore
+            oreFetched = true
             break
         end
     end
-    pathMine(targetOre)
+
+    return oreFetched, targetOre
+end
+
+local function mineOre(oreName, oreID)
+    oreFetched, targetOre = oreSearch()
+
+    if oreFetched then
+        pathMine(targetOre)
+    else
+        setAttributes()
+        oreFetched, targetOre = oreSearch()
+        pathMine(targetOre)
+    end
 end
 
 local spawnLookup = {}
@@ -2079,7 +2098,6 @@ local function preProcessor(lines)
 end
 
 local function parsePath(lines)
-    setAttributes()
 
     task.spawn(function()
         pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
@@ -2314,7 +2332,6 @@ for _,table in pairs(recordSpawns) do
 end
 
 pathrecButton.MouseButton1Down:Connect(function()
-    setAttributes()
     local pathBool = pathRecorder.Visible
     isPathRecOn = false
     
@@ -2332,7 +2349,7 @@ end)
 
 recExit.MouseButton1Down:Connect(function()
     pathRecorder.Visible = false
-    UserInputService.InputBegan:Disconnect()
+    UISConnection:Disconnect()
 end)
 
 recPosButton.MouseButton1Down:Connect(function()
@@ -2361,6 +2378,7 @@ overviewExit.MouseButton1Down:Connect(function()
     lines[2] = pathSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
     Templar:Destroy()
+    UISConnection:Disconnect()
 end)
 
 -- Settings button
@@ -2457,7 +2475,7 @@ Exit.MouseButton1Down:Connect(function()
     lines[6] = webhookSelector.Text
     writefile(settingsCfg, table.concat(lines, "\n"))
     if isPathRecOn == true then
-        UserInputService.InputBegan:Disconnect()
+        UISConnection:Disconnect()
     end
 end)
 
