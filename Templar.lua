@@ -2,8 +2,12 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
-while game.Players.LocalPlayer.PlayerGui:FindFirstChild("LoadingGate") do
-    wait()
+local loadingGate = game.Players.LocalPlayer.PlayerGui:FindFirstChild("LoadingGate")
+
+if loadingGate then
+    while loadingGate.Enabled do
+        wait()
+    end
 end
 
 player = game.Players.LocalPlayer
@@ -211,8 +215,8 @@ function generateUniqueID(ore)
     return id
 end
 
-function setAttributes()
-    if attributeSet.Value == false then
+function setAttributes(forced)
+    if forced or attributeSet.Value == false then
         attributeSet.Value = true
         local oreFolder = workspace.WORKSPACE_Interactables.Mining.OreDeposits
         for _, model in ipairs(oreFolder:GetDescendants()) do
@@ -226,8 +230,6 @@ function setAttributes()
         end
     end
 end
-
-setAttributes()
 
 exemption = {"startAutoFarm", "settingsFrame", "pathedAutoFarm", "pathSelector", "pathrecButton", "executorBenchmark", "webhookSelector", "webhookTXTLabel", "webhookActive"}
 fullExemption = {"automineTab", "webhooksTab", "configTab", "notifFrame"}
@@ -1798,6 +1800,9 @@ local function onClick(input, gameProcessed)
         oreType = part.Parent.Parent
         orePart = part.Parent.PrimaryPart
         oreID = part.Parent:GetAttribute("UniqueOreID")
+        if not oreID then
+            setAttributes(true)
+        end
         recordMine()
     end
 end
@@ -1925,7 +1930,7 @@ local function pathMine(ore)
     input("pressbutton", Enum.KeyCode.Four, 1, 1)
 end
 
-local function oreSearch()
+local function oreSearch(oreName, oreID)
     local ores = workspace.WORKSPACE_Interactables.Mining.OreDeposits[oreName]:GetChildren()
     oreFetched = false
 
@@ -1942,13 +1947,14 @@ local function oreSearch()
 end
 
 local function mineOre(oreName, oreID)
-    oreFetched, targetOre = oreSearch()
+    oreFetched, targetOre = oreSearch(oreName, oreID)
 
     if oreFetched then
+        print("i did indeed fetch")
         pathMine(targetOre)
     else
-        setAttributes()
-        oreFetched, targetOre = oreSearch()
+        setAttributes(true)
+        oreFetched, targetOre = oreSearch(oreName, oreID)
         pathMine(targetOre)
     end
 end
@@ -2098,7 +2104,7 @@ local function preProcessor(lines)
 end
 
 local function parsePath(lines)
-
+    setAttributes()
     task.spawn(function()
         pd = require(game.ReplicatedStorage.Modules.System.PlayerData)
         currentMoney = pd.Data.Bucks
@@ -2332,6 +2338,7 @@ for _,table in pairs(recordSpawns) do
 end
 
 pathrecButton.MouseButton1Down:Connect(function()
+    setAttributes()
     local pathBool = pathRecorder.Visible
     isPathRecOn = false
     
