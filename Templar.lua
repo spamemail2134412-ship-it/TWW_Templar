@@ -67,9 +67,9 @@ local function newFile(path)
 end
 
 local function createFile(file)
-	if file.item == "folder" and file.active == false then
+	if file.type == "folder" and file.active == false then
 		newFolder(file.path)
-	elseif file.item == "file" and file.active == false then
+	elseif file.type == "file" and file.active == false then
 		newFile(file.path)
 	end
 end
