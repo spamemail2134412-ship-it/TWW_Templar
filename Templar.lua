@@ -58,7 +58,7 @@ local function newFile(path)
 	if not
 		pcall(function()
 			writefile(path, settingsText)
-			print("Settings config created at: " .. fullFolderPath)
+			print("Settings config created at: " .. path)
 			return true -- successes[3] and successes[2]
 		end)
 	then
