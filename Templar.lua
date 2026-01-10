@@ -1177,16 +1177,16 @@ function initiateLoading()
 
     for _,v in successes do
 	    if v then
-		    successesValue += 1
+		    successesValue = successesValue + 1
 	    end
     end
 
     local connection
 
     connection = RunService.Heartbeat:Connect(function(dt)
-	    acc += dt
+	    acc = acc + dt
 	    if acc < interval then return end
-	    acc -= interval
+	    acc = acc - interval
 
 	    if line > #txtSuccess then 
 		    local text = ""
@@ -1214,7 +1214,7 @@ function initiateLoading()
 	if char > #currentText then
 		completedLines = completedLines .. string.format('<font color="rgb(%s)">%s</font>\n', color, currentText)
 		printToLabel.Text = completedLines
-		line += 1
+		line = line + 1
 		char = 1
 		return
 	end
@@ -1226,7 +1226,7 @@ function initiateLoading()
 
 	printToLabel.Text = completedLines .. string.format('<font color="rgb(%s)">%s%s</font>', color, confirmed, displayChar)
 
-	char += 1
+	char = char + 1
     end)
 end
 
@@ -2050,7 +2050,7 @@ local function preProcessor(lines)
 			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
             print(position)
 			if action == "move" then
-                trackMoves += 1
+                trackMoves = trackMoves + 1
                 local a = lastWaypointPos
                 local b = position
                 local dir = b - a
@@ -2085,7 +2085,7 @@ local function preProcessor(lines)
                 lastWaypointPos = position
 			end
 		elseif action and isFirst then
-            trackMoves += 1
+            trackMoves = trackMoves + 1
 			local position = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
 			isFirst = false
 			lastWaypointPos = position
@@ -2129,7 +2129,7 @@ local function parsePath(lines)
                 if checkpointIndex >= totalCheckpoints then
                     break
                 end
-				checkpointIndex += 1
+				checkpointIndex = checkpointIndex + 1
                 if first then
 				    lastCheckpoint = game.Workspace.Path:FindFirstChild("part" .. checkpointIndex)
                     lastCheckpoint.Color = Color3.fromRGB(13, 105, 172)
@@ -2267,6 +2267,17 @@ local function pathAutomine(customCall)
     end
 end
 
+local function intervalRecord() -- unused, theoretical update.
+    abortRecord = false
+    interval = 0.1
+    
+    task.spawn(function()
+        while abortRecord == false do
+            recordPosition()
+            wait(interval)
+        end
+    end)
+end
 
 task.spawn(function()
     pathAutomine()
@@ -2342,13 +2353,13 @@ pathrecButton.MouseButton1Down:Connect(function()
     local pathBool = pathRecorder.Visible
     isPathRecOn = false
     
-    if pathBool == false then
+    if not pathBool then
         createTXTFile()
         startRecording()
         pathRecorder.Visible = true
         isPathRecOn = true
     else
-        startRecording()
+        UISConnection:Disconnect()
         pathRecorder.Visible = false
         isPathRecOn = false
     end
