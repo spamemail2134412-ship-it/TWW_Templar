@@ -17,32 +17,8 @@ plrname = player.Name
 local successes = {}
 
 if plrgui:FindFirstChild("Templar") then
-return
+	return
 else
-
-local parentDirectory = "../"
-local folderName = "TWW_Templar"
-local fullFolderPath = parentDirectory .. folderName
-
-if not game.Workspace:FindFirstChild("Path") then
-        folder = Instance.new("Folder")
-        folder.Parent = game.Workspace
-        folder.Name = "Path"
-end
-
-sortedOreIndex = {}
-
-if isfolder(folderName) then
-    print("Paths folder already exists.")
-    successes[6] = true
-else
-    if not pcall(function() makefolder(folderName) print("Path folder created at: " .. fullFolderPath) successes[6] = true end) then
-        print("Function makefolder not supported.")
-        successes[6] =  false
-    end
-end
-
-settingsCfg = "TWW_Templar/settings.cfg"
 
 local settingsText = [[
 BasicPickaxe
@@ -54,26 +30,62 @@ firstStartUp = true
 webhookEnabled = false
 ]]
 
-if isfile(settingsCfg) then
-    print("Settings config already exists.")
-    successes[3] = true
-    successes[2] = true
-else
-    success, errorMessage = pcall(function()
-        writefile(settingsCfg, settingsText)
-        print("Settings config created at: " .. fullFolderPath)
-        successes[3] = true
-        successes[2] = true
-    end)
-    if errorMessage then
-        print("Method writefile not supported.")
-        successes[3] = false
-        successes[2] = false
-    end
+local files = {
+		{path = "TWW_Templar", type = "folder", active = isfolder(path)},
+		{path = "TWW_Templar/settings.cfg", type = "file", contents = settingsText, active = isfile(path)}
+	}
+
+if not game.Workspace:FindFirstChild("Path") then
+	folder = Instance.new("Folder")
+	folder.Parent = game.Workspace
+	folder.Name = "Path"
 end
 
+local function newFolder(path)
+	if not
+		pcall(function()
+			makefolder(path)
+			print("Path folder created at: " .. path)
+			return true -- successes[6]
+		end) 
+	then
+		print("Function makefolder not supported.")
+		return false -- successes[6]
+	end
+end
+
+local function newFile(path)
+	if not
+		pcall(function()
+			writefile(path, settingsText)
+			print("Settings config created at: " .. fullFolderPath)
+			return true -- successes[3] and successes[2]
+		end)
+	then
+		return false -- successes[3] and successes[2]	
+	end
+end
+
+local function createFile(file)
+	if file.item == "folder" and file.active == false then
+		newFolder(file.path)
+	elseif file.item == "file" and file.active == false then
+		newFile(file.path)
+	end
+end
+
+local function initialiseComponents()
+	for _, item in ipairs(files) do
+		createFile(item)
+	end
+end
+
+initialiseComponents()
+
+sortedOreIndex = {}
+
 local success, errorMessage = pcall(function()
-    local fileContent = readfile(settingsCfg)
+    local fileContent = readfile("TWW_Templar/settings.cfg")
     lines = {}
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(lines, line)
