@@ -31,8 +31,8 @@ webhookEnabled = false
 ]]
 
 local files = {
-		{path = "TWW_Templar", type = "folder", active = isfolder(path)},
-		{path = "TWW_Templar/settings.cfg", type = "file", contents = settingsText, active = isfile(path)}
+		{path = "TWW_Templar", type = "folder"},
+		{path = "TWW_Templar/settings.cfg", type = "file", contents = settingsText}
 	}
 
 if not game.Workspace:FindFirstChild("Path") then
@@ -67,9 +67,9 @@ local function newFile(path)
 end
 
 local function createFile(file)
-	if file.type == "folder" and file.active == false then
+	if file.type == "folder" then
 		newFolder(file.path)
-	elseif file.type == "file" and file.active == false then
+	elseif file.type == "file" then
 		newFile(file.path)
 	end
 end
