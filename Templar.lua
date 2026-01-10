@@ -48,9 +48,6 @@ local function newFolder(path)
 			print("Path folder created at: " .. path)
 			return true -- successes[6]
 		end) 
-	then
-		print("Function makefolder not supported.")
-		return false -- successes[6]
 	end
 end
 
@@ -61,8 +58,6 @@ local function newFile(path)
 			print("Settings config created at: " .. path)
 			return true -- successes[3] and successes[2]
 		end)
-	then
-		return false -- successes[3] and successes[2]	
 	end
 end
 
