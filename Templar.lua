@@ -30,9 +30,11 @@ firstStartUp = true
 webhookEnabled = false
 ]]
 
+settingsCfg = "TWW_Templar/settings.cfg"
+
 local files = {
-		{path = "TWW_Templar", type = "folder"},
-		{path = "TWW_Templar/settings.cfg", type = "file", contents = settingsText}
+		{path = "TWW_Templar", fileType = "folder"},
+		{path = "TWW_Templar/settings.cfg", fileType = "file", contents = settingsText}
 	}
 
 if not game.Workspace:FindFirstChild("Path") then
@@ -42,29 +44,25 @@ if not game.Workspace:FindFirstChild("Path") then
 end
 
 local function newFolder(path)
-	if not
-		pcall(function()
-			makefolder(path)
-			print("Path folder created at: " .. path)
-			return true -- successes[6]
-		end) 
-	end
+	local success, fail = pcall(function()
+		makefolder(path)
+		print("Path folder created at: " .. path)
+	end)
+	if successes then successes[6] = true end
 end
 
 local function newFile(path)
-	if not
-		pcall(function()
-			writefile(path, settingsText)
-			print("Settings config created at: " .. path)
-			return true -- successes[3] and successes[2]
-		end)
-	end
+	local success, fail = pcall(function()
+		writefile(path, settingsText)
+		print("Settings config created at: " .. path)
+	end)
+	if success then successes[3] = true successes[2] = true end
 end
 
 local function createFile(file)
-	if file.type == "folder" then
+	if file.fileType == "folder" then
 		newFolder(file.path)
-	elseif file.type == "file" then
+	elseif file.fileType == "file" then
 		newFile(file.path)
 	end
 end
@@ -79,9 +77,11 @@ initialiseComponents()
 
 sortedOreIndex = {}
 
+lines = {}
+
 local success, errorMessage = pcall(function()
     local fileContent = readfile("TWW_Templar/settings.cfg")
-    lines = {}
+
     for line in fileContent:gmatch("[^\r\n]+") do
         table.insert(lines, line)
     end
